@@ -1,0 +1,27 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="Reactor.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="TimestampFormat" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">HH:mm:ss.ffffff</Value>
+    </Setting>
+    <Setting Name="PollInterval" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">2000</Value>
+    </Setting>
+    <Setting Name="NotificationLogBaseUrl" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">http://neurul.ngrok.io</Value>
+    </Setting>
+    <Setting Name="AnalyzedId" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">8c4df9d3-9fc8-4377-b43d-4db544abc9f2</Value>
+    </Setting>
+    <Setting Name="AvatarUri" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">heartrate</Value>
+    </Setting>
+    <Setting Name="SpikeTargets" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">fc32f33a-7115-4eee-853e-fbcc10dbf09f, 36ebff6d-5b8b-4819-b71d-ffab7dc6e035</Value>
+    </Setting>
+    <Setting Name="ResultMarkers" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">2f695b78-ebb1-442d-a653-38b3ca3a32d1, 17c6ea5b-62a3-4c38-a044-b67957162211, dece2a11-a4ae-4f06-a90a-ac350dd77521</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>

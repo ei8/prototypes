@@ -1,0 +1,33 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="HeartRateAnalyzer.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="AvatarUrl" Type="System.String" Scope="User">
+      <Value Profile="(Default)">http://neurul.ngrok.io/heartrate/</Value>
+    </Setting>
+    <Setting Name="HeartRateId" Type="System.String" Scope="User">
+      <Value Profile="(Default)">4c62001e-8f0c-4775-8475-d461a5f42bca</Value>
+    </Setting>
+    <Setting Name="AnalyzedId" Type="System.String" Scope="User">
+      <Value Profile="(Default)">8c4df9d3-9fc8-4377-b43d-4db544abc9f2</Value>
+    </Setting>
+    <Setting Name="WarningId" Type="System.String" Scope="User">
+      <Value Profile="(Default)">16de4a5a-361c-4de5-8a2a-ec5f5addb21d</Value>
+    </Setting>
+    <Setting Name="RelaxedId" Type="System.String" Scope="User">
+      <Value Profile="(Default)">578c3f3d-388e-48e3-b71a-3399df62c94e</Value>
+    </Setting>
+    <Setting Name="AnalyzerAuthorId" Type="System.String" Scope="User">
+      <Value Profile="(Default)">2937b2cc-281f-4307-af67-1bf81708345d</Value>
+    </Setting>
+    <Setting Name="GetId" Type="System.String" Scope="User">
+      <Value Profile="(Default)">f8f59181-091b-4454-852a-61d6873a563f</Value>
+    </Setting>
+    <Setting Name="EventsId" Type="System.String" Scope="User">
+      <Value Profile="(Default)">c42b7fed-acbb-4d0d-bebe-3a2e6fbc1fd9</Value>
+    </Setting>
+    <Setting Name="UnknownRateId" Type="System.String" Scope="User">
+      <Value Profile="(Default)">c859ff31-4b25-4dda-8c3b-93f67c5004d7</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>
