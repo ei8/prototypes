@@ -11,7 +11,7 @@
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <HockeyAppResourceId>9d53d98424404d1c8634d88a25361a8e</HockeyAppResourceId>
+    <HockeyAppResourceId>e6333bd94b9a41d9b33942ac7fedd0df</HockeyAppResourceId>
     <TargetFrameworkProfile />
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>

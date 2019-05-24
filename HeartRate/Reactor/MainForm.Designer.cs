@@ -276,7 +276,7 @@
             // 
             this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
             this.aboutToolStripMenuItem.Size = new System.Drawing.Size(204, 22);
-            this.aboutToolStripMenuItem.Text = "&About d# NeurUL Studio";
+            this.aboutToolStripMenuItem.Text = "&About Reactor";
             this.aboutToolStripMenuItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
             // 
             // statusStrip1
