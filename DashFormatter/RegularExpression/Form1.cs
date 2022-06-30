@@ -13,27 +13,14 @@ namespace RegularExpression
 {
     public partial class Form1 : Form
     {
-        static string[] result;
-        static List<int> Closetabs = new List<int>();
-        static int spaces = 0;
         public Form1()
         {
             InitializeComponent();
         }
 
-        private void label1_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void textBox1_TextChanged(object sender, EventArgs e)
-        {
-            
-
-        }
-
         private void button1_Click(object sender, EventArgs e)
         {
+            var spaces = 0;
             if (string.IsNullOrEmpty(textBox2.Text))
             {
                 spaces = 1;
@@ -47,32 +34,10 @@ namespace RegularExpression
             {
                 textBox1.Text = Formatter.Process(TextBox.Text);
             }
-            catch
+            catch(ArgumentException ae)
             {
-                MessageBox.Show("the count of open not equal close");
+                MessageBox.Show(ae.Message);
             }
-            
-        }
-
-        static bool CheckStringValidation(string data)
-        {
-            var open = Regex.Matches(data, @"{");
-            var close = Regex.Matches(data, @"}");
-            if(open.Count == close.Count)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        
-
-        private void Form1_Load(object sender, EventArgs e)
-        {
-
         }
 
         private void button2_Click(object sender, EventArgs e)

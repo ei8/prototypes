@@ -162,16 +162,14 @@ namespace RegularExpression
             return data;
         }
 
-
         private void ValidateBraces(string data)
         {
             var open = Regex.Matches(data, @"{");
             var close = Regex.Matches(data, @"}");
             if (open.Count != close.Count)
             {
-                throw new ArgumentException("the count of open not equal close");
+                throw new ArgumentException("Not all curly braces are matching.");
             }
-            
         }
     }
 }
