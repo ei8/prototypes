@@ -46,7 +46,7 @@ namespace RegularExpression
             this.label1.Size = new System.Drawing.Size(38, 17);
             this.label1.TabIndex = 1;
             this.label1.Text = "Data";
-            this.label1.Click += new System.EventHandler(this.label1_Click);
+            
             // 
             // button1
             // 
@@ -66,7 +66,7 @@ namespace RegularExpression
             this.TextBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.TextBox.Size = new System.Drawing.Size(945, 129);
             this.TextBox.TabIndex = 0;
-            this.TextBox.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
+            
             // 
             // textBox1
             // 
@@ -117,7 +117,7 @@ namespace RegularExpression
             this.Controls.Add(this.TextBox);
             this.Name = "Form1";
             this.Text = "Form1";
-            this.Load += new System.EventHandler(this.Form1_Load);
+            
             this.ResumeLayout(false);
             this.PerformLayout();
 
