@@ -5,9 +5,9 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace RegularExpression
+namespace ei8.Cortex.Diary.Formatter
 {
-    public class DashFormatter
+    public class d23FormatService
     {
         public enum IndentStyleValue
         {
@@ -17,7 +17,7 @@ namespace RegularExpression
 
         private List<int> closeTabs = new List<int>();
 
-        public DashFormatter(IndentStyleValue indentStyle, int indentCount)
+        public d23FormatService(IndentStyleValue indentStyle, int indentCount)
         {
             this.IndentStyle = indentStyle;
             this.IndentCount = indentCount;
@@ -29,8 +29,8 @@ namespace RegularExpression
         public string Process(string value)
         {
             this.ValidateBraces(value);
-            var matched = Regex.Replace(value, @":|,", m => string.Format(@"{0}" + Environment.NewLine, m.Value));
-            matched = Regex.Replace(matched, @"#{|={|}", m => string.Format(Environment.NewLine + @"{0}" + Environment.NewLine, m.Value));
+            var matched = Regex.Replace(value, @":|;", m => string.Format(@"{0}" + Environment.NewLine, m.Value));
+            matched = Regex.Replace(matched, @"#{|={|},|}", m => string.Format(Environment.NewLine + @"{0}" + Environment.NewLine, m.Value));
             matched = Regex.Replace(matched, @"" + Environment.NewLine + Environment.NewLine, Environment.NewLine);
             string[] array = matched.Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
             this.closeTabs.Clear();
@@ -49,42 +49,19 @@ namespace RegularExpression
             {
                 this.ProcessInternal(data, tab, index + 1, close);
             }
-            if (Regex.IsMatch(data[index], @":"))
+            else if (Regex.IsMatch(data[index], @":|;"))
             {
-                try
-                {
-                    if (Regex.IsMatch(data[index - 1], @"{"))
-                    {
-                        tab = tab + IndentCount;
-                    }
-                }
-                catch (Exception e)
-                {
-                    tab = tab;
-                }
+                tab = tab + IndentCount;
 
                 for (var x = 1; x <= tab; x++)
-                {
                     tabs += " ";
-                }
                 data[index] = tabs + data[index];
                 this.ProcessInternal(data, tab, index + 1, close);
                 return data;
             }
             else
             {
-                if (Regex.IsMatch(data[index - 1], @","))
-                {
-
-                    for (var x = 1; x <= tab; x++)
-                    {
-                        tabs += " ";
-                    }
-                    data[index] = tabs + data[index];
-                    this.ProcessInternal(data, tab, index + 1, close);
-                    return data;
-                }
-                else if (Regex.IsMatch(data[index], @","))
+                if (Regex.IsMatch(data[index - 1], @"},"))
                 {
                     tab = tab - IndentCount;
                     for (var x = 1; x <= tab; x++)
@@ -95,7 +72,7 @@ namespace RegularExpression
                     this.ProcessInternal(data, tab, index + 1, close);
                     return data;
                 }
-                if (Regex.IsMatch(data[index - 1], @":|,"))
+                if (Regex.IsMatch(data[index - 1], @":|;|,"))
                 {
                     if (!Regex.IsMatch(data[index + 1], @"{"))
                     {
