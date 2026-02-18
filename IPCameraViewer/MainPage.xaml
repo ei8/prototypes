@@ -1,7 +1,325 @@
-﻿<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="IPCameraViewer.MainPage"
              Title="IP Camera Viewer - Multi Stream">
+    <ContentPage.Resources>
+        <DataTemplate x:Key="ListTemplate">
+            <Border Stroke="LightGray"
+                    StrokeThickness="2"
+                    Padding="10"
+                    Margin="0,0,0,15"
+                    BackgroundColor="Black">
+                <VerticalStackLayout Spacing="10">
+
+                    <!-- Header with Camera Name and Controls -->
+                    <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="10">
+                        <Label Text="{Binding CameraName}"
+                               FontAttributes="Bold"
+                               FontSize="16"
+                               TextColor="White"
+                               VerticalOptions="Center"/>
+
+                        <Button Grid.Column="1"
+                                Text="Remove"
+                                Clicked="OnRemoveStreamClicked"
+                                CommandParameter="{Binding Id}"
+                                WidthRequest="100"
+                                BackgroundColor="OrangeRed"
+                                TextColor="White"/>
+
+                        <Button Grid.Column="2"
+                                Text="{Binding IsRunning, Converter={StaticResource BoolToStartStopConverter}}"
+                                Clicked="OnToggleStreamClicked"
+                                CommandParameter="{Binding Id}"
+                                WidthRequest="100"/>
+                    </Grid>
+
+                    <Label Text="{Binding Url}"
+                           FontSize="12"
+                           TextColor="LightGray"/>
+
+                    <!-- Stream Content -->
+                    <Grid ColumnDefinitions="*,300">
+                        <Border Stroke="LightGray"
+                                StrokeThickness="2"
+                                Padding="0"
+                                HorizontalOptions="Center"
+                                VerticalOptions="Center">
+                            <Border.Triggers>
+                                <DataTrigger TargetType="Border"
+                                             Binding="{Binding IsMotionHighlighted}"
+                                             Value="True">
+                                <Setter Property="Stroke" Value="OrangeRed"/>
+                                <Setter Property="StrokeThickness" Value="6"/>
+                            </DataTrigger>
+                            <DataTrigger TargetType="Border"
+                                         Binding="{Binding IsMotionHighlighted}"
+                                         Value="False">
+                                <Setter Property="Stroke" Value="LightGray"/>
+                                <Setter Property="StrokeThickness" Value="2"/>
+                            </DataTrigger>
+                        </Border.Triggers>
+                            <Image Source="{Binding CurrentFrame}"
+                                   HeightRequest="300"
+                                   Aspect="AspectFit"
+                                   HorizontalOptions="Center"
+                                   VerticalOptions="Center"/>
+                        </Border>
+
+                        <VerticalStackLayout Grid.Column="1" Spacing="8" Padding="10,0,0,0">
+                            <Label Text="Detections" FontAttributes="Bold" TextColor="White"/>
+                            <CollectionView ItemsSource="{Binding DetectionLogs}"
+                                            HeightRequest="200"
+                                            SelectionMode="None">
+                                <CollectionView.ItemTemplate>
+                                    <DataTemplate>
+                                        <Label Text="{Binding .}" FontSize="11" TextColor="LightGray"/>
+                                    </DataTemplate>
+                                </CollectionView.ItemTemplate>
+                            </CollectionView>
+                            <Button Text="Clear Logs" 
+                                    Clicked="OnClearStreamLogsClicked"
+                                    CommandParameter="{Binding Id}"/>
+                        </VerticalStackLayout>
+                    </Grid>
+
+                    <!-- Motion Threshold Slider -->
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="{Binding MotionThresholdPercent, StringFormat='Motion Threshold: {0:F1}%'}"
+                               FontSize="13"
+                               TextColor="White"/>
+                        <Slider Minimum="0.1"
+                                Maximum="100"
+                                Value="{Binding MotionThresholdPercent}"
+                                ValueChanged="OnThresholdChanged"/>
+                    </VerticalStackLayout>
+
+                    <!-- Sound Settings -->
+                    <Border Stroke="DarkGray"
+                            StrokeThickness="1"
+                            Padding="10"
+                            BackgroundColor="#1A1A1A">
+                        <VerticalStackLayout Spacing="8">
+                            <Label Text="Sound Settings"
+                                   FontAttributes="Bold"
+                                   FontSize="14"
+                                   TextColor="White"/>
+                            
+                            <!-- Enable Sound Toggle -->
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                                <Label Text="Enable Sound Alerts"
+                                       FontSize="13"
+                                       TextColor="White"
+                                       VerticalOptions="Center"/>
+                                <Switch Grid.Column="1"
+                                        IsToggled="{Binding SoundEnabled}"
+                                        Toggled="OnSoundEnabledToggled"/>
+                            </Grid>
+
+                            <!-- Sound File Selection -->
+                            <VerticalStackLayout Spacing="5">
+                                <Label Text="Sound File:"
+                                       FontSize="13"
+                                       TextColor="White"/>
+                                <Label Text="{Binding SoundFileName}"
+                                       FontSize="12"
+                                       TextColor="LightGray"
+                                       LineBreakMode="TailTruncation"/>
+                                <Grid ColumnDefinitions="*,*" ColumnSpacing="5">
+                                    <Button Grid.Column="0"
+                                            Text="Select File"
+                                            Clicked="OnSelectSoundFileClicked"
+                                            CommandParameter="{Binding Id}"
+                                            FontSize="12"
+                                            Padding="5"/>
+                                    <Button Grid.Column="1"
+                                            Text="Clear"
+                                            Clicked="OnClearSoundFileClicked"
+                                            CommandParameter="{Binding Id}"
+                                            FontSize="12"
+                                            Padding="5"
+                                            BackgroundColor="OrangeRed"
+                                            TextColor="White"/>
+                                </Grid>
+                                <Button Text="Test Sound"
+                                        Clicked="OnTestSoundClicked"
+                                        CommandParameter="{Binding Id}"
+                                        FontSize="12"
+                                        Padding="5"
+                                        BackgroundColor="Green"
+                                        TextColor="White"
+                                        IsEnabled="{Binding SoundEnabled}"/>
+                            </VerticalStackLayout>
+
+                            <!-- Sound Volume Slider -->
+                            <VerticalStackLayout Spacing="5">
+                                <Label Text="{Binding SoundVolume, StringFormat='Volume: {0:P0}'}"
+                                       FontSize="13"
+                                       TextColor="White"/>
+                                <Slider Minimum="0"
+                                        Maximum="1"
+                                        Value="{Binding SoundVolume}"
+                                        ValueChanged="OnVolumeChanged"/>
+                            </VerticalStackLayout>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Recording Settings -->
+                    <Border Stroke="DarkGray"
+                            StrokeThickness="1"
+                            Padding="10"
+                            BackgroundColor="#1A1A1A">
+                        <VerticalStackLayout Spacing="8">
+                            <Label Text="Recording Settings"
+                                   FontAttributes="Bold"
+                                   FontSize="14"
+                                   TextColor="White"/>
+                            
+                            <!-- Enable Recording Toggle -->
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                                <Label Text="Enable Recording"
+                                       FontSize="13"
+                                       TextColor="White"
+                                       VerticalOptions="Center"/>
+                                <Switch Grid.Column="1"
+                                        IsToggled="{Binding RecordingEnabled}"
+                                        Toggled="OnRecordingEnabledToggled"/>
+                            </Grid>
+
+                            <!-- Output Formats -->
+                            <VerticalStackLayout Spacing="5" IsVisible="{Binding RecordingEnabled}">
+                                <Label Text="Output Formats:"
+                                       FontSize="13"
+                                       TextColor="White"/>
+                                <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                                    <CheckBox Grid.Column="0"
+                                              IsChecked="{Binding RecordingGif}"
+                                              CheckedChanged="OnRecordingFormatChanged"/>
+                                    <Label Grid.Column="0"
+                                           Text="GIF"
+                                           FontSize="12"
+                                           TextColor="White"
+                                           VerticalOptions="Center"
+                                           Margin="25,0,0,0"/>
+
+                                    <CheckBox Grid.Column="1"
+                                              IsChecked="{Binding RecordingPng}"
+                                              CheckedChanged="OnRecordingFormatChanged"/>
+                                    <Label Grid.Column="1"
+                                           Text="PNG"
+                                           FontSize="12"
+                                           TextColor="White"
+                                           VerticalOptions="Center"
+                                           Margin="25,0,0,0"/>
+                                </Grid>
+                                <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                                    <CheckBox Grid.Column="0"
+                                              IsChecked="{Binding RecordingMp4}"
+                                              CheckedChanged="OnRecordingFormatChanged"/>
+                                    <Label Grid.Column="0"
+                                           Text="MP4"
+                                           FontSize="12"
+                                           TextColor="White"
+                                           VerticalOptions="Center"
+                                           Margin="25,0,0,0"/>
+                                </Grid>
+                            </VerticalStackLayout>
+
+                            <!-- Output Path -->
+                            <VerticalStackLayout Spacing="5" IsVisible="{Binding RecordingEnabled}">
+                                <Label Text="Output Path:"
+                                       FontSize="13"
+                                       TextColor="White"/>
+                                <Label Text="{Binding RecordingOutputPath, StringFormat='{0}'}"
+                                       FontSize="11"
+                                       TextColor="LightGray"
+                                       LineBreakMode="TailTruncation"/>
+                                <Button Text="Select Output Folder"
+                                        Clicked="OnSelectOutputFolderClicked"
+                                        CommandParameter="{Binding Id}"
+                                        FontSize="12"
+                                        Padding="5"/>
+                            </VerticalStackLayout>
+
+                            <!-- Recording Duration Settings -->
+                            <VerticalStackLayout Spacing="5" IsVisible="{Binding RecordingEnabled}">
+                                <Label Text="{Binding RecordingBeforeSeconds, StringFormat='Record Before Detection: {0} seconds'}"
+                                       FontSize="13"
+                                       TextColor="White"/>
+                                <Slider Minimum="1"
+                                        Maximum="30"
+                                        Value="{Binding RecordingBeforeSeconds, Mode=OneWay}"
+                                        ValueChanged="OnRecordingBeforeDurationChanged"/>
+                            </VerticalStackLayout>
+
+                            <VerticalStackLayout Spacing="5" IsVisible="{Binding RecordingEnabled}">
+                                <Label Text="{Binding RecordingAfterSeconds, StringFormat='Record After Detection: {0} seconds'}"
+                                       FontSize="13"
+                                       TextColor="White"/>
+                                <Slider Minimum="1"
+                                        Maximum="60"
+                                        Value="{Binding RecordingAfterSeconds, Mode=OneWay}"
+                                        ValueChanged="OnRecordingAfterDurationChanged"/>
+                            </VerticalStackLayout>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Metrics -->
+                    <HorizontalStackLayout Spacing="20">
+                        <Label Text="{Binding Metrics}"
+                               FontSize="13"
+                               TextColor="White"/>
+                        <Label Text="{Binding MotionStatus}"
+                               TextColor="{Binding MotionColor}"
+                               FontAttributes="Bold"
+                               FontSize="13"/>
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+            </Border>
+        </DataTemplate>
+
+        <DataTemplate x:Key="TileTemplate">
+            <!-- Border maintains 4:3 aspect ratio using SizeChanged handler -->
+            <Border x:Name="TileBorder"
+                    Stroke="LightGray" StrokeThickness="2" Padding="0" BackgroundColor="Black"
+                    Margin="5" HorizontalOptions="Fill" VerticalOptions="Start"
+                    SizeChanged="OnTileSizeChanged">
+                <Border.Triggers>
+                    <DataTrigger TargetType="Border"
+                                 Binding="{Binding IsMotionHighlighted}"
+                                 Value="True">
+                        <Setter Property="Stroke" Value="OrangeRed"/>
+                        <Setter Property="StrokeThickness" Value="4"/>
+                   </DataTrigger>
+                </Border.Triggers>
+                <Grid>
+                    <Image Source="{Binding CurrentFrame}" 
+                           Aspect="AspectFill" 
+                           HorizontalOptions="Fill" 
+                           VerticalOptions="Fill" />
+                    <Label Text="{Binding CameraName}" 
+                           TextColor="White" 
+                           Margin="8" 
+                           FontAttributes="Bold" 
+                           FontSize="14"
+                           HorizontalOptions="Start"
+                           VerticalOptions="Start">
+                        <Label.Shadow>
+                            <Shadow Brush="Black" Offset="1,1" Radius="2" Opacity="0.8"/>
+                        </Label.Shadow>
+                    </Label>
+                    
+                    <Frame WidthRequest="10" HeightRequest="10" 
+                           CornerRadius="5"
+                           BackgroundColor="{Binding MotionColor}"
+                           HasShadow="False"
+                           Padding="0"
+                           HorizontalOptions="End" VerticalOptions="Start"
+                           Margin="8"/>
+                </Grid>
+            </Border>
+        </DataTemplate>
+    </ContentPage.Resources>
 
     <Grid RowDefinitions="Auto,*,Auto" Padding="20" RowSpacing="15">
 
@@ -33,29 +351,9 @@
             <HorizontalStackLayout Spacing="10">
                 <Button Text="Stop All Streams" Clicked="OnStopAllClicked"/>
                 <Button Text="Clear All Logs" Clicked="OnClearAllLogsClicked"/>
+                <Button x:Name="ListViewButton" Text="List View" Clicked="OnListViewClicked" IsEnabled="False"/>
+                <Button x:Name="GridViewButton" Text="Grid View" Clicked="OnGridViewClicked"/>
             </HorizontalStackLayout>
-        </VerticalStackLayout>
-
-        <!-- Streams Display -->
-        <ScrollView Grid.Row="1">
-            <CollectionView x:Name="StreamsCollection"
-                            SelectionMode="None">
-                <CollectionView.ItemTemplate>
-                    <DataTemplate>
-                        <Border Stroke="LightGray"
-                                StrokeThickness="2"
-                                Padding="10"
-                                Margin="0,0,0,15"
-                                BackgroundColor="Black">
-                            <VerticalStackLayout Spacing="10">
-
-                                <!-- Header with Camera Name and Controls -->
-                                <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="10">
-                                    <Label Text="{Binding CameraName}"
-                                           FontAttributes="Bold"
-                                           FontSize="16"
-                                           TextColor="White"
-                                           VerticalOptions="Center"/>
 
                                     <Button Grid.Column="1"
                                             Text="Remove"
@@ -303,22 +601,18 @@
                                     </VerticalStackLayout>
                                 </Border>
 
-                                <!-- Metrics -->
-                                <HorizontalStackLayout Spacing="20">
-                                    <Label Text="{Binding Metrics}"
-                                           FontSize="13"
-                                           TextColor="White"/>
-                                    <Label Text="{Binding MotionStatus}"
-                                           TextColor="{Binding MotionColor}"
-                                           FontAttributes="Bold"
-                                           FontSize="13"/>
-                                </HorizontalStackLayout>
-                            </VerticalStackLayout>
-                        </Border>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
-        </ScrollView>
+        <!-- Streams Display: List uses one CollectionView; Grid uses one CollectionView per column count (1–8) so changing columns works on Windows (runtime ItemsLayout.Span change is ignored). -->
+        <CollectionView Grid.Row="1"
+                        x:Name="StreamsListCollection"
+                        SelectionMode="None"
+                        ItemTemplate="{StaticResource ListTemplate}"
+                        IsVisible="True">
+            <CollectionView.ItemsLayout>
+                <LinearItemsLayout Orientation="Vertical" ItemSpacing="10"/>
+            </CollectionView.ItemsLayout>
+        </CollectionView>
+        <!-- Grid container: CollectionViews are created dynamically in code when column count changes -->
+        <Grid Grid.Row="1" x:Name="GridContainer" IsVisible="False"/>
 
         <!-- Status Bar -->
         <Label Grid.Row="2"

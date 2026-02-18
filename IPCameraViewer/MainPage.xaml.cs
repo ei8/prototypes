@@ -1,7 +1,8 @@
-﻿using Microsoft.Maui.Controls;
+using Microsoft.Maui.Controls;
 using IPCameraViewer.Services;
 using IPCameraViewer.Models;
 using System.Net.Http;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using Microsoft.Maui.Storage;
@@ -12,52 +13,52 @@ namespace IPCameraViewer
 {
     public partial class MainPage : ContentPage
     {
-		private const string MetricsResetText = "Metrics: -";
-		private const string MotionIdleText = "Motion: idle";
-		private const string MotionDetectedText = "Motion: detected";
-		private const string ErrorTitle = "Error";
-		private const string OkButtonText = "OK";
-		private const string InvalidCameraUrlMessage = "Please enter a valid camera URL.";
-		private const string CameraUrlAlreadyAddedMessage = "This camera URL is already added.";
-		private const string CameraNameFormat = "Camera {0}";
-		private const string AddedStreamFormat = "Added stream: {0}";
-		private const string RemovedStreamFormat = "Removed stream: {0}";
-		private const string StoppedStreamFormat = "Stopped stream: {0}";
-		private const string StartedStreamFormat = "Started stream: {0}";
-		private const string AllStreamsStoppedText = "All streams stopped";
-		private const string AllLogsClearedText = "All logs cleared";
-		private const string StreamErrorTitleFormat = "Stream Error - {0}";
-		private const string MetricsFormat = "Metrics: ratio={0:0.000}, changed={1}/{2}";
-		private const string MotionDetectedLogFormat = "[{0}] Motion detected (ratio={1:0.000})";
-		private const string StatusFormat = "{0} | Active streams: {1}/{2}";
-		private const string ReadyStatusText = "Ready";
-		private const string EmptyString = "";
-		private const int MaxDetectionLogs = 1000;
+        private const string MetricsResetText = "Metrics: -";
+        private const string MotionIdleText = "Motion: idle";
+        private const string MotionDetectedText = "Motion: detected";
+        private const string ErrorTitle = "Error";
+        private const string OkButtonText = "OK";
+        private const string InvalidCameraUrlMessage = "Please enter a valid camera URL.";
+        private const string CameraUrlAlreadyAddedMessage = "This camera URL is already added.";
+        private const string CameraNameFormat = "Camera {0}";
+        private const string AddedStreamFormat = "Added stream: {0}";
+        private const string RemovedStreamFormat = "Removed stream: {0}";
+        private const string StoppedStreamFormat = "Stopped stream: {0}";
+        private const string StartedStreamFormat = "Started stream: {0}";
+        private const string AllStreamsStoppedText = "All streams stopped";
+        private const string AllLogsClearedText = "All logs cleared";
+        private const string StreamErrorTitleFormat = "Stream Error - {0}";
+        private const string MetricsFormat = "Metrics: ratio={0:0.000}, changed={1}/{2}";
+        private const string MotionDetectedLogFormat = "[{0}] Motion detected (ratio={1:0.000})";
+        private const string StatusFormat = "{0} | Active streams: {1}/{2}";
+        private const string ReadyStatusText = "Ready";
+        private const string EmptyString = "";
+        private const int MaxDetectionLogs = 1000;
 
-		private readonly ObservableCollection<CameraStreamViewModel> streams = new();
-		private int streamIdCounter = 0;
-		private IAudioService? audioService;
-		private readonly DetectionRecorder detectionRecorder = new();
+        private readonly ObservableCollection<CameraStreamViewModel> streams = new();
+        private int streamIdCounter = 0;
+        private IAudioService? audioService;
+        private readonly DetectionRecorder detectionRecorder = new();
         private readonly SettingsService settingsService = new();
 
-		private const string DebugPlayMotionSoundCalled = "PlayMotionSound: Called";
-		private const string DebugAudioServiceNull = "PlayMotionSound: audioService is null, attempting to resolve";
-		private const string DebugServiceResolved = "PlayMotionSound: Service resolved: {0}";
-		private const string DebugApplicationNull = "PlayMotionSound: Application.Current or Handler is null";
-		private const string DebugAudioServiceStillNull = "PlayMotionSound: audioService is still null, cannot play sound";
-		private const string DebugSoundEnabled = "PlayMotionSound: Sound enabled: {0}";
-		private const string DebugSoundFilePath = "PlayMotionSound: Sound file path: {0}";
-		private const string DebugNoSoundFilePath = "PlayMotionSound: No sound file path configured";
-		private const string DebugFileNotExists = "PlayMotionSound: File does not exist: {0}";
-		private const string DebugCallingPlaySound = "PlayMotionSound: Calling audioService.PlaySound({0})";
-		private const string DebugExceptionFormat = "PlayMotionSound: Exception - {0}: {1}";
-		private const string DebugStackTrace = "PlayMotionSound: StackTrace: {0}";
+        private const string DebugPlayMotionSoundCalled = "PlayMotionSound: Called";
+        private const string DebugAudioServiceNull = "PlayMotionSound: audioService is null, attempting to resolve";
+        private const string DebugServiceResolved = "PlayMotionSound: Service resolved: {0}";
+        private const string DebugApplicationNull = "PlayMotionSound: Application.Current or Handler is null";
+        private const string DebugAudioServiceStillNull = "PlayMotionSound: audioService is still null, cannot play sound";
+        private const string DebugSoundEnabled = "PlayMotionSound: Sound enabled: {0}";
+        private const string DebugSoundFilePath = "PlayMotionSound: Sound file path: {0}";
+        private const string DebugNoSoundFilePath = "PlayMotionSound: No sound file path configured";
+        private const string DebugFileNotExists = "PlayMotionSound: File does not exist: {0}";
+        private const string DebugCallingPlaySound = "PlayMotionSound: Calling audioService.PlaySound({0})";
+        private const string DebugExceptionFormat = "PlayMotionSound: Exception - {0}: {1}";
+        private const string DebugStackTrace = "PlayMotionSound: StackTrace: {0}";
 
         public MainPage()
         {
             InitializeComponent();
-            this.StreamsCollection.ItemsSource = this.streams;
-            
+            this.StreamsListCollection.ItemsSource = this.streams;
+
             // Load settings
             this.LoadSettings();
 
@@ -212,6 +213,116 @@ namespace IPCameraViewer
             this.UpdateStatus(MainPage.AllLogsClearedText);
         }
 
+        private bool isTileView = false;
+        private int gridColumnsPerRow = 3;
+        private readonly Dictionary<int, CollectionView> gridCollections = new();
+        private CollectionView? currentGridCollection;
+
+        private CollectionView GetOrCreateGridCollection(int columns)
+        {
+            if (!this.gridCollections.TryGetValue(columns, out var collectionView))
+            {
+                // Create new CollectionView dynamically for this column count
+                collectionView = new CollectionView
+                {
+                    SelectionMode = SelectionMode.None,
+                    ItemTemplate = (DataTemplate)this.Resources["TileTemplate"],
+                    ItemsSource = this.streams,
+                    IsVisible = false,
+                    ItemsLayout = new GridItemsLayout(columns, ItemsLayoutOrientation.Vertical)
+                    {
+                        HorizontalItemSpacing = 10,
+                        VerticalItemSpacing = 10
+                    }
+                };
+                this.gridCollections[columns] = collectionView;
+                this.GridContainer.Children.Add(collectionView);
+            }
+            return collectionView;
+        }
+
+        private void ShowGridForColumns(int columns)
+        {
+            // Hide current grid collection if any
+            if (this.currentGridCollection != null)
+                this.currentGridCollection.IsVisible = false;
+
+            // Get or create CollectionView for this column count and show it
+            this.currentGridCollection = this.GetOrCreateGridCollection(columns);
+            this.currentGridCollection.IsVisible = true;
+        }
+
+        private void OnGridColumnsEntryTextChanged(object? sender, TextChangedEventArgs e)
+        {
+            // Optional: validate as user types, but don't apply until they press Apply or Enter
+        }
+
+        private void OnGridColumnsEntryCompleted(object? sender, EventArgs e)
+        {
+            this.ApplyGridColumns();
+        }
+
+        private void OnGridColumnsApplyClicked(object? sender, EventArgs e)
+        {
+            this.ApplyGridColumns();
+        }
+
+        private void ApplyGridColumns()
+        {
+            if (string.IsNullOrWhiteSpace(this.GridColumnsEntry.Text))
+                return;
+
+            if (int.TryParse(this.GridColumnsEntry.Text, out int columns) && columns >= 1)
+            {
+                this.gridColumnsPerRow = columns;
+                if (this.isTileView)
+                    this.ShowGridForColumns(this.gridColumnsPerRow);
+            }
+            else
+            {
+                // Invalid input - reset to current value
+                this.GridColumnsEntry.Text = this.gridColumnsPerRow.ToString();
+                this.DisplayAlert("Invalid Input", "Please enter a valid number greater than or equal to 1.", "OK");
+            }
+        }
+
+        private void OnListViewClicked(object sender, EventArgs e)
+        {
+            if (this.isTileView)
+            {
+                this.isTileView = false;
+                this.StreamsListCollection.IsVisible = true;
+                this.GridContainer.IsVisible = false;
+                this.GridColumnsPanel.IsVisible = false;
+                this.ListViewButton.IsEnabled = false;
+                this.GridViewButton.IsEnabled = true;
+            }
+        }
+
+        private void OnGridViewClicked(object sender, EventArgs e)
+        {
+            if (!this.isTileView)
+            {
+                this.isTileView = true;
+                this.StreamsListCollection.IsVisible = false;
+                this.GridContainer.IsVisible = true;
+                this.GridColumnsPanel.IsVisible = true;
+                this.GridColumnsEntry.Text = this.gridColumnsPerRow.ToString();
+                this.ListViewButton.IsEnabled = true;
+                this.GridViewButton.IsEnabled = false;
+                this.ShowGridForColumns(this.gridColumnsPerRow);
+            }
+        }
+
+        private void OnTileSizeChanged(object? sender, EventArgs e)
+        {
+            if (sender is Border border && border.Width > 0)
+            {
+                // Maintain 4:3 aspect ratio: height = width * 3/4
+                border.HeightRequest = border.Width * 0.75;
+            }
+        }
+
         private void StartStream(CameraStreamViewModel streamViewModel)
         {
             if (streamViewModel.Streamer != null)
@@ -283,7 +394,7 @@ namespace IPCameraViewer
                     JpegBytes = jpegBytes,
                     TimestampMs = timestampMs
                 });
-                
+
                 // Log every frame during recording to debug the issue
                 System.Diagnostics.Debug.WriteLine($"[RECORDING] Frame added! Total: {streamViewModel.RecordingFrames.Count}, IsRecording: {streamViewModel.IsRecording}");
             }
@@ -366,7 +477,7 @@ namespace IPCameraViewer
             System.Diagnostics.Debug.WriteLine($"[RECORDING] StartRecording called for {streamViewModel.CameraName}");
             System.Diagnostics.Debug.WriteLine($"[RECORDING] RecordingEnabled: {streamViewModel.RecordingEnabled}");
             System.Diagnostics.Debug.WriteLine($"[RECORDING] MP4: {streamViewModel.RecordingMp4}, GIF: {streamViewModel.RecordingGif}, PNG: {streamViewModel.RecordingPng}");
-            
+
             streamViewModel.IsRecording = true;
             streamViewModel.RecordingStartTime = detectionTime;
             streamViewModel.RecordingFrames.Clear();
@@ -387,14 +498,14 @@ namespace IPCameraViewer
             // Record for the configured duration after detection
             int afterSeconds = streamViewModel.RecordingAfterSeconds;
             System.Diagnostics.Debug.WriteLine($"[RECORDING] Starting {afterSeconds}-second capture period (AFTER detection)...");
-            
+
             // Start task to stop recording after the configured duration
             _ = Task.Run(async () =>
             {
                 await Task.Delay(afterSeconds * 1000);
-                
+
                 System.Diagnostics.Debug.WriteLine($"[RECORDING] {afterSeconds} seconds elapsed, stopping recording...");
-                
+
                 MainThread.BeginInvokeOnMainThread(() =>
                 {
                     if (streamViewModel.IsRecording)
@@ -414,7 +525,7 @@ namespace IPCameraViewer
         {
             System.Diagnostics.Debug.WriteLine($"[RECORDING] StopRecording called");
             System.Diagnostics.Debug.WriteLine($"[RECORDING] Final frame count: {streamViewModel.RecordingFrames.Count}");
-            
+
             streamViewModel.IsRecording = false;
 
             // Check if any format is selected
@@ -428,7 +539,7 @@ namespace IPCameraViewer
             System.Diagnostics.Debug.WriteLine($"[RECORDING] Formats enabled - GIF: {streamViewModel.RecordingGif}, PNG: {streamViewModel.RecordingPng}, MP4: {streamViewModel.RecordingMp4}");
 
             // Get output directory
-            string outputDir = streamViewModel.RecordingOutputPath ?? 
+            string outputDir = streamViewModel.RecordingOutputPath ??
                 Path.Combine(FileSystem.AppDataDirectory, "Recordings", streamViewModel.CameraName);
 
             System.Diagnostics.Debug.WriteLine($"[RECORDING] Output directory: {outputDir}");
@@ -436,13 +547,13 @@ namespace IPCameraViewer
             // IMPORTANT: Create a copy of frames BEFORE clearing, to avoid race condition
             var framesToSave = new List<FrameData>(streamViewModel.RecordingFrames);
             streamViewModel.RecordingFrames.Clear();  // Clear immediately so new recording can start
-            
+
             System.Diagnostics.Debug.WriteLine($"[RECORDING] Created copy of {framesToSave.Count} frames for saving");
 
             try
             {
                 System.Diagnostics.Debug.WriteLine($"[RECORDING] Calling SaveRecordingAsync with {framesToSave.Count} frames...");
-                
+
                 await this.detectionRecorder.SaveRecordingAsync(
                     framesToSave,  // Use the copy, not the original list
                     streamViewModel.CameraName,
@@ -498,7 +609,7 @@ namespace IPCameraViewer
                     // Get the camera-specific sound file path
                     string? soundFilePath = streamViewModel.SoundFilePath;
                     System.Diagnostics.Debug.WriteLine(string.Format(MainPage.DebugSoundFilePath, soundFilePath ?? "(null)"));
-                    
+
                     if (!string.IsNullOrEmpty(soundFilePath) && File.Exists(soundFilePath))
                     {
                         // Get the camera-specific volume (default to 1.0 if not set)
@@ -555,7 +666,7 @@ namespace IPCameraViewer
             {
                 // Update the view model property (binding will handle this, but we also need to update the streamer)
                 streamViewModel.MotionThresholdPercent = e.NewValue;
-                
+
                 // Update the streamer's threshold if it's running
                 if (streamViewModel.Streamer != null)
                 {
@@ -665,7 +776,7 @@ namespace IPCameraViewer
             if (sender is Switch switchControl && switchControl.BindingContext is CameraStreamViewModel streamViewModel)
             {
                 streamViewModel.RecordingEnabled = e.Value;
-                
+
                 // Initialize or clear frame buffer based on setting (uses camera-specific duration)
                 if (e.Value && streamViewModel.IsRunning)
                 {
