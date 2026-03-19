@@ -1,6 +1,10 @@
 #if WINDOWS
 using IPCameraViewer.Services;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
+using Windows.Media.Core;
+using Windows.Media.Playback;
+using Windows.Storage;
 
 namespace IPCameraViewer.Platforms.Windows
 {
@@ -28,7 +32,7 @@ namespace IPCameraViewer.Platforms.Windows
         private const uint SND_ASYNC = 0x0001;
         private const uint SND_NODEFAULT = 0x0002;
 
-        public void PlaySound(string? filePath)
+        public void PlaySound(string? filePath, double volume = 1.0)
         {
             if (!string.IsNullOrWhiteSpace(filePath))
             {
@@ -42,21 +46,28 @@ namespace IPCameraViewer.Platforms.Windows
                         {
                             System.Diagnostics.Debug.WriteLine(string.Format(AudioService.DebugAttemptingToPlay, fullPath));
 
-                            // Ensure path uses backslashes and is properly formatted for Windows API
-                            string normalizedPath = fullPath.Replace('/', '\\');
-                            
-                            // Call PlaySound with SND_FILENAME | SND_ASYNC
-                            // SND_ASYNC plays asynchronously without blocking
-                            uint flags = AudioService.SND_FILENAME | AudioService.SND_ASYNC;
-                            bool result = AudioService.PlaySoundWin32(normalizedPath, IntPtr.Zero, flags);
-                            System.Diagnostics.Debug.WriteLine(string.Format(AudioService.DebugPlaySoundReturned, result, normalizedPath));
-                            
-                            if (!result)
+                            // Clamp volume between 0.0 and 1.0
+                            double clampedVolume = Math.Max(0.0, Math.Min(1.0, volume));
+
+                            // Use MediaPlayer for volume control support
+                            // Fire and forget async operation
+                            _ = Task.Run(async () =>
                             {
-                                // Get last error if available
-                                int error = Marshal.GetLastWin32Error();
-                                System.Diagnostics.Debug.WriteLine(string.Format(AudioService.DebugPlaySoundFailed, error));
-                            }
+                                try
+                                {
+                                    var mediaPlayer = new MediaPlayer();
+                                    mediaPlayer.Volume = clampedVolume;
+                                    
+                                    // Open the file and play asynchronously
+                                    var file = await StorageFile.GetFileFromPathAsync(fullPath);
+                                    mediaPlayer.Source = MediaSource.CreateFromStorageFile(file);
+                                    mediaPlayer.Play();
+                                }
+                                catch (Exception ex)
+                                {
+                                    System.Diagnostics.Debug.WriteLine(string.Format(AudioService.DebugExceptionFormat, ex.GetType().Name, ex.Message));
+                                }
+                            });
                         }
                         else
                         {
@@ -67,22 +78,6 @@ namespace IPCameraViewer.Platforms.Windows
                     {
                         System.Diagnostics.Debug.WriteLine(string.Format(AudioService.DebugFileNotExists, filePath));
                     }
-                }
-                catch (DllNotFoundException ex)
-                {
-                    System.Diagnostics.Debug.WriteLine(string.Format(AudioService.DebugDllNotFoundException, ex.Message));
-                }
-                catch (EntryPointNotFoundException ex)
-                {
-                    System.Diagnostics.Debug.WriteLine(string.Format(AudioService.DebugEntryPointNotFoundException, ex.Message));
-                }
-                catch (BadImageFormatException ex)
-                {
-                    System.Diagnostics.Debug.WriteLine(string.Format(AudioService.DebugBadImageFormatException, ex.Message));
-                }
-                catch (AccessViolationException ex)
-                {
-                    System.Diagnostics.Debug.WriteLine(string.Format(AudioService.DebugAccessViolationException, ex.Message));
                 }
                 catch (Exception ex)
                 {
