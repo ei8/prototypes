@@ -2,7 +2,7 @@
 
 namespace HelloWorm
 {
-    internal class Worm : IMovable, IComposite, IElliptical
+    internal class Worm : IMovable, IRectangularComposite, IElliptical
     {
         private readonly Timer movementTriggerTimer;
 
@@ -20,7 +20,26 @@ namespace HelloWorm
         public event EventHandler<MovingEventArgs>? Moving;
         public event EventHandler<CollidedEventArgs>? Collided;
 
-        public void Collide(IPhysical target) => this.Collided?.Invoke(this, new CollidedEventArgs(target));
+        public void Collide(CollisionInfo info)
+        {
+            if (info.CollisionTarget is World && info.CollisionSource is ISectoral sector)
+            {
+                var sectorId = this.Components.OfType<Nose>().Single().GetSectorId(sector);
+                switch (sectorId)
+                {
+                    case 8:
+                    case 1:
+                        this.Direction += 45f;
+                        break;
+                    case 7:
+                    case 2:
+                        this.Direction += 22.5f;
+                        break;
+                }
+            }
+
+            this.Collided?.Invoke(this, new CollidedEventArgs(info.CollisionTarget));
+        }
 
         public void OnMoving(MovingEventArgs e) => this.Moving?.Invoke(this, e);
     }

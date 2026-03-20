@@ -25,8 +25,8 @@ namespace HelloWorm
             world.Add(
                 new Worm()
                 {
-                    Direction = 0,
-                    Location = new Point(100, 100),
+                    Direction = -30,
+                    Location = new Point(100, 20),
                     Size = new Size(Constants.Worm.Width, 90),
                     Speed = Constants.Worm.Speed,
                     Components = [
@@ -58,7 +58,6 @@ namespace HelloWorm
             for (int i = 0; i < Constants.Worm.SectorRenderCount; i++)
                 sects.Add(new Sector()
                 {
-                    Name = (i + 1).ToString(),
                     StartAngle = (i * Constants.Worm.SectorSweepAngle) + 1,
                     SweepAngle = Constants.Worm.SectorSweepAngle
                 });

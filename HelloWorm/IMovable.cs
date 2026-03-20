@@ -12,7 +12,7 @@ namespace HelloWorm
 
         event EventHandler<MovingEventArgs> Moving;
 
-        void Collide(IPhysical target);
+        void Collide(CollisionInfo info);
 
         event EventHandler<CollidedEventArgs> Collided;
     }

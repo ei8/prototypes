@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-
-namespace HelloWorm
+﻿namespace HelloWorm
 {
     public class World : IRectangular, IComposite
     {
@@ -70,15 +68,34 @@ namespace HelloWorm
                 !this.GetRectangle().Contains(e.NewLocation)
             )
             {
-                e.CollisionDetected = true;
-                e.CollisionTarget = this;
+                e.CollisionInfo = new()
+                {
+                    CollisionTarget = this,
+                    CollisionSource = odor
+                };
             }
             else if (sender is Worm worm)
             {
-                //var nose = worm.Components.OfType<Nose>().Single(); 
+                var nose = worm.Components.OfType<Nose>().Single();
 
-                // Debug.WriteLine("X: " + (worm.Location.X + nose.Location.X));
-                // Debug.WriteLine("Y: " + (worm.Location.Y + nose.Location.Y));
+                var swps = nose.GetSectorsWithPoints(
+                    (angle) => angle + worm.Direction,
+                    (location) => location.Add(worm.Location)
+                 );
+
+                ISectoral? firstSector = null;
+                if ((firstSector = swps.FirstOrDefault(swp => swp.Points.Any(p => !this.GetRectangle().Contains(p))).Sector) != null)
+                {
+                    var sector = nose.GetSectorId(firstSector);
+                    if (sector > 6 || sector < 3)
+                    {
+                        e.CollisionInfo = new()
+                        {
+                            CollisionTarget = this,
+                            CollisionSource = firstSector
+                        };
+                    }
+                }
             }
         }
 

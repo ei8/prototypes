@@ -1,7 +1,7 @@
 ﻿
 namespace HelloWorm
 {
-    internal class Nose : IComposite, IElliptical
+    internal class Nose : IRectangularComposite, IElliptical
     {
         public Nose()
         {
