@@ -37,6 +37,21 @@ namespace HelloWorm
                         break;
                 }
             }
+            else if (info.CollisionTarget is Odor && info.CollisionSource is ISectoral sector2)
+            {
+                var sectorId = this.Components.OfType<Nose>().Single().GetSectorId(sector2);
+                switch (sectorId)
+                {
+                    case 8:
+                    case 1:
+                        this.Direction += 22.5f * (sectorId == 8 ? -1 : 1);
+                        break;
+                    case 7:
+                    case 2:
+                        this.Direction += 45f * (sectorId == 7 ? -1 : 1);
+                        break;
+                }
+            }
 
             this.Collided?.Invoke(this, new CollidedEventArgs(info.CollisionTarget));
         }

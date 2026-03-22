@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Resources;
 
 namespace HelloWorm
 {
@@ -89,8 +90,32 @@ namespace HelloWorm
             else if (sender is Worm worm)
             {
                 var nose = worm.Components.OfType<Nose>().Single();
+                IPhysical target = null;
                 var firstSector = nose.GetCollisionSector(
-                    (p) => !this.GetRectangle().Contains(p),
+                    (p) => {
+                        bool collided = false;
+                        if (!this.GetRectangle().Contains(p))
+                        {
+                            target = this;
+                            collided = true;
+                        }
+
+                        if (!collided)
+                        {
+                            var odors = this.components.OfType<Odor>().ToArray();
+                            foreach (var o in odors)
+                            {
+                                if (o.GetRectangle().Contains(p))
+                                {
+                                    target = o;
+                                    collided = true;
+                                    break;
+                                }
+                            }
+                        }
+
+                        return collided;
+                    },
                     (sector) =>
                     {
                         int sectorId = nose.GetSectorId(sector);
@@ -104,7 +129,7 @@ namespace HelloWorm
                 {
                     e.CollisionInfo = new()
                     {
-                        CollisionTarget = this,
+                        CollisionTarget = target,
                         CollisionSource = firstSector
                     };
                 }
