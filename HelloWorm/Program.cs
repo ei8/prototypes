@@ -19,14 +19,17 @@ namespace HelloWorm
                 new Food()
                 {
                     Location = new Point(50, 50),
-                    Size = new Size(5, 5)
+                    Size = new Size(5, 5),
+                    StartAngle = 15f,
+                    SweepAngle = 60f
                 }
             );
+
             world.Add(
                 new Worm()
                 {
-                    Direction = -30,
-                    Location = new Point(100, 20),
+                    Direction = 370,
+                    Location = new Point(500, 20),
                     Size = new Size(Constants.Worm.Width, 90),
                     Speed = Constants.Worm.Speed,
                     Components = [

@@ -29,11 +29,11 @@ namespace HelloWorm
                 {
                     case 8:
                     case 1:
-                        this.Direction += 45f;
+                        this.Direction += 45f * (sectorId == 8 ? 1 : -1);
                         break;
                     case 7:
                     case 2:
-                        this.Direction += 22.5f;
+                        this.Direction += 22.5f * (sectorId == 7 ? 1 : -1);
                         break;
                 }
             }

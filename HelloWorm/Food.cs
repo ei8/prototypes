@@ -12,9 +12,11 @@ namespace HelloWorm
             this.emissionTriggerTimer = new Timer(Food.Emit, this, 0, Constants.EmissionTriggerTimerPeriod);
         }
 
-        public Point Location { get; set; }
+        public required Point Location { get; set; }
 
-        public Size Size { get; set; }
+        public required Size Size { get; set; }
+        public required float StartAngle { get; set; }
+        public required float SweepAngle { get; set; }
 
         public event EventHandler<EmittedEventArgs<Odor>>? Emitted;
 
@@ -23,16 +25,21 @@ namespace HelloWorm
             if (state is Food currentFood) 
             {
                 var r = new Random();
-                var direction = r.Next(Constants.CircleDegreesCount);
-                var newOdor = new Odor()
+                var deployCount = r.Next(Constants.Food.OdorDeployMax);
+                var newOdors = new List<Odor>();
+                for (int i = 0; i < deployCount; i++)
                 {
-                    Location = currentFood.Location,
-                    Direction = direction,
-                    Size = new Size(Constants.Food.Size, Constants.Food.Size),
-                    Speed = Constants.Food.Speed
-                };
+                    var sweep = r.Next((int) currentFood.SweepAngle);
+                    newOdors.Add(new Odor()
+                    {
+                        Location = currentFood.Location,
+                        Direction = currentFood.StartAngle + sweep,
+                        Size = new Size(Constants.Food.Size, Constants.Food.Size),
+                        Speed = Constants.Food.Speed
+                    });
+                }
 
-                currentFood.OnEmitted(new EmittedEventArgs<Odor>([newOdor]));
+                currentFood.OnEmitted(new EmittedEventArgs<Odor>(newOdors));
             }
         }
 

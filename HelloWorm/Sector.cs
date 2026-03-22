@@ -1,7 +1,7 @@
 ﻿
 namespace HelloWorm
 {
-    internal class Sector : ISectoral
+    internal class Sector : IRectangleBoundSectoral
     {
         public float StartAngle { get; set; }
 

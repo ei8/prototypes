@@ -1,10 +1,61 @@
-﻿using System.Drawing.Drawing2D;
+﻿using System.Diagnostics;
+using System.Drawing.Drawing2D;
 
 namespace HelloWorm
 {
     internal static class ExtensionMethods
     {
         #region Physical
+
+        internal static IRectangleBoundSectoral? GetCollisionSector(
+            this IRectangularComposite rectangularComposite,
+            Func<Point, bool> collisionChecker,
+            Func<IRectangleBoundSectoral, bool> excludeChecker,
+            Func<float, float> angleTranslator,
+            Func<Point, Point> locationTranslator
+        )
+        {
+            IRectangleBoundSectoral? result = null;
+            var swps = rectangularComposite.GetSectorsWithPoints(
+                angleTranslator,
+                locationTranslator
+             );
+
+            // get sector with the most number of collision points
+            var tups = swps
+                .Where(swp => !excludeChecker(swp.Sector))
+                .Select(swp => Tuple.Create(swp.Sector, swp.Points.Count(swpp => collisionChecker(swpp))));
+
+            var collidedTups = tups.Where(t => t.Item2 > 0);
+            if (collidedTups.Any())
+            {
+                var max = collidedTups.Max(t => t.Item2);
+
+                if (max > 0)
+                {
+                    var maxTups = collidedTups.Where(ct => ct.Item2 == max);
+
+                    if (maxTups.Count() > 1)
+                        Debug.WriteLine("Multiple sectors collided equally: " + string.Join(";", maxTups.Select(mt => mt.Item1.StartAngle)));
+
+                    result = maxTups.First().Item1;
+                }
+            }
+
+            return result;
+        }
+
+        internal static bool IsDirectionBound(this IMovable movable, Func<float, bool> positiveRemainderEvaluator, Func<float, bool> negativeRemainderEvaluator)
+        {
+            bool result = false;
+
+                float directionRemainder = Math.Abs(movable.Direction % 360f) / 360f;
+                result =
+                    (movable.Direction > 0 && positiveRemainderEvaluator(directionRemainder)) ||
+                    (movable.Direction < 0 && negativeRemainderEvaluator(directionRemainder)); ;
+
+            return result;
+        }
 
         internal static int GetSectorId(this IRectangularComposite rectangularComposite, ISectoral sectoral) =>
             rectangularComposite.Components.TakeWhile(s => s != sectoral).Count() + 1;
@@ -26,14 +77,14 @@ namespace HelloWorm
 
         internal static Rectangle GetRectangle(this IRectangular rectangle) => new(rectangle.Location, rectangle.Size);
 
-        internal static IEnumerable<(ISectoral Sector, IEnumerable<Point> Points)> GetSectorsWithPoints(
+        internal static IEnumerable<(IRectangleBoundSectoral Sector, IEnumerable<Point> Points)> GetSectorsWithPoints(
             this IRectangularComposite parent,
             Func<float, float> angleTranslator,
             Func<Point, Point> locationTranslator
         )
         {
-            var results = new List<(ISectoral, IEnumerable<Point>)>();
-            var sectors = parent.Components.OfType<ISectoral>();
+            var results = new List<(IRectangleBoundSectoral, IEnumerable<Point>)>();
+            var sectors = parent.Components.OfType<IRectangleBoundSectoral>();
             foreach (var s in sectors)
             {
                 var ps = new List<Point>();
@@ -143,18 +194,21 @@ namespace HelloWorm
                 // boundedPath.AddPie(parentRectangle, sectoral.StartAngle, sectoral.EndAngle - 90);
                 g.FillPie(rb, parentRectangle, angleTranslator(sectoral.StartAngle), sectoral.SweepAngle);
 
-                if (Constants.ShouldDrawSectorIds && rectangleBound is Sector se)
+                if (rectangleBound is Sector se)
                 {
-                    Point hypoPoint = parentRectangle.GetHypotenusePoint(
-                        angleTranslator(sectoral.StartAngle - 1 + (sectoral.SweepAngle / 2)),
-                        10
-                    );
-                    g.DrawCenteredStringAtPoint(
-                        parent.GetSectorId(se).ToString(),
-                        new Font("Arial", 8, FontStyle.Regular),
-                        Brushes.Blue,
-                        hypoPoint
-                    );
+                    if (Constants.ShouldDrawSectorIds)
+                    {
+                        Point hypoPoint = parentRectangle.GetHypotenusePoint(
+                            angleTranslator(sectoral.StartAngle - 1 + (sectoral.SweepAngle / 2)),
+                            10
+                        );
+                        g.DrawCenteredStringAtPoint(
+                            parent.GetSectorId(se).ToString(),
+                            new Font("Arial", 8, FontStyle.Regular),
+                            Brushes.Blue,
+                            hypoPoint
+                        );
+                    }
                 }
             }
 

@@ -66,6 +66,17 @@
                         // Translate back to the original top-left corner position relative to the new origin
                         g.TranslateTransform(-ellipseCenterX, -ellipseCenterY);
 
+                        if (Constants.ShouldDrawDirection)
+                        {
+                            Point hypoPoint = rc.GetRectangle().GetHypotenusePoint(180 - WorldPanel.AngleOffset, 10);
+                            g.DrawCenteredStringAtPoint(
+                                pm.Direction.ToString(),
+                                new Font("Arial", 8, FontStyle.Regular),
+                                Brushes.Green,
+                                hypoPoint
+                            );
+                        }
+
                         // Draw the ellipse
                         g.DrawRectangular(rc, pen, angleTranslator);
 

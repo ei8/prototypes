@@ -2,7 +2,7 @@
 
 namespace HelloWorm
 {
-    public interface IEmitter<T> : IPhysical where T : IPhysical
+    public interface IEmitter<T> : IPhysical, ISectoral where T : IPhysical
     {
         event EventHandler<EmittedEventArgs<T>> Emitted;
     }

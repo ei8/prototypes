@@ -16,7 +16,7 @@ namespace HelloWorm
 
             this.Controls.Add(this.worldPanel);
 
-            this.numericUpDown1.Value = (int) world.Components.OfType<Worm>().Single().Direction;
+            //this.numericUpDown1.Value = (int) world.Components.OfType<Worm>().Single().Direction;
             this.loading = false;
         }
 
@@ -43,8 +43,8 @@ namespace HelloWorm
 
         private void numericUpDown1_ValueChanged(object sender, EventArgs e)
         {
-            if (!this.loading)
-                this.worldPanel.World.Components.OfType<Worm>().Single().Direction = (int) this.numericUpDown1.Value;
+            //if (!this.loading)
+            //    this.worldPanel.World.Components.OfType<Worm>().Single().Direction = (int) this.numericUpDown1.Value;
         }
     }
 }
