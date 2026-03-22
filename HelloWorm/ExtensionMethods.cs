@@ -21,24 +21,23 @@ namespace HelloWorm
                 locationTranslator
              );
 
-            // get sector with the most number of collision points
-            var tups = swps
+            // get sectors with the most number of collision points
+            IEnumerable<(IRectangleBoundSectoral Sector, int Count)> collisionsPerSector = swps
                 .Where(swp => !excludeChecker(swp.Sector))
-                .Select(swp => Tuple.Create(swp.Sector, swp.Points.Count(swpp => collisionChecker(swpp))));
+                .Select(swp => (swp.Sector, swp.Points.Count(swpp => collisionChecker(swpp))));
 
-            var collidedTups = tups.Where(t => t.Item2 > 0);
-            if (collidedTups.Any())
+            var collidedSectors = collisionsPerSector.Where(t => t.Count > 0);
+            if (collidedSectors.Any())
             {
-                var max = collidedTups.Max(t => t.Item2);
-
+                var max = collidedSectors.Max(t => t.Count);
                 if (max > 0)
                 {
-                    var maxTups = collidedTups.Where(ct => ct.Item2 == max);
+                    var maxSectors = collidedSectors.Where(ct => ct.Count == max);
 
-                    if (maxTups.Count() > 1)
-                        Debug.WriteLine("Multiple sectors collided equally: " + string.Join(";", maxTups.Select(mt => mt.Item1.StartAngle)));
+                    if (maxSectors.Count() > 1)
+                        Debug.WriteLine("Multiple sectors collided equally: " + string.Join(";", maxSectors.Select(mt => mt.Sector.StartAngle)));
 
-                    result = maxTups.First().Item1;
+                    result = maxSectors.First().Sector;
                 }
             }
 
@@ -56,6 +55,61 @@ namespace HelloWorm
 
             return result;
         }
+
+        #region Sample Usage of IsDirectionBound
+
+        /*
+        // is southBound?
+        bool southBound = worm.IsDirectionBound(
+            // ... all positive directions between 0 and 0.5 of 360 (eg. 1 to 180 etc)
+            dr => dr > 0 && dr < 0.5,
+            // ... all negative directions between 0.5 and 1 of 360 (eg. -181 to -360 etc.)
+            dr => dr > 0.5 && dr < 1
+        );
+
+        // is northBound?
+        bool northBound = worm.IsDirectionBound(
+            // ... all positive directions between 0.5 and 1 of 360 (eg. 181 to 360 etc)
+            dr => dr > 0.5 && dr < 1,
+            // ... all negative directions between 0.0 and 0.5 of 360 (eg. -1 to -180 etc.)
+            dr => dr > 0 && dr < 0.5
+        );
+
+        var eastEvaluator = new Func<float, bool>(dr => (dr > 0 && dr < 0.25) || (dr > 0.75 && dr < 1));
+        // is eastBound?
+        bool eastBound = worm.IsDirectionBound(
+            // ... all positive directions between 0 and 0.25 or between 0.75 and 1 of 360
+            eastEvaluator,
+            // ... all negative directions between 0.0 and 0.25 or between 0.75 and 1 of 360
+            eastEvaluator
+        );
+
+        var westEvaluator = new Func<float, bool>(dr => dr > 0.25 && dr < 0.75);
+        // is westBound?
+        bool westBound = worm.IsDirectionBound(
+            // ... all positive directions between 0.25 and 0.75
+            westEvaluator,
+            // ... all negative directions between 0.25 and 0.75
+            westEvaluator
+        );
+
+        // TODO: applicable only if left/right walls 
+        // ----------------------
+        // or if southeastbound and sector is 1 or 2
+        exclude |= southBound && eastBound && sectorId < 3;
+
+        // or if northeastbound and sector is 7 or 8
+        exclude |= northBound && eastBound && sectorId > 6;
+
+        // or if southwestbound and sector is 7 or 8
+        exclude |= southBound && westBound && sectorId > 6;
+
+        // or if northwestbound and sector is 1 or 2
+        exclude |= northBound && westBound && sectorId < 3;
+        // TODO: ----------------
+        */
+
+        #endregion
 
         internal static int GetSectorId(this IRectangularComposite rectangularComposite, ISectoral sectoral) =>
             rectangularComposite.Components.TakeWhile(s => s != sectoral).Count() + 1;

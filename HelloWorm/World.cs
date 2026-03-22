@@ -95,60 +95,7 @@ namespace HelloWorm
                     {
                         int sectorId = nose.GetSectorId(sector);
                         // if one of the rear sectors 
-                        bool exclude = sectorId > 2 && sectorId < 7;
-
-                        /*
-                        // is southBound?
-                        bool southBound = worm.IsDirectionBound(
-                            // ... all positive directions between 0 and 0.5 of 360 (eg. 1 to 180 etc)
-                            dr => dr > 0 && dr < 0.5,
-                            // ... all negative directions between 0.5 and 1 of 360 (eg. -181 to -360 etc.)
-                            dr => dr > 0.5 && dr < 1
-                        );
-
-                        // is northBound?
-                        bool northBound = worm.IsDirectionBound(
-                            // ... all positive directions between 0.5 and 1 of 360 (eg. 181 to 360 etc)
-                            dr => dr > 0.5 && dr < 1,
-                            // ... all negative directions between 0.0 and 0.5 of 360 (eg. -1 to -180 etc.)
-                            dr => dr > 0 && dr < 0.5
-                        );
-
-                        var eastEvaluator = new Func<float, bool>(dr => (dr > 0 && dr < 0.25) || (dr > 0.75 && dr < 1));
-                        // is eastBound?
-                        bool eastBound = worm.IsDirectionBound(
-                            // ... all positive directions between 0 and 0.25 or between 0.75 and 1 of 360
-                            eastEvaluator,
-                            // ... all negative directions between 0.0 and 0.25 or between 0.75 and 1 of 360
-                            eastEvaluator
-                        );
-
-                        var westEvaluator = new Func<float, bool>(dr => dr > 0.25 && dr < 0.75);
-                        // is westBound?
-                        bool westBound = worm.IsDirectionBound(
-                            // ... all positive directions between 0.25 and 0.75
-                            westEvaluator,
-                            // ... all negative directions between 0.25 and 0.75
-                            westEvaluator
-                        );
-
-                        // TODO: applicable only if left/right walls 
-                        // ----------------------
-                        // or if southeastbound and sector is 1 or 2
-                        exclude |= southBound && eastBound && sectorId < 3;
-
-                        // or if northeastbound and sector is 7 or 8
-                        exclude |= northBound && eastBound && sectorId > 6;
-
-                        // or if southwestbound and sector is 7 or 8
-                        exclude |= southBound && westBound && sectorId > 6;
-
-                        // or if northwestbound and sector is 1 or 2
-                        exclude |= northBound && westBound && sectorId < 3;
-                        // TODO: ----------------
-                        */
-
-                        return exclude;
+                        return sectorId > 2 && sectorId < 7;
                     },
                     (angle) => angle + worm.Direction,
                     (location) => location.Add(worm.Location)
