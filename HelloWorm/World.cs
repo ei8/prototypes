@@ -1,17 +1,18 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Resources;
 
 namespace HelloWorm
 {
     public class World : IRectangular, IComposite
     {
-        private IList<IPhysical> components;
+        private IImmutableList<IPhysical> components;
 
         public World()
         {
             this.Location = Point.Empty;
             this.Size = Size.Empty;
-            this.components = [];
+            this.components = ImmutableList<IPhysical>.Empty;
         }
 
         public void Add(IPhysical @object)
@@ -21,7 +22,7 @@ namespace HelloWorm
 
         private void AddCore(IPhysical @object)
         {
-            this.components.Add(@object);
+            this.components = this.components.Add(@object);
 
             if (@object is IMovable movable)
             {
@@ -39,19 +40,12 @@ namespace HelloWorm
         {
             if (this.components.Contains(@object))
             {
-                try
-                {
-                    this.components.Remove(@object);
+                this.components = this.components.Remove(@object);
 
-                    if (@object is IMovable movable)
-                    {
-                        movable.Moving -= this.Movable_Moving;
-                        movable.Collided -= this.Movable_Collided;
-                    }
-                }
-                catch (IndexOutOfRangeException ioex)
+                if (@object is IMovable movable)
                 {
-                    Debug.WriteLine("Tried re-removing item.");
+                    movable.Moving -= this.Movable_Moving;
+                    movable.Collided -= this.Movable_Collided;
                 }
             }
         }
@@ -72,6 +66,20 @@ namespace HelloWorm
             {
                 this.Remove(odor);
             }
+            else if (
+                sender is Worm worm &&
+                e.Target is Odor odor2
+            )
+            {
+                this.Remove(odor2);
+            }
+            else if (
+                sender is Worm worm2 &&
+                e.Target is Food food
+            )
+            {
+                this.Remove(food);
+            }
         }
 
         private void Movable_Moving(object? sender, MovingEventArgs e)
@@ -81,58 +89,39 @@ namespace HelloWorm
                 !this.GetRectangle().Contains(e.NewLocation)
             )
             {
-                e.CollisionInfo = new()
-                {
-                    CollisionTarget = this,
-                    CollisionSource = odor
-                };
+                e.CollisionInfo = new(this, odor, 1);
             }
+            // if worm...
             else if (sender is Worm worm)
             {
                 var nose = worm.Components.OfType<Nose>().Single();
-                IPhysical target = null;
-                var firstSector = nose.GetCollisionSector(
-                    (p) => {
-                        bool collided = false;
-                        if (!this.GetRectangle().Contains(p))
-                        {
-                            target = this;
-                            collided = true;
-                        }
 
-                        if (!collided)
-                        {
-                            var odors = this.components.OfType<Odor>().ToArray();
-                            foreach (var o in odors)
-                            {
-                                if (o.GetRectangle().Contains(p))
-                                {
-                                    target = o;
-                                    collided = true;
-                                    break;
-                                }
-                            }
-                        }
+                // ...collides with...
+                var collisionSector = nose.GetCollisionSector(
+                    (sp) => {
+                        CollisionInfo? result = null;
 
-                        return collided;
-                    },
-                    (sector) =>
-                    {
-                        int sectorId = nose.GetSectorId(sector);
-                        // if one of the rear sectors 
-                        return sectorId > 2 && sectorId < 7;
+                        var sectorId = nose.GetSectorId(sp.Sector);
+                        var spCount = 0;
+                        //  ...world
+                        if ((sectorId < 3 || sectorId > 6) && (spCount = sp.Points.Count(spp => !this.GetRectangle().Contains(spp))) > 0)
+                            result = new(this, sp.Sector, spCount);
+
+                        // ...odor
+                        if (result == null)
+                            result = sp.GetCollisionInfo(this.components.OfType<Odor>());
+
+                        // ...food
+                        if (result == null)
+                            result = sp.GetCollisionInfo(this.components.OfType<Food>());
+
+                        return result;
                     },
                     (angle) => angle + worm.Direction,
                     (location) => location.Add(worm.Location)
                 );
-                if (firstSector != null)
-                {
-                    e.CollisionInfo = new()
-                    {
-                        CollisionTarget = target,
-                        CollisionSource = firstSector
-                    };
-                }
+                if (collisionSector != null)
+                    e.CollisionInfo = collisionSector;
             }
         }
 

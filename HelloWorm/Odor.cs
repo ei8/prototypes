@@ -19,7 +19,7 @@ namespace HelloWorm
         public event EventHandler<MovingEventArgs> Moving;
         public event EventHandler<CollidedEventArgs> Collided;
 
-        public void Collide(CollisionInfo info) => this.Collided?.Invoke(this, new CollidedEventArgs(info.CollisionTarget));
+        public void Collide(CollisionInfo info) => this.Collided?.Invoke(this, new CollidedEventArgs(info.Target));
 
         public void OnMoving(MovingEventArgs e) => this.Moving?.Invoke(this, e);
     }

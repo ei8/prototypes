@@ -6,38 +6,56 @@ namespace HelloWorm
     internal static class ExtensionMethods
     {
         #region Physical
-
-        internal static IRectangleBoundSectoral? GetCollisionSector(
+        internal static CollisionInfo? GetCollisionSector(
             this IRectangularComposite rectangularComposite,
-            Func<Point, bool> collisionChecker,
-            Func<IRectangleBoundSectoral, bool> excludeChecker,
+            Func<SectorPointInfo, CollisionInfo?> collisionEvaluator,
             Func<float, float> angleTranslator,
             Func<Point, Point> locationTranslator
         )
         {
-            IRectangleBoundSectoral? result = null;
-            var swps = rectangularComposite.GetSectorsWithPoints(
+            CollisionInfo? result = null;
+            var swps = rectangularComposite.GetSectorsPoints(
                 angleTranslator,
                 locationTranslator
              );
 
             // get sectors with the most number of collision points
-            IEnumerable<(IRectangleBoundSectoral Sector, int Count)> collisionsPerSector = swps
-                .Where(swp => !excludeChecker(swp.Sector))
-                .Select(swp => (swp.Sector, swp.Points.Count(swpp => collisionChecker(swpp))));
+            IEnumerable<CollisionInfo?> collisionsPerSector = swps
+                .Select(swp => collisionEvaluator(swp));
 
-            var collidedSectors = collisionsPerSector.Where(t => t.Count > 0);
+            var collidedSectors = collisionsPerSector.Where(t =>  t != null && t.Count > 0).Select(e => e!);
             if (collidedSectors.Any())
             {
-                var max = collidedSectors.Max(t => t.Count);
-                if (max > 0)
+                var max = collidedSectors.DefaultIfEmpty().Max(t => t?.Count);
+                if (max.HasValue && max.Value > 0)
                 {
                     var maxSectors = collidedSectors.Where(ct => ct.Count == max);
 
                     if (maxSectors.Count() > 1)
-                        Debug.WriteLine("Multiple sectors collided equally: " + string.Join(";", maxSectors.Select(mt => mt.Sector.StartAngle)));
+                        Debug.WriteLine("Multiple sectors collided equally: " + string.Join(";", maxSectors.Select(mt => ((Sector)mt.Source).StartAngle)));
 
-                    result = maxSectors.First().Sector;
+                    result = maxSectors.FirstOrDefault();
+                }
+            }
+
+            return result;
+        }
+
+        internal static CollisionInfo? GetCollisionInfo(this SectorPointInfo sp, IEnumerable<IRectangular> components)
+        {
+            CollisionInfo? result = null;
+
+            foreach (var c in components)
+            {
+                int spCount = sp.Points.Count(spp => c.GetRectangle().Contains(spp));
+                if (spCount > 0)
+                {
+                    result = new(
+                        c,
+                        sp.Sector,
+                        spCount
+                    );
+                    break;
                 }
             }
 
@@ -131,25 +149,30 @@ namespace HelloWorm
 
         internal static Rectangle GetRectangle(this IRectangular rectangle) => new(rectangle.Location, rectangle.Size);
 
-        internal static IEnumerable<(IRectangleBoundSectoral Sector, IEnumerable<Point> Points)> GetSectorsWithPoints(
+        internal static IEnumerable<SectorPointInfo> GetSectorsPoints(
             this IRectangularComposite parent,
             Func<float, float> angleTranslator,
             Func<Point, Point> locationTranslator
         )
         {
-            var results = new List<(IRectangleBoundSectoral, IEnumerable<Point>)>();
+            var results = new List<SectorPointInfo>();
             var sectors = parent.Components.OfType<IRectangleBoundSectoral>();
             foreach (var s in sectors)
             {
                 var ps = new List<Point>();
                 for (int i = (int)s.StartAngle; i < s.StartAngle - 1 + s.SweepAngle; i++)
                 {
-                    var hp = parent.GetRectangle().GetHypotenusePoint(angleTranslator(i));
-                    hp = locationTranslator(hp);
-                    ps.Add(hp);
+                    var parentRectangle = parent.GetRectangle();
+                    var radius = (parentRectangle.Size / 2).Width;
+                    for (int offset = 0; offset < radius; offset++)
+                    {
+                        var hp = parentRectangle.GetHypotenusePoint(angleTranslator(i), offset * -1);
+                        hp = locationTranslator(hp);
+                        ps.Add(hp);
+                    }
                 }
 
-                results.Add((s, ps));
+                results.Add(new(s, ps));
             }
 
             return results;

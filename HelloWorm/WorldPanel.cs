@@ -26,8 +26,7 @@
             if (Constants.ShouldDrawGrid)
                 g.DrawGrid(this.world.Size, 50);
 
-            var pos = this.world.Components.ToArray();
-            foreach (var p in pos)
+            foreach (var p in this.world.Components)
             {
                 using SolidBrush b = new(Color.Black);
                 using Pen pen = new(b);

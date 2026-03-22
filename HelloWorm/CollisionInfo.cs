@@ -1,8 +1,9 @@
 ﻿namespace HelloWorm
 {
-    internal class CollisionInfo
+    public class CollisionInfo(IPhysical target, IPhysical source, int count)
     {
-        public required IPhysical CollisionTarget { get; set; }
-        public required IPhysical CollisionSource { get; set; }
+        public IPhysical Target { get; init; } = target;
+        public IPhysical Source { get; init; } = source;
+        public int Count { get; init; } = count;
     }
 }

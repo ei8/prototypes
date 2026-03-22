@@ -1,6 +1,6 @@
 ﻿namespace HelloWorm
 {
-    internal interface IRectangleBoundSectoral : IRectangleBound, ISectoral
+    public interface IRectangleBoundSectoral : IRectangleBound, ISectoral
     {
     }
 }

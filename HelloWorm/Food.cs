@@ -25,7 +25,7 @@ namespace HelloWorm
             if (state is Food currentFood) 
             {
                 var r = new Random();
-                var deployCount = r.Next(Constants.Food.OdorDeployMax);
+                var deployCount = Constants.Odor.DeployMin + r.Next(Constants.Odor.DeployExtra);
                 var newOdors = new List<Odor>();
                 for (int i = 0; i < deployCount; i++)
                 {
@@ -34,8 +34,8 @@ namespace HelloWorm
                     {
                         Location = currentFood.Location,
                         Direction = currentFood.StartAngle + sweep,
-                        Size = new Size(Constants.Food.Size, Constants.Food.Size),
-                        Speed = Constants.Food.Speed
+                        Size = new Size(Constants.Odor.Size, Constants.Odor.Size),
+                        Speed = Constants.Odor.Speed
                     });
                 }
 

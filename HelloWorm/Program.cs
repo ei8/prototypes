@@ -20,8 +20,8 @@ namespace HelloWorm
                 {
                     Location = new Point(50, 50),
                     Size = new Size(5, 5),
-                    StartAngle = 15f,
-                    SweepAngle = 60f
+                    StartAngle = 0f,
+                    SweepAngle = 90f
                 }
             );
 
@@ -30,7 +30,7 @@ namespace HelloWorm
                 {
                     Direction = 370,
                     Location = new Point(500, 20),
-                    Size = new Size(Constants.Worm.Width, 90),
+                    Size = new Size(Constants.Worm.Width, 100),
                     Speed = Constants.Worm.Speed,
                     Components = [
                         new Nose()
@@ -42,15 +42,24 @@ namespace HelloWorm
                     ]
                 }
             );
-            //world.Add(
-            //    new Worm()
-            //    {
-            //        Direction = 135,
-            //        Location = new Point(200, 100),
-            //        Size = new Size(10, 80),
-            //        Speed = 1
-            //    }
-            //);
+            world.Add(
+                new Worm()
+                {
+                    Direction = 135,
+                    Location = new Point(20, 300),
+                    Size = new Size(15, 80),
+                    Speed = 8,
+                    Components = [
+                        new Nose()
+                        {
+                            Location = new Point(0, 0),
+                            Size = new Size(15, 15),
+                            Components = InitializeSectors()
+                        }
+                    ]
+                }
+            );
+
             Application.Run(new Form1(world));
         }
 

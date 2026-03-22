@@ -1,6 +1,6 @@
 ﻿namespace HelloWorm
 {
-    internal interface IRectangleBound : IPhysical
+    public interface IRectangleBound : IPhysical
     { 
     }
 }
