@@ -20,10 +20,14 @@ namespace HelloWorm
 
         public event EventHandler<EmittedEventArgs<Odor>>? Emitted;
 
+        public int Life { get; set; }
+
         private static void Emit(object? state)
         {
             if (state is Food currentFood) 
             {
+                currentFood.Life--;
+
                 var r = new Random();
                 var deployCount = Constants.Odor.DeployMin + r.Next(Constants.Odor.DeployExtra);
                 var newOdors = new List<Odor>();

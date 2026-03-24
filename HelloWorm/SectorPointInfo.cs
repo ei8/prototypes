@@ -1,8 +1,11 @@
-﻿namespace HelloWorm
+﻿using System.Drawing.Drawing2D;
+
+namespace HelloWorm
 {
-    public class SectorPointInfo(IRectangleBoundSectoral sector, IEnumerable<Point> points)
+    public class SectorPointInfo(IRectangleBoundSectoral sector, GraphicsPath path, IEnumerable<Point> circumferencePoints)
     {
         public IRectangleBoundSectoral Sector { get; init; } = sector;
-        public IEnumerable<Point> Points { get; init; } = points;
+        public GraphicsPath Path { get; init; } = path;
+        public IEnumerable<Point> CircumferencePoints { get; init; } = circumferencePoints;
     }
 }

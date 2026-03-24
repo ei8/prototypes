@@ -12,6 +12,13 @@
         {
             this.DoubleBuffered = true;
             this.world = world;
+
+            this.SizeChanged += this.WorldPanel_SizeChanged;
+        }
+
+        private void WorldPanel_SizeChanged(object? sender, EventArgs e)
+        {
+            this.world.Size = new Size(this.Size.Width - 17, this.Size.Height - 40);
         }
 
         protected override void OnPaint(PaintEventArgs e)
@@ -76,6 +83,24 @@
                             );
                         }
 
+                        if (Constants.ShouldDrawScore && p is Worm pw)
+                        {
+                            Point hypoPoint = rc.GetRectangle().GetHypotenusePoint(60 - WorldPanel.AngleOffset, 18);
+                            g.DrawCenteredStringAtPoint(
+                                pw.Score.ToString(),
+                                new Font("Arial", 10, FontStyle.Regular),
+                                Brushes.Green,
+                                hypoPoint
+                            );
+                            Point hypoPoint2 = rc.GetRectangle().GetHypotenusePoint(45 - WorldPanel.AngleOffset, 25);
+                            g.DrawCenteredStringAtPoint(
+                                pw.Life.ToString(),
+                                new Font("Arial", 7, FontStyle.Regular),
+                                Brushes.Red,
+                                hypoPoint2
+                            );
+                        }
+
                         // Draw the ellipse
                         g.DrawRectangular(rc, pen, angleTranslator);
 
@@ -83,7 +108,21 @@
                         g.Transform = originalMatrix;
                     }
                     else
+                    {
                         g.DrawRectangular(rc, pen, angleTranslator);
+
+                        if (rc is Food food)
+                        {
+                            var foodLoc = rc.GetRectangle().Location;
+                            Point hypoPoint2 = new Point(foodLoc.X + food.Size.Width + 10, foodLoc.Y + 4);
+                            g.DrawCenteredStringAtPoint(
+                                food.Life.ToString(),
+                                new Font("Arial", 7, FontStyle.Regular),
+                                Brushes.Red,
+                                hypoPoint2
+                            );
+                        }
+                    }
                 }
             }
 

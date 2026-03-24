@@ -47,13 +47,12 @@ namespace HelloWorm
 
             foreach (var c in components)
             {
-                int spCount = sp.Points.Count(spp => c.GetRectangle().Contains(spp));
-                if (spCount > 0)
+                if (sp.Path.IsVisible(c.GetRectangle().Location))
                 {
                     result = new(
                         c,
                         sp.Sector,
-                        spCount
+                        1
                     );
                     break;
                 }
@@ -159,20 +158,20 @@ namespace HelloWorm
             var sectors = parent.Components.OfType<IRectangleBoundSectoral>();
             foreach (var s in sectors)
             {
+                Rectangle parentRectangle = parent.GetRectangle();
+                var sectorPath = new GraphicsPath();
+                var sectorRectangle = new Rectangle(locationTranslator(parentRectangle.Location), parentRectangle.Size);
+                sectorPath.AddPie(sectorRectangle, angleTranslator(s.StartAngle), s.SweepAngle);
+
                 var ps = new List<Point>();
                 for (int i = (int)s.StartAngle; i < s.StartAngle - 1 + s.SweepAngle; i++)
                 {
-                    var parentRectangle = parent.GetRectangle();
-                    var radius = (parentRectangle.Size / 2).Width;
-                    for (int offset = 0; offset < radius; offset++)
-                    {
-                        var hp = parentRectangle.GetHypotenusePoint(angleTranslator(i), offset * -1);
-                        hp = locationTranslator(hp);
-                        ps.Add(hp);
-                    }
+                    var hp = parentRectangle.GetHypotenusePoint(angleTranslator(i));
+                    hp = locationTranslator(hp);
+                    ps.Add(hp);
                 }
 
-                results.Add(new(s, ps));
+                results.Add(new(s, sectorPath, ps));
             }
 
             return results;
@@ -268,7 +267,6 @@ namespace HelloWorm
                 parentRectangle.Location = parentRectangle.Location.Translate(locationTranslators);
 
                 Brush rb = ExtensionMethods.GetRandomBrushColor(2);
-                // boundedPath.AddPie(parentRectangle, sectoral.StartAngle, sectoral.EndAngle - 90);
                 g.FillPie(rb, parentRectangle, angleTranslator(sectoral.StartAngle), sectoral.SweepAngle);
 
                 if (rectangleBound is Sector se)

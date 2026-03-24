@@ -1,6 +1,4 @@
 ﻿using System.Collections.Immutable;
-using System.Diagnostics;
-using System.Resources;
 
 namespace HelloWorm
 {
@@ -79,7 +77,32 @@ namespace HelloWorm
             )
             {
                 this.Remove(food);
+                this.CreateFood();
+                worm2.Grow();
             }
+        }
+
+        public void CreateFood()
+        {
+            var r = new Random(); 
+            this.Add(
+                new Food()
+                {
+                    Location = new Point(r.Next(this.Size.Width), r.Next(this.Size.Height)),
+                    Size = new Size(5, 5),
+                    StartAngle = r.Next(Constants.CircleDegreesCount),
+                    SweepAngle = 45 + r.Next(135),
+                    Life = Constants.Food.InitialLife
+                }
+            );
+        }
+
+        public void CreateWorm()
+        {
+            var r = new Random();
+            var size = Constants.Worm.MinWidth;
+            var center = this.Size / 2;
+            this.Add(new Worm(r.Next(Constants.CircleDegreesCount), center.Width, center.Height, size));
         }
 
         private void Movable_Moving(object? sender, MovingEventArgs e)
@@ -94,34 +117,43 @@ namespace HelloWorm
             // if worm...
             else if (sender is Worm worm)
             {
-                var nose = worm.Components.OfType<Nose>().Single();
+                if (worm.Life > 0)
+                {
+                    var nose = worm.Components.OfType<Nose>().Single();
 
-                // ...collides with...
-                var collisionSector = nose.GetCollisionSector(
-                    (sp) => {
-                        CollisionInfo? result = null;
+                    // ...collides with...
+                    var collisionSector = nose.GetCollisionSector(
+                        (sp) =>
+                        {
+                            CollisionInfo? result = null;
 
-                        var sectorId = nose.GetSectorId(sp.Sector);
-                        var spCount = 0;
-                        //  ...world
-                        if ((sectorId < 3 || sectorId > 6) && (spCount = sp.Points.Count(spp => !this.GetRectangle().Contains(spp))) > 0)
-                            result = new(this, sp.Sector, spCount);
+                            var sectorId = nose.GetSectorId(sp.Sector);
+                            var spCount = 0;
+                            //  ...world
+                            if ((sectorId < 3 || sectorId > 6) && (spCount = sp.CircumferencePoints.Count(spp => !this.GetRectangle().Contains(spp))) > 0)
+                                result = new(this, sp.Sector, spCount);
 
-                        // ...odor
-                        if (result == null)
-                            result = sp.GetCollisionInfo(this.components.OfType<Odor>());
+                            // ...odor
+                            if (result == null)
+                                result = sp.GetCollisionInfo(this.components.OfType<Odor>());
 
-                        // ...food
-                        if (result == null)
-                            result = sp.GetCollisionInfo(this.components.OfType<Food>());
+                            // ...food
+                            if (result == null)
+                                result = sp.GetCollisionInfo(this.components.OfType<Food>());
 
-                        return result;
-                    },
-                    (angle) => angle + worm.Direction,
-                    (location) => location.Add(worm.Location)
-                );
-                if (collisionSector != null)
-                    e.CollisionInfo = collisionSector;
+                            return result;
+                        },
+                        (angle) => angle + worm.Direction,
+                        (location) => location.Add(worm.Location)
+                    );
+                    if (collisionSector != null)
+                        e.CollisionInfo = collisionSector;
+                }
+                else
+                {
+                    this.Remove(worm);
+                    this.CreateWorm();
+                }
             }
         }
 
@@ -136,6 +168,12 @@ namespace HelloWorm
         {
             foreach (var em in e.Emission)
                 this.Add(em);
+
+            if (sender is Food food && food.Life < 0)
+            {
+                this.Remove(food);
+                this.CreateFood();
+            }
         }
 
         public Point Location { get; set; }
