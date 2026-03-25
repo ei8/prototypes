@@ -2,10 +2,14 @@
 
 namespace HelloWorm
 {
-    internal class Worm : IMovable, IRectangularComposite, IElliptical
+    internal class Worm : IMovable, IRectangularComposite, IElliptical, IPerishable, IRegenerative
     {
         private readonly Timer movementTriggerTimer;
 
+        public Worm() : this(0, 0, 0, 0)
+        {
+        }
+        
         public Worm(int direction, int x, int y, int width)
         {
             this.Direction = direction;
@@ -146,5 +150,13 @@ namespace HelloWorm
         }
 
         public void OnMoving(MovingEventArgs e) => this.Moving?.Invoke(this, e);
+
+        public IPhysical Create(Size worldSize)
+        {
+            var r = new Random();
+            var size = Constants.Worm.MinWidth;
+            var center = worldSize / 2;
+            return new Worm(r.Next(Constants.CircleDegreesCount), center.Width, center.Height, size);
+        }
     }
 }

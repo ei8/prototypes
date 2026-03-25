@@ -15,9 +15,9 @@ namespace HelloWorm
             var world = new World();
             world.Location = new Point(0, 0);
             world.Size = new Size(600, 400);
-            world.CreateFood();
-            world.CreateWorm();
-            world.CreateWorm();
+            world.Add(new Food().Create(world.Size));
+            world.Add(new Worm().Create(world.Size));
+            world.Add(new Worm().Create(world.Size));
             
             Application.Run(new Form1(world));
         }

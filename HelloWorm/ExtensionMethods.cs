@@ -269,21 +269,18 @@ namespace HelloWorm
                 Brush rb = ExtensionMethods.GetRandomBrushColor(2);
                 g.FillPie(rb, parentRectangle, angleTranslator(sectoral.StartAngle), sectoral.SweepAngle);
 
-                if (rectangleBound is Sector se)
+                if (Constants.ShouldDrawSectorIds)
                 {
-                    if (Constants.ShouldDrawSectorIds)
-                    {
-                        Point hypoPoint = parentRectangle.GetHypotenusePoint(
-                            angleTranslator(sectoral.StartAngle - 1 + (sectoral.SweepAngle / 2)),
-                            10
-                        );
-                        g.DrawCenteredStringAtPoint(
-                            parent.GetSectorId(se).ToString(),
-                            new Font("Arial", 8, FontStyle.Regular),
-                            Brushes.Blue,
-                            hypoPoint
-                        );
-                    }
+                    Point hypoPoint = parentRectangle.GetHypotenusePoint(
+                        angleTranslator(sectoral.StartAngle - 1 + (sectoral.SweepAngle / 2)),
+                        10
+                    );
+                    g.DrawCenteredStringAtPoint(
+                        parent.GetSectorId(sectoral).ToString(),
+                        new Font("Arial", 8, FontStyle.Regular),
+                        Brushes.Blue,
+                        hypoPoint
+                    );
                 }
             }
 

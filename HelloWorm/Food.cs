@@ -1,9 +1,8 @@
-﻿using System.Runtime.CompilerServices;
-using Timer = System.Threading.Timer;
+﻿using Timer = System.Threading.Timer;
 
 namespace HelloWorm
 {
-    internal class Food : IRectangular, IEmitter<Odor>
+    internal class Food : IRectangular, IEmitter, IPerishable, IRegenerative
     {
         private readonly Timer emissionTriggerTimer;
 
@@ -12,13 +11,13 @@ namespace HelloWorm
             this.emissionTriggerTimer = new Timer(Food.Emit, this, 0, Constants.EmissionTriggerTimerPeriod);
         }
 
-        public required Point Location { get; set; }
+        public Point Location { get; set; }
 
-        public required Size Size { get; set; }
-        public required float StartAngle { get; set; }
-        public required float SweepAngle { get; set; }
+        public Size Size { get; set; }
+        public float StartAngle { get; set; }
+        public float SweepAngle { get; set; }
 
-        public event EventHandler<EmittedEventArgs<Odor>>? Emitted;
+        public event EventHandler<EmittedEventArgs>? Emitted;
 
         public int Life { get; set; }
 
@@ -43,10 +42,23 @@ namespace HelloWorm
                     });
                 }
 
-                currentFood.OnEmitted(new EmittedEventArgs<Odor>(newOdors));
+                currentFood.OnEmitted(new EmittedEventArgs(newOdors));
             }
         }
 
-        private void OnEmitted(EmittedEventArgs<Odor> e) => this.Emitted?.Invoke(this, e);
+        private void OnEmitted(EmittedEventArgs e) => this.Emitted?.Invoke(this, e);
+
+        public IPhysical Create(Size worldSize)
+        {
+            var r = new Random();
+            return new Food()
+            {
+                Location = new Point(r.Next(worldSize.Width), r.Next(worldSize.Height)),
+                Size = new Size(5, 5),
+                StartAngle = r.Next(Constants.CircleDegreesCount),
+                SweepAngle = 45 + r.Next(135),
+                Life = Constants.Food.InitialLife
+            };
+        }
     }
 }

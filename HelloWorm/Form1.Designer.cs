@@ -44,7 +44,7 @@ namespace HelloWorm
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
             Name = "Form1";
-            Text = "Form1";
+            Text = "Hello Worm";
             Load += Form1_Load;
             ResizeEnd += Form1_ResizeEnd;
             ResumeLayout(false);

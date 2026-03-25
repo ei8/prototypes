@@ -1,12 +1,12 @@
 ﻿namespace HelloWorm
 {
-    public class EmittedEventArgs<T> : EventArgs where T : IPhysical
+    public class EmittedEventArgs : EventArgs 
     {
-        public EmittedEventArgs(IEnumerable<T> emission)
+        public EmittedEventArgs(IEnumerable<IPhysical> emission)
         {
             this.Emission = emission ?? throw new ArgumentNullException(nameof(emission));
         }
 
-        public IEnumerable<T> Emission { get; }
+        public IEnumerable<IPhysical> Emission { get; }
     }
 }

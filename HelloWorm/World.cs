@@ -27,6 +27,9 @@ namespace HelloWorm
                 movable.Moving += this.Movable_Moving;
                 movable.Collided += this.Movable_Collided;
             }
+
+            if (@object is IEmitter emitter)
+                emitter.Emitted += this.Emitter_Emitted;
         }
 
         public void Remove(IPhysical @object)
@@ -46,13 +49,12 @@ namespace HelloWorm
                     movable.Collided -= this.Movable_Collided;
                 }
             }
-        }
 
-        public void Remove<T>(IEmitter<T> emitter) where T : IPhysical
-        {
-            this.RemoveCore(emitter);
+            if (@object is IRegenerative regenerative)
+                this.Add(regenerative.Create(this.Size));
 
-            emitter.Emitted -= this.Emitter_Emitted;
+            if (@object is IEmitter emitter)
+                emitter.Emitted -= this.Emitter_Emitted;
         }
 
         private void Movable_Collided(object? sender, CollidedEventArgs e)
@@ -77,32 +79,8 @@ namespace HelloWorm
             )
             {
                 this.Remove(food);
-                this.CreateFood();
                 worm2.Grow();
             }
-        }
-
-        public void CreateFood()
-        {
-            var r = new Random(); 
-            this.Add(
-                new Food()
-                {
-                    Location = new Point(r.Next(this.Size.Width), r.Next(this.Size.Height)),
-                    Size = new Size(5, 5),
-                    StartAngle = r.Next(Constants.CircleDegreesCount),
-                    SweepAngle = 45 + r.Next(135),
-                    Life = Constants.Food.InitialLife
-                }
-            );
-        }
-
-        public void CreateWorm()
-        {
-            var r = new Random();
-            var size = Constants.Worm.MinWidth;
-            var center = this.Size / 2;
-            this.Add(new Worm(r.Next(Constants.CircleDegreesCount), center.Width, center.Height, size));
         }
 
         private void Movable_Moving(object? sender, MovingEventArgs e)
@@ -117,62 +95,51 @@ namespace HelloWorm
             // if worm...
             else if (sender is Worm worm)
             {
-                if (worm.Life > 0)
-                {
-                    var nose = worm.Components.OfType<Nose>().Single();
+                var nose = worm.Components.OfType<Nose>().Single();
 
-                    // ...collides with...
-                    var collisionSector = nose.GetCollisionSector(
-                        (sp) =>
-                        {
-                            CollisionInfo? result = null;
+                // ...collides with...
+                var collisionSector = nose.GetCollisionSector(
+                    (sp) =>
+                    {
+                        CollisionInfo? result = null;
 
-                            var sectorId = nose.GetSectorId(sp.Sector);
-                            var spCount = 0;
-                            //  ...world
-                            if ((sectorId < 3 || sectorId > 6) && (spCount = sp.CircumferencePoints.Count(spp => !this.GetRectangle().Contains(spp))) > 0)
-                                result = new(this, sp.Sector, spCount);
+                        var sectorId = nose.GetSectorId(sp.Sector);
+                        var spCount = 0;
+                        //  ...world
+                        if ((sectorId < 3 || sectorId > 6) && (spCount = sp.CircumferencePoints.Count(spp => !this.GetRectangle().Contains(spp))) > 0)
+                            result = new(this, sp.Sector, spCount);
 
-                            // ...odor
-                            if (result == null)
-                                result = sp.GetCollisionInfo(this.components.OfType<Odor>());
+                        // ...odor
+                        if (result == null)
+                            result = sp.GetCollisionInfo(this.components.OfType<Odor>());
 
-                            // ...food
-                            if (result == null)
-                                result = sp.GetCollisionInfo(this.components.OfType<Food>());
+                        // ...food
+                        if (result == null)
+                            result = sp.GetCollisionInfo(this.components.OfType<Food>());
 
-                            return result;
-                        },
-                        (angle) => angle + worm.Direction,
-                        (location) => location.Add(worm.Location)
-                    );
-                    if (collisionSector != null)
-                        e.CollisionInfo = collisionSector;
-                }
-                else
-                {
-                    this.Remove(worm);
-                    this.CreateWorm();
-                }
+                        return result;
+                    },
+                    (angle) => angle + worm.Direction,
+                    (location) => location.Add(worm.Location)
+                );
+                if (collisionSector != null)
+                    e.CollisionInfo = collisionSector;
+            }
+
+            if (sender is IPerishable perishable && perishable.Life < 0)
+            {
+                this.Remove(perishable);
             }
         }
 
-        public void Add<T>(IEmitter<T> emitter) where T : IPhysical
-        {
-            this.AddCore(emitter);
-
-            emitter.Emitted += this.Emitter_Emitted;
-        }
-
-        private void Emitter_Emitted<T>(object? sender, EmittedEventArgs<T> e) where T: IPhysical
+        private void Emitter_Emitted(object? sender, EmittedEventArgs e)
         {
             foreach (var em in e.Emission)
                 this.Add(em);
 
-            if (sender is Food food && food.Life < 0)
+            if (sender is IPerishable perishable && perishable.Life < 0)
             {
-                this.Remove(food);
-                this.CreateFood();
+                this.Remove(perishable);
             }
         }
 
