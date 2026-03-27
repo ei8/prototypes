@@ -266,8 +266,6 @@ namespace ei8.Prototypes.HelloWorm
             else if (info.Target is Odor && info.Source is ISectoral sector2)
             {
                 var sectorId = this.Components.OfType<Nose>().Single().GetSectorId(sector2);
-                if (sectorId == 1)
-                {
 #if DEBUG
                     Debug.WriteLine("Odor spiking Sector " + sectorId + ">>>>>>>>>>>>>>>>>>>>>>");
 #endif
@@ -279,7 +277,6 @@ namespace ei8.Prototypes.HelloWorm
                         this.Neurons
                     );
                 }
-            }
 
             this.Collided?.Invoke(this, new CollidedEventArgs(info.Target));
         }
