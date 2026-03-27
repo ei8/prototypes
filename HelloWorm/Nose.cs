@@ -1,5 +1,5 @@
 ﻿
-namespace HelloWorm
+namespace ei8.Prototypes.HelloWorm
 {
     internal class Nose : IRectangularComposite, IElliptical
     {

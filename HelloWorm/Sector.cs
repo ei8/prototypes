@@ -1,5 +1,5 @@
 ﻿
-namespace HelloWorm
+namespace ei8.Prototypes.HelloWorm
 {
     public class Sector : IRectangleBoundSectoral
     {

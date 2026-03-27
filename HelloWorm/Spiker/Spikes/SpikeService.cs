@@ -1,4 +1,4 @@
-﻿using HelloWorm.Spiker.Neurons;
+﻿using ei8.Prototypes.HelloWorm.Spiker.Neurons;
 using System.Diagnostics;
 
 namespace HelloWorld.Spiker.Spikes

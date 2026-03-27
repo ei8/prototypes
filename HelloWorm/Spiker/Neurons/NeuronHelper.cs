@@ -1,6 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 
-namespace HelloWorm.Spiker.Neurons
+namespace ei8.Prototypes.HelloWorm.Spiker.Neurons
 {
     public class NeuronHelper
     {

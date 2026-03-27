@@ -1,6 +1,6 @@
-﻿using HelloWorm.Spiker.Neurons;
+﻿using ei8.Prototypes.HelloWorm.Spiker.Neurons;
 
-namespace HelloWorm
+namespace ei8.Prototypes.HelloWorm
 {
     public interface INeurULized
     {

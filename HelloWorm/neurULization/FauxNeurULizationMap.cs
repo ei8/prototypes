@@ -1,4 +1,4 @@
-﻿namespace HelloWorm.neurULization
+﻿namespace ei8.Prototypes.HelloWorm.neurULization
 {
     public  class FauxNeurULizationMap<T>(string neuronId, T value)
     {

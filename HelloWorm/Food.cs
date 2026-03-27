@@ -1,6 +1,6 @@
 ﻿using Timer = System.Threading.Timer;
 
-namespace HelloWorm
+namespace ei8.Prototypes.HelloWorm
 {
     internal class Food : IRectangular, IEmitter, IPerishable, IRegenerative
     {

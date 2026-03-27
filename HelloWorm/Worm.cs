@@ -1,11 +1,11 @@
 ﻿using HelloWorld.Spiker.Spikes;
-using HelloWorm.neurULization;
-using HelloWorm.Spiker.Neurons;
+using ei8.Prototypes.HelloWorm.neurULization;
+using ei8.Prototypes.HelloWorm.Spiker.Neurons;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using Timer = System.Threading.Timer;
 
-namespace HelloWorm
+namespace ei8.Prototypes.HelloWorm
 {
     internal class Worm : IMovable, IRectangularComposite, IElliptical, IPerishable, IRegenerative, INeurULized
     {

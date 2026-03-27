@@ -1,4 +1,4 @@
-﻿namespace HelloWorm.Spiker.Neurons
+﻿namespace ei8.Prototypes.HelloWorm.Spiker.Neurons
 {
     public class NeuronCollection : ObservableKeyedCollection<string, Neuron>
     {

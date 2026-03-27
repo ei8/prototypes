@@ -1,6 +1,6 @@
 ﻿using System.Collections.Immutable;
 
-namespace HelloWorm
+namespace ei8.Prototypes.HelloWorm
 {
     public class World : IRectangular, IComposite
     {
