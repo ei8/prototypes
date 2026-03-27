@@ -9,13 +9,29 @@ namespace ei8.Prototypes.HelloWorm
             // TODO:
             public static readonly string Odor = NeuronHelper.GetNewShortGuid();
             public static readonly string Sector1 = NeuronHelper.GetNewShortGuid();
+            public static readonly string Sector2 = NeuronHelper.GetNewShortGuid();
+            public static readonly string Sector3 = NeuronHelper.GetNewShortGuid();
+            public static readonly string Sector4 = NeuronHelper.GetNewShortGuid();
+            public static readonly string Sector5 = NeuronHelper.GetNewShortGuid();
+            public static readonly string Sector6 = NeuronHelper.GetNewShortGuid();
+            public static readonly string Sector7 = NeuronHelper.GetNewShortGuid();
             public static readonly string Sector8 = NeuronHelper.GetNewShortGuid();
             public static readonly string Rotate = NeuronHelper.GetNewShortGuid();
             public static readonly string Clockwise = NeuronHelper.GetNewShortGuid();
             public static readonly string CounterClockwise = NeuronHelper.GetNewShortGuid();
             public static readonly string Degrees22_5 = NeuronHelper.GetNewShortGuid();
+            public static readonly string Degrees45 = NeuronHelper.GetNewShortGuid();
+            public static readonly string Degrees60 = NeuronHelper.GetNewShortGuid();
+            public static readonly string Degrees70 = NeuronHelper.GetNewShortGuid();
 
             public static readonly string OdorSector1 = NeuronHelper.GetNewShortGuid();
+            public static readonly string OdorSector2 = NeuronHelper.GetNewShortGuid();
+            public static readonly string OdorSector3 = NeuronHelper.GetNewShortGuid();
+            public static readonly string OdorSector4 = NeuronHelper.GetNewShortGuid();
+            public static readonly string OdorSector5 = NeuronHelper.GetNewShortGuid();
+            public static readonly string OdorSector6 = NeuronHelper.GetNewShortGuid();
+            public static readonly string OdorSector7 = NeuronHelper.GetNewShortGuid();
+            public static readonly string OdorSector8 = NeuronHelper.GetNewShortGuid();
         }
 
         public const bool ShouldDrawGrid = false;

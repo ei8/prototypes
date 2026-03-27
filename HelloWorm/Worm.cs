@@ -15,6 +15,19 @@ namespace ei8.Prototypes.HelloWorm
             CounterClockwise
         }
 
+        // TODO:
+        private static readonly IEnumerable<FauxNeurULizationMap<RotationDirection>> Param1ValueMaps = [
+            new(Constants.NeuronId.Clockwise, RotationDirection.Clockwise),
+            new(Constants.NeuronId.CounterClockwise, RotationDirection.CounterClockwise)
+        ];
+
+        private static readonly IEnumerable<FauxNeurULizationMap<float>> Param2ValueMaps = [
+            new(Constants.NeuronId.Degrees22_5, 22.5f),
+            new(Constants.NeuronId.Degrees45, 45f),
+            new(Constants.NeuronId.Degrees60, 60f),
+            new(Constants.NeuronId.Degrees70, 70f)
+        ];
+
         private readonly Timer movementTriggerTimer;
         private readonly ISpikeService spikeService;
         private NeuronCollection neurons;
@@ -168,15 +181,6 @@ namespace ei8.Prototypes.HelloWorm
             return result;
         }
 
-        private static readonly IEnumerable<FauxNeurULizationMap<RotationDirection>> Param1ValueMaps = [
-            new(Constants.NeuronId.Clockwise, RotationDirection.Clockwise),
-            new(Constants.NeuronId.CounterClockwise, RotationDirection.CounterClockwise)
-        ];
-
-        private static readonly IEnumerable<FauxNeurULizationMap<float>> Param2ValueMaps = [
-            new(Constants.NeuronId.Degrees22_5, 22.5f)
-        ];
-
         private void Rotate(RotationDirection direction, float degrees)
         {
 #if DEBUG
@@ -275,25 +279,6 @@ namespace ei8.Prototypes.HelloWorm
                         this.Neurons
                     );
                 }
-                // TODO:
-                switch (sectorId)
-                {
-                    case 8:
-                        this.Direction += 22.5f * (sectorId == 1 ? 1 : -1);
-                        break;
-                    case 2:
-                    case 7:
-                        this.Direction += 45f * (sectorId == 2 ? 1 : -1);
-                        break;
-                    case 3:
-                    case 6:
-                        this.Direction += 60f * (sectorId == 3 ? 1 : -1);
-                        break;
-                    case 4:
-                    case 5:
-                        this.Direction += 70f * (sectorId == 4 ? 1 : -1);
-                        break;
-                }
             }
 
             this.Collided?.Invoke(this, new CollidedEventArgs(info.Target));
@@ -308,5 +293,7 @@ namespace ei8.Prototypes.HelloWorm
             var center = worldSize / 2;
             return new Worm(r.Next(Constants.CircleDegreesCount), center.Width, center.Height, size);
         }
+
+        public ISpikeService SpikeService => this.spikeService;
     }
 }
