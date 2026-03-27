@@ -1,7 +1,23 @@
-﻿namespace HelloWorm
+﻿using HelloWorm.Spiker.Neurons;
+
+namespace HelloWorm
 {
     internal static class Constants
     {
+        public static class NeuronId
+        {
+            // TODO:
+            public static readonly string Odor = NeuronHelper.GetNewShortGuid();
+            public static readonly string Sector1 = NeuronHelper.GetNewShortGuid();
+            public static readonly string Sector8 = NeuronHelper.GetNewShortGuid();
+            public static readonly string Rotate = NeuronHelper.GetNewShortGuid();
+            public static readonly string Clockwise = NeuronHelper.GetNewShortGuid();
+            public static readonly string CounterClockwise = NeuronHelper.GetNewShortGuid();
+            public static readonly string Degrees22_5 = NeuronHelper.GetNewShortGuid();
+
+            public static readonly string OdorSector1 = NeuronHelper.GetNewShortGuid();
+        }
+
         public const bool ShouldDrawGrid = false;
         public const bool ShouldDrawRectangularRectangles = false;
         public const bool ShouldDrawSectorIds = false;
@@ -11,6 +27,11 @@
         public const int MovementTriggerTimerPeriod = 100;
         public const int EmissionTriggerTimerPeriod = 500;
         public const int CircleDegreesCount = 360;
+
+        public static class Spiker
+        {
+            public const int RelatedFiresPeriod = 35000;
+        }
 
         public static class Worm
         {

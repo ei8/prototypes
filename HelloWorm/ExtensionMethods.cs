@@ -31,8 +31,10 @@ namespace HelloWorm
                 {
                     var maxSectors = collidedSectors.Where(ct => ct.Count == max);
 
+#if DEBUG
                     if (maxSectors.Count() > 1)
                         Debug.WriteLine("Multiple sectors collided equally: " + string.Join(";", maxSectors.Select(mt => ((Sector)mt.Source).StartAngle)));
+#endif
 
                     result = maxSectors.FirstOrDefault();
                 }
@@ -110,7 +112,7 @@ namespace HelloWorm
             westEvaluator
         );
 
-        // TODO: applicable only if left/right walls 
+        // applicable only if left/right walls 
         // ----------------------
         // or if southeastbound and sector is 1 or 2
         exclude |= southBound && eastBound && sectorId < 3;
@@ -123,7 +125,7 @@ namespace HelloWorm
 
         // or if northwestbound and sector is 1 or 2
         exclude |= northBound && westBound && sectorId < 3;
-        // TODO: ----------------
+        // ----------------
         */
 
         #endregion
@@ -283,9 +285,6 @@ namespace HelloWorm
                     );
                 }
             }
-
-            // TODO:
-            // WorldPanel.DrawCompositeSectoral(g, rectangleBounded, pen);
         }
 
         internal static void DrawRectangular(
