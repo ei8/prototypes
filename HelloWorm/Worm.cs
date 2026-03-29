@@ -1,6 +1,7 @@
-﻿using HelloWorld.Spiker.Spikes;
-using ei8.Prototypes.HelloWorm.neurULization;
+﻿using ei8.Prototypes.HelloWorm.neurULization;
 using ei8.Prototypes.HelloWorm.Spiker.Neurons;
+using HelloWorld.Spiker.Spikes;
+using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using Timer = System.Threading.Timer;
@@ -31,7 +32,7 @@ namespace ei8.Prototypes.HelloWorm
         private readonly Timer movementTriggerTimer;
         private readonly ISpikeService spikeService;
         private NeuronCollection neurons;
-        private ImmutableQueue<NeuronFireInfo> neuronFireInfos;
+        private ConcurrentDictionary<DateTime, NeuronFireInfo> neuronFireInfos;
 
         public Worm() : this(0, 0, 0, 0)
         {
@@ -54,7 +55,7 @@ namespace ei8.Prototypes.HelloWorm
 
             this.movementTriggerTimer = new Timer(this.WrapMove, null, 0, Constants.MovementTriggerTimerPeriod);
             this.spikeService = new SpikeService();
-            this.neuronFireInfos = ImmutableQueue<NeuronFireInfo>.Empty;
+            this.neuronFireInfos = new ConcurrentDictionary<DateTime, NeuronFireInfo>();
         }
 
         private static IEnumerable<Sector> InitializeSectors()
@@ -86,105 +87,48 @@ namespace ei8.Prototypes.HelloWorm
                 neurons = value;
 
                 foreach (var n in this.neurons)
+                {
+                    n.Triggered += this.N_Triggered;
                     n.Fired += this.N_Fired;
+                }
             }
+        }
+
+        private void N_Triggered(object? sender, TriggeredEventArgs e)
+        {
+#region DEBUG
+            //Debug.WriteLine("Triggered: " + ((Neuron)sender!).ToString());
+#endregion
         }
 
         private void N_Fired(object? sender, FiredEventArgs e)
         {
-            var neuron = (Neuron) sender!;
-            this.neuronFireInfos = this.neuronFireInfos.Enqueue(new(neuron, e.FireInfo));
-            if (this.neuronFireInfos.Count() > 10)
-                this.neuronFireInfos = this.neuronFireInfos.Dequeue();
+            #region DEBUG
+            //            Debug.WriteLine("Fired: " + ((Neuron)sender!).ToString());
+            #endregion
+            var neuron = (Neuron)sender!;
+            this.neuronFireInfos.Clean(
+                (nfi) => nfi.FireInfo.Timestamp, 
+                e.FireInfo.Timestamp.Subtract(Constants.Spiker.RelativeSpikesPeriod)
+            );
 
-            if (Worm.TryFauxDeneurULizeInvoke(
-                this.neuronFireInfos,
+            var nnfi = new NeuronFireInfo(neuron, e.FireInfo);
+            this.neuronFireInfos.TryAdd(nnfi.FireInfo.Timestamp, nnfi);
+
+            if (this.neuronFireInfos.Values.TryFauxDeneurULizeInvoke(
                 Constants.NeuronId.Rotate,
-                Constants.Spiker.RelatedFiresPeriod,
                 Worm.Param1ValueMaps,
                 Worm.Param2ValueMaps,
                 out RotationDirection? parameter1,
                 out float? parameter2
             ))
-            {
                 this.Rotate(parameter1!.Value, parameter2!.Value);
-            }
-        }
-
-        /// <summary>
-        /// As indicated, this is a temporary approach. 
-        /// Ideally, the fired neurons for a method and its parameters
-        /// should be retrieved via mirrors if necessary, deneurULized, cached and invoked accordingly. 
-        /// eg. Rotate Method (granny), Clockwise Direction Parameter (granny), 22.5 Float Degrees Parameter (granny)
-        /// Using Method (class), MethodParameter (class)
-        /// </summary>
-        /// <typeparam name="T1"></typeparam>
-        /// <typeparam name="T2"></typeparam>
-        /// <param name="neuronFireInfos"></param>
-        /// <param name="methodNeuronId"></param>
-        /// <param name="param1ValueMaps"></param>
-        /// <param name="param2ValueMaps"></param>
-        /// <param name="parameter1"></param>
-        /// <param name="parameter2"></param>
-        /// <returns></returns>
-        private static bool TryFauxDeneurULizeInvoke<T1, T2>(
-            IEnumerable<NeuronFireInfo> neuronFireInfos, 
-            string methodNeuronId, 
-            int relatedFiresPeriod,
-            IEnumerable<FauxNeurULizationMap<T1>> param1ValueMaps,
-            IEnumerable<FauxNeurULizationMap<T2>> param2ValueMaps,
-            out T1? parameter1, 
-            out T2? parameter2
-        ) 
-            where T1 : struct
-            where T2 : struct
-        {
-            bool result = false;
-            parameter1 = default;
-            parameter2 = default;
-
-            var latestFire = neuronFireInfos.Last();
-            // if last fired is one of the anticipated neurons
-            // TODO: anticipated neurons can include instantiates grannies (eg. instantiates^methodParameter) to optimize recognition,
-            // ie. no need to recognize all possible values
-            if (latestFire.Neuron.Id == methodNeuronId ||
-                param1ValueMaps.Any(p1vm => p1vm.NeuronId == latestFire.Neuron.Id) ||
-                param2ValueMaps.Any(p2vm => p2vm.NeuronId == latestFire.Neuron.Id)
-            )
-            {
-                // Get all fires within period since latest fire
-                var relatedFires = neuronFireInfos.Where(nf =>
-                    latestFire.FireInfo.Timestamp.Subtract(nf.FireInfo.Timestamp).TotalNanoseconds <
-                    relatedFiresPeriod
-                );
-
-                // if number of related fires equals method + 2 parameters
-                if (relatedFires.Count() >= 3)
-                {
-#if DEBUG
-                    Debug.WriteLine("Nanos: " + string.Join(",", relatedFires.Select(rf => latestFire.FireInfo.Timestamp.Subtract(rf.FireInfo.Timestamp).TotalNanoseconds)));
-                    Debug.WriteLine($"Related Fires: {string.Join(",", relatedFires.Select(rf => rf.Neuron.Data))}");
-#endif
-                    if (
-                        // and specified method was fired
-                        relatedFires.Any(n => n.Neuron.Id == methodNeuronId) &&
-                        // and any param1 was fired
-                        (parameter1 = param1ValueMaps.SingleOrDefault(pvm => relatedFires.Any(rf => pvm.NeuronId == rf.Neuron.Id))?.Value) != null &&
-                        // and any param2 was fired
-                        (parameter2 = param2ValueMaps.SingleOrDefault(pvm => relatedFires.Any(rf => pvm.NeuronId == rf.Neuron.Id))?.Value) != null
-                    )
-                    {
-                        result = true;
-                    }
-                }
-            }
-            return result;
         }
 
         private void Rotate(RotationDirection direction, float degrees)
         {
 #if DEBUG
-            Debug.WriteLine($"Rotating {direction}{degrees}! <<<<<<<<<<<<<<<<");
+            Debug.WriteLine($"Rotating {direction}{degrees}! ////////////////////////////");
 #endif
 
             this.Direction += degrees * (direction == RotationDirection.Clockwise ? 1 : -1);
@@ -267,20 +211,19 @@ namespace ei8.Prototypes.HelloWorm
             {
                 var sectorId = this.Components.OfType<Nose>().Single().GetSectorId(sector2);
 #if DEBUG
-                    Debug.WriteLine("Odor spiking Sector " + sectorId + ">>>>>>>>>>>>>>>>>>>>>>");
+                    Debug.WriteLine("Odor spiking Sector " + sectorId + @"\\\\\\\\\\\\\\\\\\\\\\\\\\\\");
 #endif
-                    this.spikeService.Spike(
-                        [
-                            new SpikeTarget(typeof(Constants.NeuronId).GetField("Sector" + sectorId)!.GetValue(null)!.ToString()!),
-                            new SpikeTarget(Constants.NeuronId.Odor)
-                        ],
-                        this.Neurons
-                    );
-                }
+                this.spikeService.Spike(
+                     [
+                        new SpikeTarget(typeof(Constants.NeuronId).GetField("Sector" + sectorId)!.GetValue(null)!.ToString()!),
+                        new SpikeTarget(Constants.NeuronId.Odor)
+                     ],
+                     this.neurons
+                );
+            }
 
             this.Collided?.Invoke(this, new CollidedEventArgs(info.Target));
         }
-
         public void OnMoving(MovingEventArgs e) => this.Moving?.Invoke(this, e);
 
         public IPhysical Create(Size worldSize)

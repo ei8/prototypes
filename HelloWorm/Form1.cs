@@ -24,14 +24,20 @@ namespace ei8.Prototypes.HelloWorm
 
         private void WorldPanel_DoubleClick(object? sender, EventArgs e)
         {
-            var worm = this.worldPanel.World.Components.OfType<Worm>().Single();
-            worm.SpikeService.Spike(
-                [
-                    new SpikeTarget(typeof(Constants.NeuronId).GetField("Sector5")!.GetValue(null)!.ToString()!),
-                    new SpikeTarget(Constants.NeuronId.Odor)
-                ],
-                worm.Neurons
-            );
+            // TODO: var worm = this.worldPanel.World.Components.OfType<Worm>().Single();
+            //worm.SpikeService.Spike(
+            //    [
+            //        new SpikeTarget(typeof(Constants.NeuronId).GetField("Sector5")!.GetValue(null)!.ToString()!),
+            //        new SpikeTarget(Constants.NeuronId.Odor)
+            //    ],
+            //    worm.Neurons
+            //);
+
+            var f = this.worldPanel.World.Components.OfType<Food>().SingleOrDefault();
+            if (f != null)
+                this.worldPanel.World.Remove(f);
+            else
+                this.worldPanel.World.Add(new Food().Create(this.worldPanel.World.Size));
         }
 
         private void UpdatePanelSize()
@@ -53,10 +59,6 @@ namespace ei8.Prototypes.HelloWorm
         private void Form1_ResizeEnd(object sender, EventArgs e)
         {
             this.UpdatePanelSize();
-        }
-
-        private void Form1_DoubleClick(object sender, EventArgs e)
-        {
         }
     }
 }

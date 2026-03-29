@@ -4,6 +4,7 @@ namespace ei8.Prototypes.HelloWorm
 {
     public class World : IRectangular, IComposite
     {
+        // TODO: change to concurrentDictionary
         private IImmutableList<IPhysical> components;
 
         public World()
@@ -51,7 +52,12 @@ namespace ei8.Prototypes.HelloWorm
             }
 
             if (@object is IRegenerative regenerative)
-                this.Add(regenerative.Create(this.Size));
+            {
+                var regen = regenerative.Create(this.Size);
+                this.Add(regen);
+                if (regenerative is INeurULized neurULized)
+                    ((INeurULized) regen).Neurons = neurULized.Neurons;
+            }
 
             if (@object is IEmitter emitter)
                 emitter.Emitted -= this.Emitter_Emitted;

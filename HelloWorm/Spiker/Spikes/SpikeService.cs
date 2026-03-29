@@ -1,4 +1,5 @@
-﻿using ei8.Prototypes.HelloWorm.Spiker.Neurons;
+﻿using ei8.Prototypes.HelloWorm;
+using ei8.Prototypes.HelloWorm.Spiker.Neurons;
 using System.Diagnostics;
 
 namespace HelloWorld.Spiker.Spikes
@@ -45,7 +46,7 @@ namespace HelloWorld.Spiker.Spikes
                         {
                             Target = target,
                             Origin = new SpikeOrigin(NeuronHelper.GetNewShortGuid()),
-                            Trigger = new TriggerInfo(DateTime.Now, NeurotransmitterEffect.Excite, 1f, "User"),
+                            Trigger = new TriggerInfo(DateTime.Now, Constants.Spiker.NeurotransmitterEffect.Excite, 1f, "User"),
                             Path = new FireInfo[0],
                             Neurons = neurons
                         }
@@ -54,22 +55,26 @@ namespace HelloWorld.Spiker.Spikes
             }
         }
 
-        private static void SpikeNeuron(object stateInfo)
+        private static void SpikeNeuron(object? stateInfo)
         {
-            SpikeParameters parameters = (SpikeParameters)stateInfo;
+            SpikeParameters parameters = (SpikeParameters)stateInfo!;
             var spikeResultingFireInfo = parameters.Target.Spike(parameters.Origin, parameters.Trigger, parameters.Path);
             if (spikeResultingFireInfo != FireInfo.Empty)
             {
                 parameters.Target.Terminals.ToList().ForEach(
-                    t => ThreadPool.QueueUserWorkItem(SpikeService.SpikeNeuron, new SpikeParameters()
+                    t =>
+                    {
+                        var sp = new SpikeParameters()
                         {
                             Target = parameters.Neurons[t.TargetId],
                             Origin = parameters.Origin,
                             Trigger = new TriggerInfo(DateTime.Now, t.Effect, t.Strength, parameters.Target.Id),
                             Path = parameters.Path.Concat(new FireInfo[] { spikeResultingFireInfo }),
                             Neurons = parameters.Neurons
-                        }
-                    )
+                        };
+                        if (!ThreadPool.QueueUserWorkItem(SpikeService.SpikeNeuron, sp))
+                            Debug.WriteLine("Unable to queue work item for: " + sp.Target.Id + ":" + sp.Target.Data);
+                    }
                 );
             }
         }

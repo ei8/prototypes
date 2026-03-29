@@ -1,10 +1,102 @@
-﻿using System.Diagnostics;
+﻿using ei8.Prototypes.HelloWorm.neurULization;
+using ei8.Prototypes.HelloWorm.Spiker.Neurons;
+using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Drawing.Drawing2D;
 
 namespace ei8.Prototypes.HelloWorm
 {
     internal static class ExtensionMethods
     {
+        #region Spiker
+        /// <summary>
+        /// As indicated, this is a temporary approach. 
+        /// Ideally, the fired neurons for a method and its parameters
+        /// should be retrieved via mirrors if necessary, deneurULized, cached and invoked accordingly. 
+        /// eg. Rotate Method (granny), Clockwise Direction Parameter (granny), 22.5 Float Degrees Parameter (granny)
+        /// Using Method (class), MethodParameter (class)
+        /// </summary>
+        /// <typeparam name="T1"></typeparam>
+        /// <typeparam name="T2"></typeparam>
+        /// <param name="neuronFireInfos"></param>
+        /// <param name="methodNeuronId"></param>
+        /// <param name="param1ValueMaps"></param>
+        /// <param name="param2ValueMaps"></param>
+        /// <param name="parameter1"></param>
+        /// <param name="parameter2"></param>
+        /// <returns></returns>
+        internal static bool TryFauxDeneurULizeInvoke<T1, T2>(
+            this IEnumerable<NeuronFireInfo> neuronFireInfos,
+            string methodNeuronId,
+            IEnumerable<FauxNeurULizationMap<T1>> param1ValueMaps,
+            IEnumerable<FauxNeurULizationMap<T2>> param2ValueMaps,
+            out T1? parameter1,
+            out T2? parameter2
+        )
+            where T1 : struct
+            where T2 : struct
+        {
+            bool result = false;
+            parameter1 = default;
+            parameter2 = default;
+
+            var latestFire = neuronFireInfos.LastOrDefault();
+            // if last fired is one of the anticipated neurons
+            // TODO: anticipated neurons can include instantiates grannies (eg. instantiates^methodParameter) to optimize recognition,
+            // ie. no need to recognize all possible values
+            if (
+                latestFire != null &&
+                (
+                    latestFire.Neuron.Id == methodNeuronId ||
+                    param1ValueMaps.Any(p1vm => p1vm.NeuronId == latestFire.Neuron.Id) ||
+                    param2ValueMaps.Any(p2vm => p2vm.NeuronId == latestFire.Neuron.Id)
+                )
+            )
+            {
+#if DEBUG
+                //Debug.WriteLine($"Related Fires: {relatedFires.Count()}");
+#endif
+                // if number of related fires equals method + 2 parameters
+                if (neuronFireInfos.Count() >= 3)
+                {
+#if DEBUG
+                    Debug.WriteLine($"Related Fires (Micros): {string.Join(
+                            ", ",
+                            neuronFireInfos.Select(rf =>
+                                rf.Neuron.Data +
+                                " (" +
+                                latestFire.FireInfo.Timestamp.Subtract(rf.FireInfo.Timestamp).TotalMicroseconds +
+                                ")"
+                             )
+                        )}");
+#endif
+                    if (
+                        // and specified method was fired
+                        neuronFireInfos.Any(n => n.Neuron.Id == methodNeuronId) &&
+                        // and any param1 was fired
+                        (parameter1 = param1ValueMaps.FirstOrDefault(pvm => neuronFireInfos.Any(rf => pvm.NeuronId == rf.Neuron.Id))?.Value) != null &&
+                        // and any param2 was fired
+                        (parameter2 = param2ValueMaps.FirstOrDefault(pvm => neuronFireInfos.Any(rf => pvm.NeuronId == rf.Neuron.Id))?.Value) != null
+                    )
+                    {
+                        result = true;
+                    }
+                }
+            }
+            return result;
+        }
+
+        public static void Clean<T>(this ConcurrentDictionary<DateTime, T> concurrentDictionary, Func<T, DateTime> timestampRetriever, DateTime maxTimestamp)
+        {
+            foreach (var nfi in concurrentDictionary.Values)
+            {
+                var ts = timestampRetriever(nfi);
+                if (ts < maxTimestamp)
+                    concurrentDictionary.Remove(ts, out _);
+            }
+        }
+        #endregion
+
         #region Physical
         internal static CollisionInfo? GetCollisionSector(
             this IRectangularComposite rectangularComposite,

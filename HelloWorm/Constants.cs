@@ -2,9 +2,9 @@
 
 namespace ei8.Prototypes.HelloWorm
 {
-    internal static class Constants
+    public struct Constants
     {
-        public static class NeuronId
+        public struct NeuronId
         {
             // TODO:
             public static readonly string Odor = NeuronHelper.GetNewShortGuid();
@@ -44,17 +44,28 @@ namespace ei8.Prototypes.HelloWorm
         public const int EmissionTriggerTimerPeriod = 500;
         public const int CircleDegreesCount = 360;
 
-        public static class Spiker
+        public struct Spiker
         {
-            public const int RelatedFiresPeriod = 35000;
+            public const int DefaultThreshold = -55;
+            public const int RestingPotential = -70;
+            public const int SpikeDepolarizationAmount = 15;
+            public static readonly TimeSpan RefractoryPeriod = new TimeSpan(0, 0, 0, 0, 50, 0);
+            public static readonly TimeSpan RelativeSpikesPeriod = new TimeSpan(0, 0, 0, 0, 0, 20);
+
+            public enum NeurotransmitterEffect
+            {
+                Inhibit = -1,
+                NotSet = 0,
+                Excite = 1
+            }
         }
 
-        public static class Worm
+        public struct Worm
         {
             public const int InitialLife = 1000;
             public const int WidthGrowthRate = 2;
             public const int MinSpeed = 3;
-            public const int MaxSpeed = 6;
+            public const int MaxSpeed = 5;
             public const int MinLength = 80;
             public const int MaxLength = 150;
             public const int MinWidth = 30;
@@ -64,12 +75,12 @@ namespace ei8.Prototypes.HelloWorm
             public static readonly int SectorSweepAngle = Constants.CircleDegreesCount / Constants.Worm.SectorCount;
         }
 
-        public static class Food
+        public struct Food
         {
-            public const int InitialLife = 100;
+            public const int InitialLife = 200;
         }
 
-        public static class Odor
+        public struct Odor
         {
             public const int Size = 2;
             public const int Speed = 5;

@@ -1,10 +1,12 @@
-﻿using System.ComponentModel;
+﻿using System.Collections.Concurrent;
+using System.Collections.Immutable;
+using System.ComponentModel;
 
 namespace ei8.Prototypes.HelloWorm.Spiker.Neurons
 {
     public class Neuron
     {
-        public Neuron(string id, string data, params Terminal[] terminals) : this(id, data, Constants.DefaultThreshold, terminals)
+        public Neuron(string id, string data, params Terminal[] terminals) : this(id, data, Constants.Spiker.DefaultThreshold, terminals)
         {
         }
 
@@ -13,8 +15,8 @@ namespace ei8.Prototypes.HelloWorm.Spiker.Neurons
             this.Id = id;
             this.Data = data;
             this.Threshold = threshold;
-            this.triggerInfos = new List<TriggerInfo>();
-            this.fireInfos = new List<FireInfo>();
+            this.triggerInfos = new ConcurrentDictionary<DateTime, TriggerInfo>();
+            this.lastFireInfo = null;
             this.terminals = new List<Terminal>(terminals);
         }
 
@@ -44,50 +46,50 @@ namespace ei8.Prototypes.HelloWorm.Spiker.Neurons
             }
         }
 
-        private IList<TriggerInfo> triggerInfos;
+        private ConcurrentDictionary<DateTime, TriggerInfo> triggerInfos;
 
-        private IList<FireInfo> fireInfos;
+        private FireInfo? lastFireInfo;
 
         public FireInfo Spike(SpikeOrigin spikeOrigin, TriggerInfo triggerInfo, IEnumerable<FireInfo> path)
         {
             FireInfo result = FireInfo.Empty;
 
-            this.triggerInfos.Add(triggerInfo);
-            // Note: this.triggerInfos.ToList() required to fix "collection modified" issue
-            var effectiveTriggers = Neuron.GetEffectiveTriggers(this.triggerInfos.ToList());
-            var positiveCharge = Neuron.GetChargeByEffect(effectiveTriggers, NeurotransmitterEffect.Excite);
-            var negativeCharge = Neuron.GetChargeByEffect(effectiveTriggers, NeurotransmitterEffect.Inhibit);
-            var sumCharge = (int) (Constants.RestingPotential + positiveCharge + negativeCharge);
-            
+            this.triggerInfos.Clean((ti) => ti.Timestamp, triggerInfo.Timestamp.Subtract(Constants.Spiker.RefractoryPeriod));
+            this.triggerInfos.TryAdd(triggerInfo.Timestamp, triggerInfo);
+
+            var tis = this.triggerInfos.Values;
+
+            var positiveCharge = Neuron.GetChargeByEffect(tis, Constants.Spiker.NeurotransmitterEffect.Excite);
+            var negativeCharge = Neuron.GetChargeByEffect(tis, Constants.Spiker.NeurotransmitterEffect.Inhibit);
+            var sumCharge = (int) (Constants.Spiker.RestingPotential + positiveCharge + negativeCharge);
+
             this.Triggered?.Invoke(this, new TriggeredEventArgs(spikeOrigin, triggerInfo, sumCharge, path));
 
+            #region DEBUG
+            // Debug.WriteLine($"EffectiveTriggers: {this.triggerInfos.Count()}; Sum charge: {positiveCharge} + {negativeCharge} = {sumCharge} ({this.Data})");
+            #endregion
+
             // if spiked enough and spiked after repolarization
-            if (sumCharge >= this.Threshold && DateTime.Now > this.fireInfos.LastOrDefault().Timestamp.Add(Constants.RefractoryPeriod))
+            if (sumCharge >= this.Threshold && (!this.lastFireInfo.HasValue || DateTime.Now > this.lastFireInfo.Value.Timestamp.Add(Constants.Spiker.RefractoryPeriod)))
             {
-                result = new FireInfo(DateTime.Now, effectiveTriggers.ToArray());
-                this.fireInfos.Add(result);
-                this.triggerInfos.Clear();
+                result = new FireInfo(DateTime.Now, tis.ToArray());
+                this.lastFireInfo = result;
                 this.Fired?.Invoke(this, new FiredEventArgs(result, sumCharge));
             }
 
             return result;
         }
 
-        private static float GetChargeByEffect(IEnumerable<TriggerInfo> effectiveTriggers, NeurotransmitterEffect effect)
+        private static float GetChargeByEffect(IEnumerable<TriggerInfo> effectiveTriggers, Constants.Spiker.NeurotransmitterEffect effect)
         {
             // sum triggers within the last refractory period
             return effectiveTriggers.Sum(
                 ti => ti.Effect == effect ? 
-                    Constants.SpikeDepolarizationAmount * ti.Strength * ((int) effect) : 
+                    Constants.Spiker.SpikeDepolarizationAmount * ti.Strength * ((int) effect) : 
                     0
                 );
         }
 
-        private static IEnumerable<TriggerInfo> GetEffectiveTriggers(IList<TriggerInfo> triggerInfos)
-        {
-            return triggerInfos.Where(d => d.Timestamp > DateTime.Now.Subtract(Constants.RefractoryPeriod));
-        }
-        
         public void AddTerminal(Terminal value)
         {
             this.terminals.Add(value);

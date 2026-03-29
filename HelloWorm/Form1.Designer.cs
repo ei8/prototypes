@@ -47,7 +47,7 @@ namespace ei8.Prototypes.HelloWorm
             Text = "Hello Worm";
             Load += Form1_Load;
             ResizeEnd += Form1_ResizeEnd;
-            DoubleClick += Form1_DoubleClick;
+
             ResumeLayout(false);
         }
 
