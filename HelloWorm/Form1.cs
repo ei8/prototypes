@@ -1,4 +1,5 @@
 using HelloWorld.Spiker.Spikes;
+using System.Diagnostics;
 
 namespace ei8.Prototypes.HelloWorm
 {
@@ -33,7 +34,7 @@ namespace ei8.Prototypes.HelloWorm
             //    worm.Neurons
             //);
 
-            var f = this.worldPanel.World.Components.OfType<Food>().SingleOrDefault();
+            var f = this.worldPanel.World.Components.OfType<Food>().FirstOrDefault();
             if (f != null)
                 this.worldPanel.World.Remove(f);
             else
@@ -53,7 +54,8 @@ namespace ei8.Prototypes.HelloWorm
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            this.worldPanel.Invalidate();
+            this.worldPanel.InvalidateRectangularComposite(this.worldPanel.World);
+            // TODO: this.worldPanel.Invalidate();
         }
 
         private void Form1_ResizeEnd(object sender, EventArgs e)

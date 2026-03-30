@@ -64,7 +64,7 @@ namespace ei8.Prototypes.HelloWorm
         {
             public const int InitialLife = 1000;
             public const int WidthGrowthRate = 2;
-            public const int MinSpeed = 3;
+            public const int MinSpeed = 4;
             public const int MaxSpeed = 5;
             public const int MinLength = 80;
             public const int MaxLength = 150;
@@ -84,8 +84,13 @@ namespace ei8.Prototypes.HelloWorm
         {
             public const int Size = 2;
             public const int Speed = 5;
-            public const int DeployMin = 2;
+            public const int DeployMin = 3;
             public const int DeployExtra = 2;
+        }
+
+        public struct Render
+        {
+            public const int RegularOffset = 15;
         }
     }
 }

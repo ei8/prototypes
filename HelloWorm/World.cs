@@ -2,7 +2,7 @@
 
 namespace ei8.Prototypes.HelloWorm
 {
-    public class World : IRectangular, IComposite
+    public class World : IRectangularComposite
     {
         // TODO: change to concurrentDictionary
         private IImmutableList<IPhysical> components;

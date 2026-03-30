@@ -2,7 +2,6 @@
 using ei8.Prototypes.HelloWorm.Spiker.Neurons;
 using HelloWorld.Spiker.Spikes;
 using System.Collections.Concurrent;
-using System.Collections.Immutable;
 using System.Diagnostics;
 using Timer = System.Threading.Timer;
 

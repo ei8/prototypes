@@ -19,6 +19,7 @@ namespace ei8.Prototypes.HelloWorm
             world.Location = new Point(0, 0);
             world.Size = new Size(600, 400);
             world.Add(new Food().Create(world.Size));
+            world.Add(new Food().Create(world.Size));
             world.Add(new Worm().Create(world.Size));
             // TODO: world.Add(new Worm().Create(world.Size));
 

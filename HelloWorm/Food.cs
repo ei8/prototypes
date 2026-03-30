@@ -56,7 +56,7 @@ namespace ei8.Prototypes.HelloWorm
                 Location = new Point(r.Next(worldSize.Width), r.Next(worldSize.Height)),
                 Size = new Size(5, 5),
                 StartAngle = r.Next(Constants.CircleDegreesCount),
-                SweepAngle = 45 + r.Next(135),
+                SweepAngle = 90 + r.Next(135),
                 Life = Constants.Food.InitialLife
             };
         }

@@ -273,6 +273,42 @@ namespace ei8.Prototypes.HelloWorm
         #endregion
 
         #region Drawing
+
+        public static void InvalidateRectangularComposite(this WorldPanel worldPanel, IRectangularComposite rc)
+        {
+            foreach (var c in rc.Components)
+            {
+                if (c is IRectangularComposite composite)
+                {
+                    worldPanel.InvalidateRectangularComposite(composite);
+                }
+                else if (c is IRectangular r)
+                {
+                    worldPanel.InvalidateRectangle(r, Constants.Render.RegularOffset);
+                }
+            }
+
+            if (rc is not World)
+            {
+                var offset = rc is Worm w ? (w.Size.Width * 2) : Constants.Render.RegularOffset;
+                worldPanel.InvalidateRectangle(rc, offset);
+            }
+        }
+
+        private static void InvalidateRectangle(this WorldPanel worldPanel, IRectangular r, int offset)
+        {
+            var cr = r.GetRectangle();
+            cr = cr.Resize(offset);
+            worldPanel.Invalidate(cr, false);
+        }
+
+        private static Rectangle Resize(this Rectangle cr, int offset)
+        {
+            cr.Offset(-offset, -offset);
+            cr.Size = new Size(cr.Size.Width + (offset * 2), cr.Size.Height + (offset * 2));
+            return cr;
+        }
+
         static Brush GetRandomBrushColor(int maxValue)
         {
             var random = new Random();
