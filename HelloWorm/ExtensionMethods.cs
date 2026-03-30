@@ -53,22 +53,19 @@ namespace ei8.Prototypes.HelloWorm
                 )
             )
             {
-#if DEBUG
-                //Debug.WriteLine($"Related Fires: {relatedFires.Count()}");
-#endif
                 // if number of related fires equals method + 2 parameters
                 if (neuronFireInfos.Count() >= 3)
                 {
 #if DEBUG
-                    Debug.WriteLine($"Related Fires (Micros): {string.Join(
-                            ", ",
-                            neuronFireInfos.Select(rf =>
-                                rf.Neuron.Data +
-                                " (" +
-                                latestFire.FireInfo.Timestamp.Subtract(rf.FireInfo.Timestamp).TotalMicroseconds +
-                                ")"
-                             )
-                        )}");
+                    //Debug.WriteLine($"Related Fires (Micros): {string.Join(
+                    //        ", ",
+                    //        neuronFireInfos.Select(rf =>
+                    //            rf.Neuron.Data +
+                    //            " (" +
+                    //            latestFire.FireInfo.Timestamp.Subtract(rf.FireInfo.Timestamp).TotalMicroseconds +
+                    //            ")"
+                    //         )
+                    //    )}");
 #endif
                     if (
                         // and specified method was fired

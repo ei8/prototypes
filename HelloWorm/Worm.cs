@@ -15,7 +15,6 @@ namespace ei8.Prototypes.HelloWorm
             CounterClockwise
         }
 
-        // TODO:
         private static readonly IEnumerable<FauxNeurULizationMap<RotationDirection>> Param1ValueMaps = [
             new(Constants.NeuronId.Clockwise, RotationDirection.Clockwise),
             new(Constants.NeuronId.CounterClockwise, RotationDirection.CounterClockwise)
@@ -127,7 +126,7 @@ namespace ei8.Prototypes.HelloWorm
         private void Rotate(RotationDirection direction, float degrees)
         {
 #if DEBUG
-            Debug.WriteLine($"Rotating {direction}{degrees}! ////////////////////////////");
+            // Debug.WriteLine($"Rotating {direction}{degrees}! ////////////////////////////");
 #endif
 
             this.Direction += degrees * (direction == RotationDirection.Clockwise ? 1 : -1);
@@ -190,35 +189,29 @@ namespace ei8.Prototypes.HelloWorm
 
         public void Collide(CollisionInfo info)
         {
-            if (info.Target is World && info.Source is ISectoral sector)
+            if (info.Source is ISectoral sector)
             {
                 var sectorId = this.Components.OfType<Nose>().Single().GetSectorId(sector);
-                // TODO:
-                switch (sectorId)
-                {
-                    case 1:
-                    case 8:
-                        this.Direction += 45f * (sectorId == 8 ? 1 : -1);
-                        break;
-                    case 2:
-                    case 7:
-                        this.Direction += 22.5f * (sectorId == 7 ? 1 : -1);
-                        break;
-                }
-            }
-            else if (info.Target is Odor && info.Source is ISectoral sector2)
-            {
-                var sectorId = this.Components.OfType<Nose>().Single().GetSectorId(sector2);
 #if DEBUG
-                    Debug.WriteLine("Odor spiking Sector " + sectorId + @"\\\\\\\\\\\\\\\\\\\\\\\\\\\\");
+                // Debug.WriteLine("Odor spiking Sector " + sectorId + @"\\\\\\\\\\\\\\\\\\\\\\\\\\\\");
 #endif
-                this.spikeService.Spike(
-                     [
-                        new SpikeTarget(typeof(Constants.NeuronId).GetField("Sector" + sectorId)!.GetValue(null)!.ToString()!),
-                        new SpikeTarget(Constants.NeuronId.Odor)
-                     ],
-                     this.neurons
-                );
+                var target2Id = string.Empty;
+
+                if (info.Target is Odor)
+                    target2Id = Constants.NeuronId.Odor;
+                else if (info.Target is World)
+                    target2Id = Constants.NeuronId.World;
+
+                if (!string.IsNullOrWhiteSpace(target2Id))
+                {
+                    this.spikeService.Spike(
+                        [
+                            new SpikeTarget(typeof(Constants.NeuronId).GetField("Sector" + sectorId)!.GetValue(null)!.ToString()!),
+                            new SpikeTarget(target2Id)
+                        ],
+                        this.neurons
+                    );
+                }
             }
 
             this.Collided?.Invoke(this, new CollidedEventArgs(info.Target));

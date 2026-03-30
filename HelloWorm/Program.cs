@@ -40,14 +40,24 @@ namespace ei8.Prototypes.HelloWorm
                     new Terminal(Constants.NeuronId.OdorSector8, Constants.Spiker.NeurotransmitterEffect.Excite, 0.5f)
                 ),
                 new Neuron(
+                    Constants.NeuronId.World,
+                    nameof(Constants.NeuronId.World),
+                    new Terminal(Constants.NeuronId.WorldSector1, Constants.Spiker.NeurotransmitterEffect.Excite, 0.5f),
+                    new Terminal(Constants.NeuronId.WorldSector2, Constants.Spiker.NeurotransmitterEffect.Excite, 0.5f),
+                    new Terminal(Constants.NeuronId.WorldSector7, Constants.Spiker.NeurotransmitterEffect.Excite, 0.5f),
+                    new Terminal(Constants.NeuronId.WorldSector8, Constants.Spiker.NeurotransmitterEffect.Excite, 0.5f)
+                ),
+                new Neuron(
                     Constants.NeuronId.Sector1,
                     nameof(Constants.NeuronId.Sector1),
-                    new Terminal(Constants.NeuronId.OdorSector1, Constants.Spiker.NeurotransmitterEffect.Excite, 0.5f)
+                    new Terminal(Constants.NeuronId.OdorSector1, Constants.Spiker.NeurotransmitterEffect.Excite, 0.5f),
+                    new Terminal(Constants.NeuronId.WorldSector1, Constants.Spiker.NeurotransmitterEffect.Excite, 0.5f)
                 ),
                 new Neuron(
                     Constants.NeuronId.Sector2,
                     nameof(Constants.NeuronId.Sector2),
-                    new Terminal(Constants.NeuronId.OdorSector2, Constants.Spiker.NeurotransmitterEffect.Excite, 0.5f)
+                    new Terminal(Constants.NeuronId.OdorSector2, Constants.Spiker.NeurotransmitterEffect.Excite, 0.5f),
+                    new Terminal(Constants.NeuronId.WorldSector2, Constants.Spiker.NeurotransmitterEffect.Excite, 0.5f)
                 ),
                 new Neuron(
                     Constants.NeuronId.Sector3,
@@ -72,14 +82,44 @@ namespace ei8.Prototypes.HelloWorm
                 new Neuron(
                     Constants.NeuronId.Sector7,
                     nameof(Constants.NeuronId.Sector7),
-                    new Terminal(Constants.NeuronId.OdorSector7, Constants.Spiker.NeurotransmitterEffect.Excite, 0.5f)
+                    new Terminal(Constants.NeuronId.OdorSector7, Constants.Spiker.NeurotransmitterEffect.Excite, 0.5f),
+                    new Terminal(Constants.NeuronId.WorldSector7, Constants.Spiker.NeurotransmitterEffect.Excite, 0.5f)
                 ),
                 new Neuron(
                     Constants.NeuronId.Sector8, 
                     nameof(Constants.NeuronId.Sector8),
-                    new Terminal(Constants.NeuronId.OdorSector8, Constants.Spiker.NeurotransmitterEffect.Excite, 0.5f)
+                    new Terminal(Constants.NeuronId.OdorSector8, Constants.Spiker.NeurotransmitterEffect.Excite, 0.5f),
+                    new Terminal(Constants.NeuronId.WorldSector8, Constants.Spiker.NeurotransmitterEffect.Excite, 0.5f)
                 ),
                 // Interneurons
+                new Neuron(
+                    Constants.NeuronId.WorldSector1,
+                    nameof(Constants.NeuronId.WorldSector1),
+                    new Terminal(Constants.NeuronId.Rotate),
+                    new Terminal(Constants.NeuronId.CounterClockwise),
+                    new Terminal(Constants.NeuronId.Degrees45)
+                ),
+                new Neuron(
+                    Constants.NeuronId.WorldSector2,
+                    nameof(Constants.NeuronId.WorldSector2),
+                    new Terminal(Constants.NeuronId.Rotate),
+                    new Terminal(Constants.NeuronId.CounterClockwise),
+                    new Terminal(Constants.NeuronId.Degrees22_5)
+                ),
+                new Neuron(
+                    Constants.NeuronId.WorldSector7,
+                    nameof(Constants.NeuronId.WorldSector7),
+                    new Terminal(Constants.NeuronId.Rotate),
+                    new Terminal(Constants.NeuronId.Clockwise),
+                    new Terminal(Constants.NeuronId.Degrees22_5)
+                ),
+                new Neuron(
+                    Constants.NeuronId.WorldSector8,
+                    nameof(Constants.NeuronId.WorldSector8),
+                    new Terminal(Constants.NeuronId.Rotate),
+                    new Terminal(Constants.NeuronId.Clockwise),
+                    new Terminal(Constants.NeuronId.Degrees45)
+                ),
                 new Neuron(
                     Constants.NeuronId.OdorSector1,
                     nameof(Constants.NeuronId.OdorSector1),
