@@ -1,6 +1,3 @@
-using HelloWorld.Spiker.Spikes;
-using System.Diagnostics;
-
 namespace ei8.Prototypes.HelloWorm
 {
     public partial class Form1 : Form

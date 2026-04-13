@@ -56,7 +56,7 @@ namespace ei8.Prototypes.HelloWorm
                 var regen = regenerative.Create(this.Size);
                 this.Add(regen);
                 if (regenerative is INeurULized neurULized)
-                    ((INeurULized) regen).Neurons = neurULized.Neurons;
+                    ((INeurULized) regen).Network = neurULized.Network;
             }
 
             if (@object is IEmitter emitter)

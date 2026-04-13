@@ -7,40 +7,40 @@ namespace ei8.Prototypes.HelloWorm
         public struct NeuronId
         {
             // Inputs
-            public static readonly string World = NeuronHelper.GetNewShortGuid();
-            public static readonly string Odor = NeuronHelper.GetNewShortGuid();
-            public static readonly string Sector1 = NeuronHelper.GetNewShortGuid();
-            public static readonly string Sector2 = NeuronHelper.GetNewShortGuid();
-            public static readonly string Sector3 = NeuronHelper.GetNewShortGuid();
-            public static readonly string Sector4 = NeuronHelper.GetNewShortGuid();
-            public static readonly string Sector5 = NeuronHelper.GetNewShortGuid();
-            public static readonly string Sector6 = NeuronHelper.GetNewShortGuid();
-            public static readonly string Sector7 = NeuronHelper.GetNewShortGuid();
-            public static readonly string Sector8 = NeuronHelper.GetNewShortGuid();
+            public static readonly Guid World = Guid.NewGuid();
+            public static readonly Guid Odor = Guid.NewGuid();
+            public static readonly Guid Sector1 = Guid.NewGuid();
+            public static readonly Guid Sector2 = Guid.NewGuid();
+            public static readonly Guid Sector3 = Guid.NewGuid();
+            public static readonly Guid Sector4 = Guid.NewGuid();
+            public static readonly Guid Sector5 = Guid.NewGuid();
+            public static readonly Guid Sector6 = Guid.NewGuid();
+            public static readonly Guid Sector7 = Guid.NewGuid();
+            public static readonly Guid Sector8 = Guid.NewGuid();
 
             // Interneurons
-            public static readonly string OdorSector1 = NeuronHelper.GetNewShortGuid();
-            public static readonly string OdorSector2 = NeuronHelper.GetNewShortGuid();
-            public static readonly string OdorSector3 = NeuronHelper.GetNewShortGuid();
-            public static readonly string OdorSector4 = NeuronHelper.GetNewShortGuid();
-            public static readonly string OdorSector5 = NeuronHelper.GetNewShortGuid();
-            public static readonly string OdorSector6 = NeuronHelper.GetNewShortGuid();
-            public static readonly string OdorSector7 = NeuronHelper.GetNewShortGuid();
-            public static readonly string OdorSector8 = NeuronHelper.GetNewShortGuid();
+            public static readonly Guid OdorSector1 = Guid.NewGuid();
+            public static readonly Guid OdorSector2 = Guid.NewGuid();
+            public static readonly Guid OdorSector3 = Guid.NewGuid();
+            public static readonly Guid OdorSector4 = Guid.NewGuid();
+            public static readonly Guid OdorSector5 = Guid.NewGuid();
+            public static readonly Guid OdorSector6 = Guid.NewGuid();
+            public static readonly Guid OdorSector7 = Guid.NewGuid();
+            public static readonly Guid OdorSector8 = Guid.NewGuid();
 
-            public static readonly string WorldSector1 = NeuronHelper.GetNewShortGuid();
-            public static readonly string WorldSector2 = NeuronHelper.GetNewShortGuid();
-            public static readonly string WorldSector7 = NeuronHelper.GetNewShortGuid();
-            public static readonly string WorldSector8 = NeuronHelper.GetNewShortGuid();
+            public static readonly Guid WorldSector1 = Guid.NewGuid();
+            public static readonly Guid WorldSector2 = Guid.NewGuid();
+            public static readonly Guid WorldSector7 = Guid.NewGuid();
+            public static readonly Guid WorldSector8 = Guid.NewGuid();
 
             // Outputs
-            public static readonly string Rotate = NeuronHelper.GetNewShortGuid();
-            public static readonly string Clockwise = NeuronHelper.GetNewShortGuid();
-            public static readonly string CounterClockwise = NeuronHelper.GetNewShortGuid();
-            public static readonly string Degrees22_5 = NeuronHelper.GetNewShortGuid();
-            public static readonly string Degrees45 = NeuronHelper.GetNewShortGuid();
-            public static readonly string Degrees60 = NeuronHelper.GetNewShortGuid();
-            public static readonly string Degrees70 = NeuronHelper.GetNewShortGuid();
+            public static readonly Guid Rotate = Guid.NewGuid();
+            public static readonly Guid Clockwise = Guid.NewGuid();
+            public static readonly Guid CounterClockwise = Guid.NewGuid();
+            public static readonly Guid Degrees22_5 = Guid.NewGuid();
+            public static readonly Guid Degrees45 = Guid.NewGuid();
+            public static readonly Guid Degrees60 = Guid.NewGuid();
+            public static readonly Guid Degrees70 = Guid.NewGuid();
         }
 
         public const bool ShouldDrawGrid = false;
@@ -60,13 +60,6 @@ namespace ei8.Prototypes.HelloWorm
             public const int SpikeDepolarizationAmount = 15;
             public static readonly TimeSpan RefractoryPeriod = new TimeSpan(0, 0, 0, 0, 50, 0);
             public static readonly TimeSpan RelativeSpikesPeriod = new TimeSpan(0, 0, 0, 0, 0, 20);
-
-            public enum NeurotransmitterEffect
-            {
-                Inhibit = -1,
-                NotSet = 0,
-                Excite = 1
-            }
         }
 
         public struct Worm

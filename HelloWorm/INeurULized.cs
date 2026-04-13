@@ -1,9 +1,9 @@
-﻿using ei8.Prototypes.HelloWorm.Spiker.Neurons;
+﻿using ei8.Cortex.Coding;
 
 namespace ei8.Prototypes.HelloWorm
 {
     public interface INeurULized
     {
-        NeuronCollection Neurons { get; set; }
+        Network Network { get; set; }
     }
 }

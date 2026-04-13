@@ -1,14 +1,14 @@
-﻿using ei8.Prototypes.HelloWorm;
+﻿using ei8.Cortex.Coding;
 using ei8.Prototypes.HelloWorm.Spiker.Neurons;
 using System.Diagnostics;
 
-namespace HelloWorld.Spiker.Spikes
+namespace ei8.Prototypes.HelloWorm.Spiker.Spikes
 {
     public class SpikeService : ISpikeService
     {
         private class SpikeParameters
         {
-            public Neuron Target { get; set; }
+            public SpikingNeuron Target { get; set; }
 
             public SpikeOrigin Origin { get; set; }
 
@@ -16,15 +16,15 @@ namespace HelloWorld.Spiker.Spikes
 
             public IEnumerable<FireInfo> Path { get; set; }
 
-            public NeuronCollection Neurons { get; set; }
+            public Network Network { get; set; }
         }
         
-        public event EventHandler Spiking;
-
         private int spikeCount = 1;
+        private readonly Network network;
 
-        public SpikeService()
+        public SpikeService(Network network)
         {
+            this.network = network;
         }
 
         public void SetSpikeCount(int value)
@@ -32,25 +32,24 @@ namespace HelloWorld.Spiker.Spikes
             this.spikeCount = value;
         }
 
-        public void Spike(IEnumerable<SpikeTarget> targets, NeuronCollection neurons)
+        public void Spike(IEnumerable<Guid> targets)
         {
-            this.Spiking?.Invoke(this, EventArgs.Empty);
-
             for (int i = 1; i <= this.spikeCount; i++)
             {
-                var nts = targets.Select(st => neurons[st.Id]);
-                foreach (Neuron target in nts)
+                var targetNeurons = targets.Select(this.network.ValidateGet);
+
+                foreach (SpikingNeuron target in targetNeurons)
                 {
                     SpikeService.SpikeNeuron(
                         new SpikeParameters()
                         {
                             Target = target,
-                            Origin = new SpikeOrigin(NeuronHelper.GetNewShortGuid()),
-                            Trigger = new TriggerInfo(DateTime.Now, Constants.Spiker.NeurotransmitterEffect.Excite, 1f, "User"),
-                            Path = new FireInfo[0],
-                            Neurons = neurons
+                            Origin = new SpikeOrigin(Guid.NewGuid()),
+                            Trigger = new TriggerInfo(DateTime.Now, NeurotransmitterEffect.Excite, 1f, Guid.Empty),
+                            Path = Array.Empty<FireInfo>(),
+                            Network = this.network
                         }
-                        );
+                    );
                 }
             }
         }
@@ -61,19 +60,20 @@ namespace HelloWorld.Spiker.Spikes
             var spikeResultingFireInfo = parameters.Target.Spike(parameters.Origin, parameters.Trigger, parameters.Path);
             if (spikeResultingFireInfo != FireInfo.Empty)
             {
-                parameters.Target.Terminals.ToList().ForEach(
+                parameters.Network.GetTerminals(parameters.Target.Id).ToList().ForEach(
                     t =>
                     {
+                        var target = parameters.Network.ValidateGet(t.PostsynapticNeuronId);
                         var sp = new SpikeParameters()
                         {
-                            Target = parameters.Neurons[t.TargetId],
+                            Target = target,
                             Origin = parameters.Origin,
                             Trigger = new TriggerInfo(DateTime.Now, t.Effect, t.Strength, parameters.Target.Id),
-                            Path = parameters.Path.Concat(new FireInfo[] { spikeResultingFireInfo }),
-                            Neurons = parameters.Neurons
+                            Path = parameters.Path.Concat([ spikeResultingFireInfo ]),
+                            Network = parameters.Network
                         };
                         if (!ThreadPool.QueueUserWorkItem(SpikeService.SpikeNeuron, sp))
-                            Debug.WriteLine("Unable to queue work item for: " + sp.Target.Id + ":" + sp.Target.Data);
+                            Debug.WriteLine($"Unable to queue work item for: {sp.Target}");
                     }
                 );
             }

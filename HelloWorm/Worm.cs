@@ -1,8 +1,8 @@
-﻿using ei8.Prototypes.HelloWorm.neurULization;
+﻿using ei8.Cortex.Coding;
+using ei8.Prototypes.HelloWorm.neurULization;
 using ei8.Prototypes.HelloWorm.Spiker.Neurons;
-using HelloWorld.Spiker.Spikes;
+using ei8.Prototypes.HelloWorm.Spiker.Spikes;
 using System.Collections.Concurrent;
-using System.Diagnostics;
 using Timer = System.Threading.Timer;
 
 namespace ei8.Prototypes.HelloWorm
@@ -28,8 +28,8 @@ namespace ei8.Prototypes.HelloWorm
         ];
 
         private readonly Timer movementTriggerTimer;
-        private readonly ISpikeService spikeService;
-        private NeuronCollection neurons;
+        private ISpikeService spikeService;
+        private Network network;
         private ConcurrentDictionary<DateTime, NeuronFireInfo> neuronFireInfos;
 
         public Worm() : this(0, 0, 0, 0)
@@ -52,7 +52,6 @@ namespace ei8.Prototypes.HelloWorm
             this.UpdateSize(Constants.Worm.MinWidth);
 
             this.movementTriggerTimer = new Timer(this.WrapMove, null, 0, Constants.MovementTriggerTimerPeriod);
-            this.spikeService = new SpikeService();
             this.neuronFireInfos = new ConcurrentDictionary<DateTime, NeuronFireInfo>();
         }
 
@@ -77,14 +76,15 @@ namespace ei8.Prototypes.HelloWorm
         public int Score { get; set; }
         public int Life { get; set; }
         public IEnumerable<IPhysical> Components { get; set; }
-        public NeuronCollection Neurons 
+        public Network Network 
         { 
-            get => neurons; 
+            get => network; 
             set
             {
-                neurons = value;
+                this.network = value;
+                this.spikeService = new SpikeService(this.network);
 
-                foreach (var n in this.neurons)
+                foreach (var n in this.network.GetItems<SpikingNeuron>())
                 {
                     n.Triggered += this.N_Triggered;
                     n.Fired += this.N_Fired;
@@ -104,7 +104,7 @@ namespace ei8.Prototypes.HelloWorm
             #region DEBUG
             //            Debug.WriteLine("Fired: " + ((Neuron)sender!).ToString());
             #endregion
-            var neuron = (Neuron)sender!;
+            var neuron = (SpikingNeuron)sender!;
             this.neuronFireInfos.Clean(
                 (nfi) => nfi.FireInfo.Timestamp, 
                 e.FireInfo.Timestamp.Subtract(Constants.Spiker.RelativeSpikesPeriod)
@@ -195,21 +195,20 @@ namespace ei8.Prototypes.HelloWorm
 #if DEBUG
                 // Debug.WriteLine("Odor spiking Sector " + sectorId + @"\\\\\\\\\\\\\\\\\\\\\\\\\\\\");
 #endif
-                var target2Id = string.Empty;
+                var target2Id = Guid.Empty;
 
                 if (info.Target is Odor)
                     target2Id = Constants.NeuronId.Odor;
                 else if (info.Target is World)
                     target2Id = Constants.NeuronId.World;
 
-                if (!string.IsNullOrWhiteSpace(target2Id))
+                if (target2Id != Guid.Empty)
                 {
                     this.spikeService.Spike(
                         [
-                            new SpikeTarget(typeof(Constants.NeuronId).GetField("Sector" + sectorId)!.GetValue(null)!.ToString()!),
-                            new SpikeTarget(target2Id)
-                        ],
-                        this.neurons
+                            (Guid) typeof(Constants.NeuronId).GetField("Sector" + sectorId)!.GetValue(null)!,
+                            target2Id
+                        ]
                     );
                 }
             }

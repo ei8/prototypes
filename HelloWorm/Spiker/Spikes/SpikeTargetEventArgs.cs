@@ -1,18 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace HelloWorld.Spiker.Spikes
+﻿namespace ei8.Prototypes.HelloWorm.Spiker.Spikes
 {
     public class SpikeTargetEventArgs : EventArgs
     {
-        public SpikeTargetEventArgs(SpikeTarget target)
+        public SpikeTargetEventArgs(Guid target)
         {
             this.Target = target;
         }
 
-        public SpikeTarget Target { get; private set; }
+        public Guid Target { get; private set; }
     }
 }

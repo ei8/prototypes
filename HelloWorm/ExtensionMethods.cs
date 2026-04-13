@@ -1,4 +1,5 @@
-﻿using ei8.Prototypes.HelloWorm.neurULization;
+﻿using ei8.Cortex.Coding;
+using ei8.Prototypes.HelloWorm.neurULization;
 using ei8.Prototypes.HelloWorm.Spiker.Neurons;
 using System.Collections.Concurrent;
 using System.Diagnostics;
@@ -27,7 +28,7 @@ namespace ei8.Prototypes.HelloWorm
         /// <returns></returns>
         internal static bool TryFauxDeneurULizeInvoke<T1, T2>(
             this IEnumerable<NeuronFireInfo> neuronFireInfos,
-            string methodNeuronId,
+            Guid methodNeuronId,
             IEnumerable<FauxNeurULizationMap<T1>> param1ValueMaps,
             IEnumerable<FauxNeurULizationMap<T2>> param2ValueMaps,
             out T1? parameter1,
@@ -91,6 +92,14 @@ namespace ei8.Prototypes.HelloWorm
                 if (ts < maxTimestamp)
                     concurrentDictionary.Remove(ts, out _);
             }
+        }
+
+        public static SpikingNeuron ValidateGet(this Network network, Guid id)
+        {
+            if (network.TryGetById(id, out SpikingNeuron neuron))
+                return neuron;
+            else
+                throw new ArgumentException($"Neuron with specified Id '{id}' was not found.");
         }
         #endregion
 

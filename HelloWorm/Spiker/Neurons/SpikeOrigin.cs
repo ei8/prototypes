@@ -1,19 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ei8.Prototypes.HelloWorm.Spiker.Neurons
+﻿namespace ei8.Prototypes.HelloWorm.Spiker.Neurons
 {
     public struct SpikeOrigin
     {
-        public SpikeOrigin(string id)
+        public SpikeOrigin(Guid id)
         {
             this.Id = id;
         }
 
-        public string Id { get; set; }
+        public Guid Id { get; set; }
 
         public override string ToString()
         {
