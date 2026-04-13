@@ -1,10 +1,10 @@
-﻿namespace ei8.Prototypes.HelloWorm.Spiker.Spikes
+﻿namespace ei8.Prototypes.HelloWorm.Spiker
 {
     public class SpikeTargetEventArgs : EventArgs
     {
         public SpikeTargetEventArgs(Guid target)
         {
-            this.Target = target;
+            Target = target;
         }
 
         public Guid Target { get; private set; }

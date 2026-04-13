@@ -1,7 +1,6 @@
 ﻿using ei8.Cortex.Coding;
 using ei8.Prototypes.HelloWorm.neurULization;
-using ei8.Prototypes.HelloWorm.Spiker.Neurons;
-using ei8.Prototypes.HelloWorm.Spiker.Spikes;
+using ei8.Prototypes.HelloWorm.Spiker;
 using System.Collections.Concurrent;
 using Timer = System.Threading.Timer;
 
@@ -83,28 +82,24 @@ namespace ei8.Prototypes.HelloWorm
             {
                 this.network = value;
                 this.spikeService = new SpikeService(this.network);
-
-                foreach (var n in this.network.GetItems<SpikingNeuron>())
-                {
-                    n.Triggered += this.N_Triggered;
-                    n.Fired += this.N_Fired;
-                }
+                this.spikeService.Triggered += this.SpikeService_Triggered;
+                this.spikeService.Fired += this.SpikeService_Fired;
             }
         }
 
-        private void N_Triggered(object? sender, TriggeredEventArgs e)
+        private void SpikeService_Triggered(object? sender, TriggeredEventArgs e)
         {
 #region DEBUG
             //Debug.WriteLine("Triggered: " + ((Neuron)sender!).ToString());
 #endregion
         }
 
-        private void N_Fired(object? sender, FiredEventArgs e)
+        private void SpikeService_Fired(object? sender, FiredEventArgs e)
         {
             #region DEBUG
             //            Debug.WriteLine("Fired: " + ((Neuron)sender!).ToString());
             #endregion
-            var neuron = (SpikingNeuron)sender!;
+            var neuron = e.Source;
             this.neuronFireInfos.Clean(
                 (nfi) => nfi.FireInfo.Timestamp, 
                 e.FireInfo.Timestamp.Subtract(Constants.Spiker.RelativeSpikesPeriod)

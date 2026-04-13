@@ -4,6 +4,11 @@ namespace ei8.Prototypes.HelloWorm
 {
     internal static class Helpers
     {
+        internal static Neuron CreateNeuron(
+            Guid id,
+            string tag
+        ) => Neuron.CreateTransient(id, tag, string.Empty, null);
+
         internal static Terminal CreateTerminal(
             Guid presynapticNeuronId,
             Guid postsynapticNeuronId

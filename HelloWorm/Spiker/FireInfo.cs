@@ -1,4 +1,4 @@
-﻿namespace ei8.Prototypes.HelloWorm.Spiker.Neurons
+﻿namespace ei8.Prototypes.HelloWorm.Spiker
 {
     public struct FireInfo
     {
@@ -6,21 +6,21 @@
 
         public FireInfo(DateTime timestamp, TriggerInfo[] triggers)
         {
-            this.Timestamp = timestamp;
-            this.Triggers = triggers;
+            Timestamp = timestamp;
+            Triggers = triggers;
         }
 
         public DateTime Timestamp { get; private set; }
 
         public TriggerInfo[] Triggers { get; private set; }
 
-        public override bool Equals(Object obj)
+        public override bool Equals(object obj)
         {
             return obj is FireInfo && this == (FireInfo)obj;
         }
         public override int GetHashCode()
         {
-            return this.Timestamp.GetHashCode();
+            return Timestamp.GetHashCode();
         }
         public static bool operator ==(FireInfo x, FireInfo y)
         {

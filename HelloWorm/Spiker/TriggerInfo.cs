@@ -1,16 +1,16 @@
 ﻿using ei8.Cortex.Coding;
 using System.Diagnostics.CodeAnalysis;
 
-namespace ei8.Prototypes.HelloWorm.Spiker.Neurons
+namespace ei8.Prototypes.HelloWorm.Spiker
 {
     public struct TriggerInfo
     {
         public TriggerInfo(DateTime timestamp, NeurotransmitterEffect effect, float strength, Guid presynapticId)
         {
-            this.Timestamp = timestamp;
-            this.Effect = effect;
-            this.Strength = strength;
-            this.PresynapticId = presynapticId;
+            Timestamp = timestamp;
+            Effect = effect;
+            Strength = strength;
+            PresynapticId = presynapticId;
         }
 
         public readonly DateTime Timestamp;
@@ -24,10 +24,10 @@ namespace ei8.Prototypes.HelloWorm.Spiker.Neurons
             if (obj != null && obj is TriggerInfo triggerInfo)
             {
                 result =
-                    this.Timestamp == triggerInfo.Timestamp &&
-                    this.Effect == triggerInfo.Effect &&
-                    this.Strength == triggerInfo.Strength &&
-                    this.PresynapticId == triggerInfo.PresynapticId;
+                    Timestamp == triggerInfo.Timestamp &&
+                    Effect == triggerInfo.Effect &&
+                    Strength == triggerInfo.Strength &&
+                    PresynapticId == triggerInfo.PresynapticId;
             }
             return result;
         }

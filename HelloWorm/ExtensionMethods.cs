@@ -1,6 +1,6 @@
 ﻿using ei8.Cortex.Coding;
 using ei8.Prototypes.HelloWorm.neurULization;
-using ei8.Prototypes.HelloWorm.Spiker.Neurons;
+using ei8.Prototypes.HelloWorm.Spiker;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Drawing.Drawing2D;
@@ -94,12 +94,17 @@ namespace ei8.Prototypes.HelloWorm
             }
         }
 
-        public static SpikingNeuron ValidateGet(this Network network, Guid id)
+        public static Neuron ValidateGet(this Network network, Guid id)
         {
-            if (network.TryGetById(id, out SpikingNeuron neuron))
+            if (network.TryGetById(id, out Neuron neuron))
                 return neuron;
             else
                 throw new ArgumentException($"Neuron with specified Id '{id}' was not found.");
+        }
+
+        public static string ToString(this Neuron neuron)
+        {
+            return $"{neuron.Id}:Neuron '{neuron.Tag}'";
         }
         #endregion
 

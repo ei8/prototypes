@@ -1,17 +1,17 @@
-﻿namespace ei8.Prototypes.HelloWorm.Spiker.Neurons
+﻿namespace ei8.Prototypes.HelloWorm.Spiker
 {
     public struct SpikeOrigin
     {
         public SpikeOrigin(Guid id)
         {
-            this.Id = id;
+            Id = id;
         }
 
         public Guid Id { get; set; }
 
         public override string ToString()
         {
-            return $"SpikeOrigin: '{this.Id}'";
+            return $"SpikeOrigin: '{Id}'";
         }
     }
 }
