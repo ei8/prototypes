@@ -6,9 +6,9 @@ namespace ei8.Prototypes.HelloWorm.Spiker
     {
         public FiredEventArgs(Neuron source, FireInfo fireInfo, int charge)
         {
-            Source = source;
-            FireInfo = fireInfo;
-            Charge = charge;
+            this.Source = source;
+            this.FireInfo = fireInfo;
+            this.Charge = charge;
         }
 
         public Neuron Source { get; }

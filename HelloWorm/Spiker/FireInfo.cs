@@ -6,8 +6,8 @@
 
         public FireInfo(DateTime timestamp, TriggerInfo[] triggers)
         {
-            Timestamp = timestamp;
-            Triggers = triggers;
+            this.Timestamp = timestamp;
+            this.Triggers = triggers;
         }
 
         public DateTime Timestamp { get; private set; }

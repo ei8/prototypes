@@ -6,11 +6,11 @@ namespace ei8.Prototypes.HelloWorm.Spiker
     {
         public TriggeredEventArgs(Neuron source, SpikeOrigin spikeOrigin, TriggerInfo triggerInfo, int charge, IEnumerable<FireInfo> path)
         {
-            Source = source;
-            SpikeOrigin = spikeOrigin;
-            TriggerInfo = triggerInfo;
-            Charge = charge;
-            Path = path;
+            this.Source = source;
+            this.SpikeOrigin = spikeOrigin;
+            this.TriggerInfo = triggerInfo;
+            this.Charge = charge;
+            this.Path = path;
         }
 
         public Neuron Source { get; }

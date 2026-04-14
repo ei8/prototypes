@@ -1,6 +1,5 @@
 ﻿using ei8.Cortex.Coding;
 using ei8.Prototypes.HelloWorm;
-using ei8.Prototypes.HelloWorm.Spiker;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 
@@ -54,7 +53,7 @@ namespace ei8.Prototypes.HelloWorm.Spiker
 
                 foreach (Neuron target in targetNeurons)
                 {
-                    SpikeService.SpikeNeuron(
+                    SpikeService.SpikeCore(
                         new SpikeParameters(
                             target,
                             new SpikeOrigin(Guid.NewGuid()),
@@ -67,25 +66,20 @@ namespace ei8.Prototypes.HelloWorm.Spiker
             }
         }
 
-        private static void SpikeNeuron(object? stateInfo)
+        private static void SpikeCore(object? stateInfo)
         {
             SpikeParameters parameters = (SpikeParameters)stateInfo!;
 
-            if (!parameters.SpikeService.spikes.ContainsKey(parameters.Target.Id))
-                parameters.SpikeService.spikes.TryAdd(parameters.Target.Id, new SpikeInfo(parameters.Target.Id));
-
-            if (parameters.SpikeService.spikes.TryGetValue(parameters.Target.Id, out SpikeInfo? spikeInfo))
+            if (parameters.SpikeService.spikes.TryGetAdd(parameters.Target.Id, id => new SpikeInfo(id), out SpikeInfo? spikeInfo))
             {
                 var spikeResultingFireInfo = FireInfo.Empty;
 
-                spikeInfo.Triggers.Clean((ti) => ti.Timestamp, parameters.Trigger.Timestamp.Subtract(Constants.Spiker.RefractoryPeriod));
+                spikeInfo!.Triggers.Clean((ti) => ti.Timestamp, parameters.Trigger.Timestamp.Subtract(Constants.Spiker.RefractoryPeriod));
                 spikeInfo.Triggers.TryAdd(parameters.Trigger.Timestamp, parameters.Trigger);
 
-                var tis = spikeInfo.Triggers.Values;
+                ICollection<TriggerInfo> triggers = spikeInfo.Triggers.Values;
 
-                var positiveCharge = SpikeService.GetChargeByEffect(tis, NeurotransmitterEffect.Excite);
-                var negativeCharge = SpikeService.GetChargeByEffect(tis, NeurotransmitterEffect.Inhibit);
-                var sumCharge = (int)(Constants.Spiker.RestingPotential + positiveCharge + negativeCharge);
+                int sumCharge = SpikeService.GetSumCharge(triggers);
 
                 parameters.SpikeService.Triggered?.Invoke(
                     parameters.SpikeService,
@@ -105,16 +99,13 @@ namespace ei8.Prototypes.HelloWorm.Spiker
                     )
                 )
                 {
-                    spikeResultingFireInfo = new FireInfo(DateTime.Now, tis.ToArray());
+                    spikeResultingFireInfo = new FireInfo(DateTime.Now, triggers.ToArray());
                     spikeInfo.LastFire = spikeResultingFireInfo;
                     parameters.SpikeService.Fired?.Invoke(
                         parameters.SpikeService,
                         new FiredEventArgs(parameters.Target, spikeResultingFireInfo, sumCharge)
                     );
-                }
 
-                if (spikeResultingFireInfo != FireInfo.Empty)
-                {
                     parameters.SpikeService.network.GetTerminals(parameters.Target.Id).ToList().ForEach(
                         t =>
                         {
@@ -125,7 +116,7 @@ namespace ei8.Prototypes.HelloWorm.Spiker
                                 parameters.Path.Concat([spikeResultingFireInfo]),
                                 parameters.SpikeService
                             );
-                            if (!ThreadPool.QueueUserWorkItem(SpikeNeuron, sp))
+                            if (!ThreadPool.QueueUserWorkItem(SpikeService.SpikeCore, sp))
                                 Debug.WriteLine($"Unable to queue work item for: {sp.Target}");
                         }
                     );
@@ -133,6 +124,14 @@ namespace ei8.Prototypes.HelloWorm.Spiker
             }
             else
                 throw new InvalidOperationException($"SpikeInfo for neuron '{parameters.Target.Id}' was not found.");
+        }
+
+        private static int GetSumCharge(ICollection<TriggerInfo> tis)
+        {
+            var positiveCharge = SpikeService.GetChargeByEffect(tis, NeurotransmitterEffect.Excite);
+            var negativeCharge = SpikeService.GetChargeByEffect(tis, NeurotransmitterEffect.Inhibit);
+            var sumCharge = (int)(Constants.Spiker.RestingPotential + positiveCharge + negativeCharge);
+            return sumCharge;
         }
 
         private static float GetChargeByEffect(IEnumerable<TriggerInfo> effectiveTriggers, NeurotransmitterEffect effect)

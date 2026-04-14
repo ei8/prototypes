@@ -106,6 +106,25 @@ namespace ei8.Prototypes.HelloWorm
         {
             return $"{neuron.Id}:Neuron '{neuron.Tag}'";
         }
+
+        public static bool TryGetAdd<TKey, TValue>(this ConcurrentDictionary<TKey, TValue> dictionary, TKey key, Func<TKey, TValue> valueCreator, out TValue? result)
+            where TKey : notnull
+        {
+            var bResult = false;
+
+            if (!dictionary.ContainsKey(key))
+                dictionary.TryAdd(key, valueCreator(key));
+
+            if (dictionary.TryGetValue(key, out TValue? getResult))
+            {
+                bResult = true;
+                result = getResult;
+            }
+            else
+                result = default;
+
+            return bResult;
+        }
         #endregion
 
         #region Physical

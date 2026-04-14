@@ -7,10 +7,10 @@ namespace ei8.Prototypes.HelloWorm.Spiker
     {
         public TriggerInfo(DateTime timestamp, NeurotransmitterEffect effect, float strength, Guid presynapticId)
         {
-            Timestamp = timestamp;
-            Effect = effect;
-            Strength = strength;
-            PresynapticId = presynapticId;
+            this.Timestamp = timestamp;
+            this.Effect = effect;
+            this.Strength = strength;
+            this.PresynapticId = presynapticId;
         }
 
         public readonly DateTime Timestamp;
@@ -24,10 +24,10 @@ namespace ei8.Prototypes.HelloWorm.Spiker
             if (obj != null && obj is TriggerInfo triggerInfo)
             {
                 result =
-                    Timestamp == triggerInfo.Timestamp &&
-                    Effect == triggerInfo.Effect &&
-                    Strength == triggerInfo.Strength &&
-                    PresynapticId == triggerInfo.PresynapticId;
+                    this.Timestamp == triggerInfo.Timestamp &&
+                    this.Effect == triggerInfo.Effect &&
+                    this.Strength == triggerInfo.Strength &&
+                    this.PresynapticId == triggerInfo.PresynapticId;
             }
             return result;
         }

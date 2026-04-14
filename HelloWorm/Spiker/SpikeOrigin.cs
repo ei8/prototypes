@@ -4,7 +4,7 @@
     {
         public SpikeOrigin(Guid id)
         {
-            Id = id;
+            this.Id = id;
         }
 
         public Guid Id { get; set; }
