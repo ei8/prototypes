@@ -1,5 +1,4 @@
-﻿using BidirectionalMap;
-using ei8.Cortex.Coding;
+﻿using ei8.Cortex.Coding;
 using ei8.Cortex.Coding.Mirrors;
 using ei8.Cortex.Coding.Model.Reflection;
 using ei8.Prototypes.HelloWorm.Spiker;
