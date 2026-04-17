@@ -2,45 +2,6 @@
 {
     public struct Constants
     {
-        public struct NeuronId
-        {
-            // Inputs
-            public static readonly Guid World = Guid.NewGuid();
-            public static readonly Guid Odor = Guid.NewGuid();
-            public static readonly Guid Sector1 = Guid.NewGuid();
-            public static readonly Guid Sector2 = Guid.NewGuid();
-            public static readonly Guid Sector3 = Guid.NewGuid();
-            public static readonly Guid Sector4 = Guid.NewGuid();
-            public static readonly Guid Sector5 = Guid.NewGuid();
-            public static readonly Guid Sector6 = Guid.NewGuid();
-            public static readonly Guid Sector7 = Guid.NewGuid();
-            public static readonly Guid Sector8 = Guid.NewGuid();
-
-            // Interneurons
-            public static readonly Guid OdorSector1 = Guid.NewGuid();
-            public static readonly Guid OdorSector2 = Guid.NewGuid();
-            public static readonly Guid OdorSector3 = Guid.NewGuid();
-            public static readonly Guid OdorSector4 = Guid.NewGuid();
-            public static readonly Guid OdorSector5 = Guid.NewGuid();
-            public static readonly Guid OdorSector6 = Guid.NewGuid();
-            public static readonly Guid OdorSector7 = Guid.NewGuid();
-            public static readonly Guid OdorSector8 = Guid.NewGuid();
-
-            public static readonly Guid WorldSector1 = Guid.NewGuid();
-            public static readonly Guid WorldSector2 = Guid.NewGuid();
-            public static readonly Guid WorldSector7 = Guid.NewGuid();
-            public static readonly Guid WorldSector8 = Guid.NewGuid();
-
-            // Outputs
-            public static readonly Guid Rotate = Guid.NewGuid();
-            public static readonly Guid Clockwise = Guid.NewGuid();
-            public static readonly Guid CounterClockwise = Guid.NewGuid();
-            public static readonly Guid Degrees22_5 = Guid.NewGuid();
-            public static readonly Guid Degrees45 = Guid.NewGuid();
-            public static readonly Guid Degrees60 = Guid.NewGuid();
-            public static readonly Guid Degrees70 = Guid.NewGuid();
-        }
-
         public const bool ShouldDrawGrid = false;
         public const bool ShouldDrawRectangularRectangles = false;
         public const bool ShouldDrawSectorIds = false;

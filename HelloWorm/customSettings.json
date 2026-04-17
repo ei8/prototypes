@@ -1,0 +1,80 @@
+{
+  "exclude": [
+    "**/bin",
+    "**/bower_components",
+    "**/jspm_packages",
+    "**/node_modules",
+    "**/obj",
+    "**/platforms"
+  ],
+  "Mirrors": [
+    {
+      "Keys": [ "ei8.Prototypes.HelloWorm.Worm;Rotate" ],
+      "Url": "http://neurul.net/sample/cortex/neurons/93e60d9e-14cc-4e72-823d-c00633b32f00"
+    },
+    {
+      "Keys": [ "ei8.Prototypes.HelloWorm.Worm+RotationDirection|Clockwise" ],
+      "Url": "http://neurul.net/sample/cortex/neurons/93e60d9e-14cc-4e72-823d-c00633b32f01"
+    },
+    {
+      "Keys": [ "ei8.Prototypes.HelloWorm.Worm+RotationDirection|CounterClockwise" ],
+      "Url": "http://neurul.net/sample/cortex/neurons/93e60d9e-14cc-4e72-823d-c00633b32f02"
+    },
+    {
+      "Keys": [ "ei8.Prototypes.HelloWorm.Worm+RotationDegrees|Small" ],
+      "Url": "http://neurul.net/sample/cortex/neurons/93e60d9e-14cc-4e72-823d-c00633b32f03"
+    },
+    {
+      "Keys": [ "ei8.Prototypes.HelloWorm.Worm+RotationDegrees|Medium" ],
+      "Url": "http://neurul.net/sample/cortex/neurons/93e60d9e-14cc-4e72-823d-c00633b32f04"
+    },
+    {
+      "Keys": [ "ei8.Prototypes.HelloWorm.Worm+RotationDegrees|Large" ],
+      "Url": "http://neurul.net/sample/cortex/neurons/93e60d9e-14cc-4e72-823d-c00633b32f05"
+    },
+    {
+      "Keys": [ "ei8.Prototypes.HelloWorm.Worm+RotationDegrees|ExtraLarge" ],
+      "Url": "http://neurul.net/sample/cortex/neurons/93e60d9e-14cc-4e72-823d-c00633b32f06"
+    },
+    {
+      "Keys": [ "ei8.Prototypes.HelloWorm.Worm+SectorValues|Sector1" ],
+      "Url": "http://neurul.net/sample/cortex/neurons/93e60d9e-14cc-4e72-823d-c00633b32f07"
+    },
+    {
+      "Keys": [ "ei8.Prototypes.HelloWorm.Worm+SectorValues|Sector2" ],
+      "Url": "http://neurul.net/sample/cortex/neurons/93e60d9e-14cc-4e72-823d-c00633b32f08"
+    },
+    {
+      "Keys": [ "ei8.Prototypes.HelloWorm.Worm+SectorValues|Sector3" ],
+      "Url": "http://neurul.net/sample/cortex/neurons/93e60d9e-14cc-4e72-823d-c00633b32f09"
+    },
+    {
+      "Keys": [ "ei8.Prototypes.HelloWorm.Worm+SectorValues|Sector4" ],
+      "Url": "http://neurul.net/sample/cortex/neurons/93e60d9e-14cc-4e72-823d-c00633b32f10"
+    },
+    {
+      "Keys": [ "ei8.Prototypes.HelloWorm.Worm+SectorValues|Sector5" ],
+      "Url": "http://neurul.net/sample/cortex/neurons/93e60d9e-14cc-4e72-823d-c00633b32f11"
+    },
+    {
+      "Keys": [ "ei8.Prototypes.HelloWorm.Worm+SectorValues|Sector6" ],
+      "Url": "http://neurul.net/sample/cortex/neurons/93e60d9e-14cc-4e72-823d-c00633b32f12"
+    },
+    {
+      "Keys": [ "ei8.Prototypes.HelloWorm.Worm+SectorValues|Sector7" ],
+      "Url": "http://neurul.net/sample/cortex/neurons/93e60d9e-14cc-4e72-823d-c00633b32f13"
+    },
+    {
+      "Keys": [ "ei8.Prototypes.HelloWorm.Worm+SectorValues|Sector8" ],
+      "Url": "http://neurul.net/sample/cortex/neurons/93e60d9e-14cc-4e72-823d-c00633b32f14"
+    },
+    {
+      "Keys": [ "ei8.Prototypes.HelloWorm.World" ],
+      "Url": "http://neurul.net/sample/cortex/neurons/93e60d9e-14cc-4e72-823d-c00633b32f15"
+    },
+    {
+      "Keys": [ "ei8.Prototypes.HelloWorm.Odor" ],
+      "Url": "http://neurul.net/sample/cortex/neurons/93e60d9e-14cc-4e72-823d-c00633b32f16"
+    }
+  ]
+}

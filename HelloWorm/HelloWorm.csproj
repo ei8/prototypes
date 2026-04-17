@@ -10,6 +10,9 @@
 
   <ItemGroup>
     <PackageReference Include="ei8.Cortex.Coding" Version="0.3.4" />
+    <PackageReference Include="ei8.Cortex.Coding.Persistence" Version="0.3.8" />
+    <PackageReference Include="ei8.Cortex.Diary.Nucleus.Client" Version="0.2.9" />
+    <PackageReference Include="ei8.Cortex.Library.Client" Version="0.4.0" />
   </ItemGroup>
 
   <ItemGroup>

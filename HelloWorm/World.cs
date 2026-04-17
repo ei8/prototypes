@@ -1,4 +1,5 @@
-﻿using System.Collections.Immutable;
+﻿using neurUL.Common.Domain.Model;
+using System.Collections.Immutable;
 
 namespace ei8.Prototypes.HelloWorm
 {
@@ -55,8 +56,13 @@ namespace ei8.Prototypes.HelloWorm
             {
                 var regen = regenerative.Create(this.Size);
                 this.Add(regen);
+
                 if (regenerative is INeurULized neurULized)
-                    ((INeurULized) regen).Network = neurULized.Network;
+                {
+                    AssertionConcern.AssertArgumentValid(n => n.Network != null && n.MirrorConfigs != null, neurULized, "neurULized object should be initialized adequately.", nameof(@object));
+
+                    ((INeurULized)regen).Initialize(neurULized.Network!, neurULized.MirrorConfigs!);
+                }
             }
 
             if (@object is IEmitter emitter)

@@ -16,8 +16,8 @@ namespace ei8.Prototypes.HelloWorm
         public Point Location { get; set; }
         public Size Size { get; set; }
 
-        public event EventHandler<MovingEventArgs> Moving;
-        public event EventHandler<CollidedEventArgs> Collided;
+        public event EventHandler<MovingEventArgs>? Moving;
+        public event EventHandler<CollidedEventArgs>? Collided;
 
         public void Collide(CollisionInfo info) => this.Collided?.Invoke(this, new CollidedEventArgs(info.Target));
 

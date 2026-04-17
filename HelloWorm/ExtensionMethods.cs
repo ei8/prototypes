@@ -1,9 +1,14 @@
 ﻿using ei8.Cortex.Coding;
+using ei8.Cortex.Coding.Mirrors;
+using ei8.Cortex.Coding.Model.Reflection;
 using ei8.Prototypes.HelloWorm.neurULization;
 using ei8.Prototypes.HelloWorm.Spiker;
+using neurUL.Common.Domain.Model;
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing.Drawing2D;
+using System.Reflection;
 
 namespace ei8.Prototypes.HelloWorm
 {
@@ -21,18 +26,18 @@ namespace ei8.Prototypes.HelloWorm
         /// <typeparam name="T2"></typeparam>
         /// <param name="neuronFireInfos"></param>
         /// <param name="methodNeuronId"></param>
-        /// <param name="param1ValueMaps"></param>
-        /// <param name="param2ValueMaps"></param>
+        /// <param name="param1ValueMap"></param>
+        /// <param name="param2ValueMap"></param>
         /// <param name="parameter1"></param>
         /// <param name="parameter2"></param>
         /// <returns></returns>
         internal static bool TryFauxDeneurULizeInvoke<T1, T2>(
             this IEnumerable<NeuronFireInfo> neuronFireInfos,
             Guid methodNeuronId,
-            IEnumerable<FauxNeurULizationMap<T1>> param1ValueMaps,
-            IEnumerable<FauxNeurULizationMap<T2>> param2ValueMaps,
-            out T1? parameter1,
-            out T2? parameter2
+            IEnumerable<NeuronValueMap<T1>> param1ValueMap,
+            IEnumerable<NeuronValueMap<T2>> param2ValueMap,
+            [NotNullWhen(true)] out T1? parameter1,
+            [NotNullWhen(true)] out T2? parameter2
         )
             where T1 : struct
             where T2 : struct
@@ -49,8 +54,8 @@ namespace ei8.Prototypes.HelloWorm
                 latestFire != null &&
                 (
                     latestFire.Neuron.Id == methodNeuronId ||
-                    param1ValueMaps.Any(p1vm => p1vm.NeuronId == latestFire.Neuron.Id) ||
-                    param2ValueMaps.Any(p2vm => p2vm.NeuronId == latestFire.Neuron.Id)
+                    param1ValueMap.Any(p1vm => p1vm.NeuronId == latestFire.Neuron.Id) ||
+                    param2ValueMap.Any(p2vm => p2vm.NeuronId == latestFire.Neuron.Id)
                 )
             )
             {
@@ -61,7 +66,7 @@ namespace ei8.Prototypes.HelloWorm
                     //Debug.WriteLine($"Related Fires (Micros): {string.Join(
                     //        ", ",
                     //        neuronFireInfos.Select(rf =>
-                    //            rf.Neuron.Data +
+                    //            rf.Neuron.Tag +
                     //            " (" +
                     //            latestFire.FireInfo.Timestamp.Subtract(rf.FireInfo.Timestamp).TotalMicroseconds +
                     //            ")"
@@ -72,9 +77,9 @@ namespace ei8.Prototypes.HelloWorm
                         // and specified method was fired
                         neuronFireInfos.Any(n => n.Neuron.Id == methodNeuronId) &&
                         // and any param1 was fired
-                        (parameter1 = param1ValueMaps.FirstOrDefault(pvm => neuronFireInfos.Any(rf => pvm.NeuronId == rf.Neuron.Id))?.Value) != null &&
+                        (parameter1 = param1ValueMap.FirstOrDefault(pvm => neuronFireInfos.Any(rf => pvm.NeuronId == rf.Neuron.Id))?.Value) != null &&
                         // and any param2 was fired
-                        (parameter2 = param2ValueMaps.FirstOrDefault(pvm => neuronFireInfos.Any(rf => pvm.NeuronId == rf.Neuron.Id))?.Value) != null
+                        (parameter2 = param2ValueMap.FirstOrDefault(pvm => neuronFireInfos.Any(rf => pvm.NeuronId == rf.Neuron.Id))?.Value) != null
                     )
                     {
                         result = true;
@@ -125,6 +130,147 @@ namespace ei8.Prototypes.HelloWorm
 
             return bResult;
         }
+
+        public static Neuron CreateInputNeuron(this Network network, MirrorConfig mirrorConfig, float strengthToInterneurons, params Neuron[] interneurons)
+        {
+            AssertionConcern.AssertArgumentNotNull(mirrorConfig, nameof(mirrorConfig)); 
+
+            var result = network.CreateNeuron(mirrorConfig);
+
+            foreach (var interneuron in interneurons)
+                network.CreateTerminal(result, interneuron, NeurotransmitterEffect.Excite, strengthToInterneurons);
+
+            return result;
+        }
+
+        public static Neuron CreateRotationInterneuron(this Network network, Neuron rotateNeuron, Neuron directionNeuron, Neuron degreesNeuron)
+        {
+            var result = network.CreateNeuron();
+
+            network.CreateTerminal(result, rotateNeuron);
+            network.CreateTerminal(result, directionNeuron);
+            network.CreateTerminal(result, degreesNeuron);
+
+            return result;
+        }
+
+        public static Neuron CreateNeuron(
+            this Network network,
+            MirrorConfig mirrorConfig
+        )
+        {
+            AssertionConcern.AssertArgumentNotNull(mirrorConfig, nameof(mirrorConfig));
+
+            var result = Neuron.CreateTransient(Guid.NewGuid(), string.Join(',', mirrorConfig.Keys), mirrorConfig.Url, null);
+            network.AddReplace(result);
+            return result;
+        }
+
+        public static Neuron CreateNeuron(
+            this Network network
+        )
+        {
+            var result = Neuron.CreateTransient(Guid.NewGuid(), null, null, null);
+            network.AddReplace(result);
+            return result;
+        }
+
+        public static Terminal CreateTerminal(
+            this Network network,
+            Neuron presynapticNeuron,
+            Neuron postsynapticNeuron
+        ) => network.CreateTerminal(presynapticNeuron, postsynapticNeuron, NeurotransmitterEffect.Excite, 1f);
+
+        public static Terminal CreateTerminal(
+            this Network network,
+            Neuron presynapticNeuron,
+            Neuron postsynapticNeuron,
+            NeurotransmitterEffect effect,
+            float strength
+        )
+        {
+            var result = new Terminal(Guid.NewGuid(), presynapticNeuron.Id, postsynapticNeuron.Id, effect, strength);
+            network.AddReplace(result);
+            return result;
+        }
+
+        public static IEnumerable<NeuronValueMap<T>> ConvertToNeuronValueMap<T>(this IEnumerable<T> values, IEnumerable<MirrorConfig> mirrorConfigs, Network network) where T : Enum
+        {
+            return values.Select(p1v =>
+            {
+                Neuron? result = null;
+                if (
+                    !mirrorConfigs.TryGetMirrorNeuron(
+                        p1v.ToEnumKeyString(),
+                        network,
+                        out result
+                    )
+                )
+                    throw new InvalidOperationException($"Failed retrieving NeuronValueMap for {p1v.ToEnumKeyString()}");
+
+                return new NeuronValueMap<T>(result!.Id, p1v);
+            }
+            );
+        }
+
+        #region TODO: Promote to ei8.Cortex.Coding
+        public static bool TryGetMirrorNeuron(this IEnumerable<MirrorConfig> mirrorConfigs, string key, Network network, [NotNullWhen(true)] out Neuron? result)
+        {
+            result = null;
+
+            return mirrorConfigs.TryGetByKey(
+                key,
+                out MirrorConfig? config
+            ) &&
+            network.TryGetByMirrorUrl(
+                config.Url,
+                out result
+            );
+        }
+
+        public static bool TryGetByMirrorUrl(this Network network, string mirrorUrl, [NotNullWhen(true)] out Neuron? result)
+        {
+            bool bResult = false;
+            result = null;
+            var neurons = from n in network.GetItems<Neuron>()
+                where n.MirrorUrl == mirrorUrl
+                select n;
+
+            if (neurons.Any())
+            {
+                result = neurons.Single();
+                bResult = true;
+            }
+
+            return bResult;
+        }
+
+        public static bool TryGetByKey(this IEnumerable<MirrorConfig> configs, string key, [NotNullWhen(true)] out MirrorConfig? result)
+        {
+            result = configs.SingleOrDefault(c => c.Keys.Any(ck => ck == key));
+            return result != null;
+        }
+
+        public static string ToEnumKeyString(this Enum value)
+        {
+            return $"{value.GetType().ToKeyString()}|{value.ToString()}";
+        }
+
+        public static string ToMethodKeyString(this Type type, string methodName, params Type[] parameterTypes)
+        {
+            return type.GetMethod(methodName, BindingFlags.Instance | BindingFlags.NonPublic, null, parameterTypes, null)!.ToMethodKeyString();
+        }
+
+        public static string ToMethodKeyString(this MethodInfo value)
+        {
+            if (value is MethodInfo methodInfo)
+            {
+                return methodInfo.ReflectedType.ToKeyString() + ";" + methodInfo.Name;
+            }
+
+            throw new ArgumentOutOfRangeException(nameof(value));
+        }
+        #endregion
         #endregion
 
         #region Physical

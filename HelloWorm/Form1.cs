@@ -1,3 +1,6 @@
+using ei8.Cortex.Coding;
+using ei8.Cortex.Coding.Model.Reflection;
+
 namespace ei8.Prototypes.HelloWorm
 {
     public partial class Form1 : Form
@@ -22,14 +25,18 @@ namespace ei8.Prototypes.HelloWorm
 
         private void WorldPanel_DoubleClick(object? sender, EventArgs e)
         {
-            // TODO: var worm = this.worldPanel.World.Components.OfType<Worm>().Single();
-            //worm.SpikeService.Spike(
+            //var worm = this.worldPanel.World.Components.OfType<Worm>().Single();
+            //if (
+            //    worm.Network!.TryGetByMirrorUrl(worm.MirrorConfigs!.Single(mc => mc.Keys.Contains(Worm.SectorValues.Sector1.ToEnumKeyString())).Url, out Neuron? sectorNeuron) &&
+            //    worm.Network!.TryGetByMirrorUrl(worm.MirrorConfigs!.Single(mc => mc.Keys.Contains(typeof(Odor).ToKeyString())).Url, out Neuron? odorNeuron)
+            //)
+            //worm.SpikeService!.Spike(
             //    [
-            //        new SpikeTarget(typeof(Constants.NeuronId).GetField("Sector5")!.GetValue(null)!.ToString()!),
-            //        new SpikeTarget(Constants.NeuronId.Odor)
-            //    ],
-            //    worm.Neurons
+            //        sectorNeuron.Id,
+            //        odorNeuron.Id
+            //    ]
             //);
+            //worm.Collide(new CollisionInfo(new Odor(), worm.Components.OfType<Nose>().Single().Components.OfType<Sector>().First(), 1));
 
             var f = this.worldPanel.World.Components.OfType<Food>().FirstOrDefault();
             if (f != null)

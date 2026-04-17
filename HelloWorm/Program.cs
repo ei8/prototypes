@@ -1,4 +1,8 @@
 using ei8.Cortex.Coding;
+using ei8.Cortex.Coding.Mirrors;
+using ei8.Cortex.Coding.Model.Reflection;
+using HelloWorm;
+using neurUL.Common.Domain.Model;
 
 namespace ei8.Prototypes.HelloWorm
 {
@@ -10,11 +14,44 @@ namespace ei8.Prototypes.HelloWorm
         [STAThread]
         static void Main()
         {
-            // TODO: bool fe = File.Exists("customSettings.json");
-
             // To customize application configuration such as set high DPI settings or default font,
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
+
+            #region Network retrieval
+            var settings = System.Text.Json.JsonSerializer.Deserialize<Settings>(File.ReadAllText("customSettings.json"));
+            //var rp = new RequestProvider();
+            //rp.SetHttpClientHandler(new HttpClientHandler());
+            //var client = new ei8.Cortex.Library.Client.Out.HttpNeuronQueryClient(rp);
+            //var queryResult = client.GetNeurons(
+            //    "http://fibona.cc/worm1/av8r/",
+            //    new NeuronQuery()
+            //    {
+            //        Depth = 5,
+            //        DirectionValues = DirectionValues.Outbound
+            //    },
+            //    "Guest"
+            //).Result;
+            //var net = queryResult.ToNetwork();
+            #endregion
+
+
+            // TODO: Prepare data
+            // Create neurons
+            //var rp = new RequestProvider();
+            //rp.SetHttpClientHandler(new HttpClientHandler());
+            //var client = new HttpNeuronClient(rp);
+            //client.CreateNeuron(
+            //    "http://fibona.cc/worm1/av8r/",
+            //    Guid.NewGuid().ToString(),
+            //    "Hello worm",
+            //    null,
+            //    "http://fibona.cc/worm1/gogogo/",
+            //    "bearerToken"
+            //).Wait();
+
+            // var ks = typeof(Worm).ToMethodKeyString("Rotate", typeof(Worm.RotationDirection), typeof(Worm.RotationDegrees));
+
 
             var world = new World();
             world.Location = new Point(0, 0);
@@ -25,129 +62,136 @@ namespace ei8.Prototypes.HelloWorm
             // TODO: world.Add(new Worm().Create(world.Size));
 
             var ns = new Network();
-            var nis = new INetworkItem[]
-            { 
-                // Primitives
-                Helpers.CreateNeuron(Constants.NeuronId.Odor, nameof(Constants.NeuronId.Odor)),
-                Helpers.CreateTerminal(Constants.NeuronId.Odor, Constants.NeuronId.OdorSector1, NeurotransmitterEffect.Excite, 0.5f),
-                Helpers.CreateTerminal(Constants.NeuronId.Odor, Constants.NeuronId.OdorSector2, NeurotransmitterEffect.Excite, 0.5f),
-                Helpers.CreateTerminal(Constants.NeuronId.Odor, Constants.NeuronId.OdorSector3, NeurotransmitterEffect.Excite, 0.5f),
-                Helpers.CreateTerminal(Constants.NeuronId.Odor, Constants.NeuronId.OdorSector4, NeurotransmitterEffect.Excite, 0.5f),
-                Helpers.CreateTerminal(Constants.NeuronId.Odor, Constants.NeuronId.OdorSector5, NeurotransmitterEffect.Excite, 0.5f),
-                Helpers.CreateTerminal(Constants.NeuronId.Odor, Constants.NeuronId.OdorSector6, NeurotransmitterEffect.Excite, 0.5f),
-                Helpers.CreateTerminal(Constants.NeuronId.Odor, Constants.NeuronId.OdorSector7, NeurotransmitterEffect.Excite, 0.5f),
-                Helpers.CreateTerminal(Constants.NeuronId.Odor, Constants.NeuronId.OdorSector8, NeurotransmitterEffect.Excite, 0.5f),
 
-                Helpers.CreateNeuron(Constants.NeuronId.World, nameof(Constants.NeuronId.World)),
-                Helpers.CreateTerminal(Constants.NeuronId.World,Constants.NeuronId.WorldSector1, NeurotransmitterEffect.Excite, 0.5f),
-                Helpers.CreateTerminal(Constants.NeuronId.World, Constants.NeuronId.WorldSector2, NeurotransmitterEffect.Excite, 0.5f),
-                Helpers.CreateTerminal(Constants.NeuronId.World, Constants.NeuronId.WorldSector7, NeurotransmitterEffect.Excite, 0.5f),
-                Helpers.CreateTerminal(Constants.NeuronId.World, Constants.NeuronId.WorldSector8, NeurotransmitterEffect.Excite, 0.5f),
+            AssertionConcern.AssertStateTrue(settings != null && settings.Mirrors != null, "Mirror Configs required.");
 
-                Helpers.CreateNeuron(Constants.NeuronId.Sector1, nameof(Constants.NeuronId.Sector1)),
-                Helpers.CreateTerminal(Constants.NeuronId.Sector1, Constants.NeuronId.OdorSector1, NeurotransmitterEffect.Excite, 0.5f),
-                Helpers.CreateTerminal(Constants.NeuronId.Sector1, Constants.NeuronId.WorldSector1, NeurotransmitterEffect.Excite, 0.5f),
+            if (
+                settings != null &&
+                settings.Mirrors != null &&
+                settings.Mirrors.TryGetByKey(typeof(Worm).ToMethodKeyString("Rotate", typeof(Worm.RotationDirection), typeof(Worm.RotationDegrees)), out MirrorConfig? rotateConfig) &&
+                settings.Mirrors.TryGetByKey(Worm.RotationDirection.Clockwise.ToEnumKeyString(), out MirrorConfig? clockwiseConfig) &&
+                settings.Mirrors.TryGetByKey(Worm.RotationDirection.CounterClockwise.ToEnumKeyString(), out MirrorConfig? counterClockwiseConfig) &&
+                settings.Mirrors.TryGetByKey(Worm.RotationDegrees.Small.ToEnumKeyString(), out MirrorConfig? smallConfig) &&
+                settings.Mirrors.TryGetByKey(Worm.RotationDegrees.Medium.ToEnumKeyString(), out MirrorConfig? mediumConfig) &&
+                settings.Mirrors.TryGetByKey(Worm.RotationDegrees.Large.ToEnumKeyString(), out MirrorConfig? largeConfig) &&
+                settings.Mirrors.TryGetByKey(Worm.RotationDegrees.ExtraLarge.ToEnumKeyString(), out MirrorConfig? extraLargeConfig) &&
+                settings.Mirrors.TryGetByKey(typeof(Odor).ToKeyString(), out MirrorConfig? odorConfig) &&
+                settings.Mirrors.TryGetByKey(typeof(World).ToKeyString(), out MirrorConfig? worldConfig) &&
+                settings.Mirrors.TryGetByKey(Worm.SectorValues.Sector1.ToEnumKeyString(), out MirrorConfig? sector1Config) &&
+                settings.Mirrors.TryGetByKey(Worm.SectorValues.Sector2.ToEnumKeyString(), out MirrorConfig? sector2Config) &&
+                settings.Mirrors.TryGetByKey(Worm.SectorValues.Sector3.ToEnumKeyString(), out MirrorConfig? sector3Config) &&
+                settings.Mirrors.TryGetByKey(Worm.SectorValues.Sector4.ToEnumKeyString(), out MirrorConfig? sector4Config) &&
+                settings.Mirrors.TryGetByKey(Worm.SectorValues.Sector5.ToEnumKeyString(), out MirrorConfig? sector5Config) &&
+                settings.Mirrors.TryGetByKey(Worm.SectorValues.Sector6.ToEnumKeyString(), out MirrorConfig? sector6Config) &&
+                settings.Mirrors.TryGetByKey(Worm.SectorValues.Sector7.ToEnumKeyString(), out MirrorConfig? sector7Config) &&
+                settings.Mirrors.TryGetByKey(Worm.SectorValues.Sector8.ToEnumKeyString(), out MirrorConfig? sector8Config)
+            )
+            {
 
-                Helpers.CreateNeuron(Constants.NeuronId.Sector2, nameof(Constants.NeuronId.Sector2)),
-                Helpers.CreateTerminal(Constants.NeuronId.Sector2, Constants.NeuronId.OdorSector2, NeurotransmitterEffect.Excite, 0.5f),
-                Helpers.CreateTerminal(Constants.NeuronId.Sector2, Constants.NeuronId.WorldSector2, NeurotransmitterEffect.Excite, 0.5f),
+                // ... Output neurons
+                var rotateNeuron = ns.CreateNeuron(rotateConfig);
+                var clockwiseNeuron = ns.CreateNeuron(clockwiseConfig);
+                var counterClockwiseNeuron = ns.CreateNeuron(counterClockwiseConfig);
+                var smallNeuron = ns.CreateNeuron(smallConfig);
+                var mediumNeuron = ns.CreateNeuron(mediumConfig);
+                var largeNeuron = ns.CreateNeuron(largeConfig);
+                var extraLargeNeuron = ns.CreateNeuron(extraLargeConfig);
 
-                Helpers.CreateNeuron(Constants.NeuronId.Sector3, nameof(Constants.NeuronId.Sector3)),
-                Helpers.CreateTerminal(Constants.NeuronId.Sector3, Constants.NeuronId.OdorSector3, NeurotransmitterEffect.Excite, 0.5f),
+                // ... Interneurons
+                var worldSector1Neuron = ns.CreateRotationInterneuron(rotateNeuron, counterClockwiseNeuron, mediumNeuron);
+                var worldSector2Neuron = ns.CreateRotationInterneuron(rotateNeuron, counterClockwiseNeuron, smallNeuron);
+                var worldSector7Neuron = ns.CreateRotationInterneuron(rotateNeuron, clockwiseNeuron, smallNeuron);
+                var worldSector8Neuron = ns.CreateRotationInterneuron(rotateNeuron, clockwiseNeuron, mediumNeuron);
 
-                Helpers.CreateNeuron(Constants.NeuronId.Sector4, nameof(Constants.NeuronId.Sector4)),
-                Helpers.CreateTerminal(Constants.NeuronId.Sector4, Constants.NeuronId.OdorSector4, NeurotransmitterEffect.Excite, 0.5f),
+                var odorSector1Neuron = ns.CreateRotationInterneuron(rotateNeuron, clockwiseNeuron, smallNeuron);
+                var odorSector2Neuron = ns.CreateRotationInterneuron(rotateNeuron, clockwiseNeuron, mediumNeuron);
+                var odorSector3Neuron = ns.CreateRotationInterneuron(rotateNeuron, clockwiseNeuron, largeNeuron);
+                var odorSector4Neuron = ns.CreateRotationInterneuron(rotateNeuron, clockwiseNeuron, extraLargeNeuron);
+                var odorSector5Neuron = ns.CreateRotationInterneuron(rotateNeuron, counterClockwiseNeuron, extraLargeNeuron);
+                var odorSector6Neuron = ns.CreateRotationInterneuron(rotateNeuron, counterClockwiseNeuron, largeNeuron);
+                var odorSector7Neuron = ns.CreateRotationInterneuron(rotateNeuron, counterClockwiseNeuron, mediumNeuron);
+                var odorSector8Neuron = ns.CreateRotationInterneuron(rotateNeuron, counterClockwiseNeuron, smallNeuron);
 
-                Helpers.CreateNeuron(Constants.NeuronId.Sector5, nameof(Constants.NeuronId.Sector5)),
-                Helpers.CreateTerminal(Constants.NeuronId.Sector5, Constants.NeuronId.OdorSector5, NeurotransmitterEffect.Excite, 0.5f),
+                // ... Input Neurons
+                ns.CreateInputNeuron(
+                    odorConfig,
+                    0.5f,
+                    odorSector1Neuron,
+                    odorSector2Neuron,
+                    odorSector3Neuron,
+                    odorSector4Neuron,
+                    odorSector5Neuron,
+                    odorSector6Neuron,
+                    odorSector7Neuron,
+                    odorSector8Neuron
+                );
 
-                Helpers.CreateNeuron(Constants.NeuronId.Sector6, nameof(Constants.NeuronId.Sector6)),
-                Helpers.CreateTerminal(Constants.NeuronId.Sector6, Constants.NeuronId.OdorSector6, NeurotransmitterEffect.Excite, 0.5f),
+                ns.CreateInputNeuron(
+                    worldConfig,
+                    0.5f,
+                    worldSector1Neuron,
+                    worldSector2Neuron,
+                    worldSector7Neuron,
+                    worldSector8Neuron
+                );
 
-                Helpers.CreateNeuron(Constants.NeuronId.Sector7, nameof(Constants.NeuronId.Sector7)),
-                Helpers.CreateTerminal(Constants.NeuronId.Sector7, Constants.NeuronId.OdorSector7, NeurotransmitterEffect.Excite, 0.5f),
-                Helpers.CreateTerminal(Constants.NeuronId.Sector7, Constants.NeuronId.WorldSector7, NeurotransmitterEffect.Excite, 0.5f),
+                ns.CreateInputNeuron(
+                    sector1Config,
+                    0.5f,
+                    odorSector1Neuron,
+                    worldSector1Neuron
+                );
 
-                Helpers.CreateNeuron(Constants.NeuronId.Sector8, nameof(Constants.NeuronId.Sector8)),
-                Helpers.CreateTerminal(Constants.NeuronId.Sector8, Constants.NeuronId.OdorSector8, NeurotransmitterEffect.Excite, 0.5f),
-                Helpers.CreateTerminal(Constants.NeuronId.Sector8, Constants.NeuronId.WorldSector8, NeurotransmitterEffect.Excite, 0.5f),
-            
-                // Interneurons
-                Helpers.CreateNeuron(Constants.NeuronId.WorldSector1, nameof(Constants.NeuronId.WorldSector1)),
-                Helpers.CreateTerminal(Constants.NeuronId.WorldSector1, Constants.NeuronId.Rotate),
-                Helpers.CreateTerminal(Constants.NeuronId.WorldSector1, Constants.NeuronId.CounterClockwise),
-                Helpers.CreateTerminal(Constants.NeuronId.WorldSector1, Constants.NeuronId.Degrees45),
+                ns.CreateInputNeuron(
+                    sector2Config,
+                    0.5f,
+                    odorSector2Neuron,
+                    worldSector2Neuron
+                );
 
-                Helpers.CreateNeuron(Constants.NeuronId.WorldSector2, nameof(Constants.NeuronId.WorldSector2)),
-                Helpers.CreateTerminal(Constants.NeuronId.WorldSector2, Constants.NeuronId.Rotate),
-                Helpers.CreateTerminal(Constants.NeuronId.WorldSector2, Constants.NeuronId.CounterClockwise),
-                Helpers.CreateTerminal(Constants.NeuronId.WorldSector2, Constants.NeuronId.Degrees22_5),
+                ns.CreateInputNeuron(
+                    sector3Config,
+                    0.5f,
+                    odorSector3Neuron
+                );
 
-                Helpers.CreateNeuron(Constants.NeuronId.WorldSector7, nameof(Constants.NeuronId.WorldSector7)),
-                Helpers.CreateTerminal(Constants.NeuronId.WorldSector7, Constants.NeuronId.Rotate),
-                Helpers.CreateTerminal(Constants.NeuronId.WorldSector7, Constants.NeuronId.Clockwise),
-                Helpers.CreateTerminal(Constants.NeuronId.WorldSector7, Constants.NeuronId.Degrees22_5),
+                ns.CreateInputNeuron(
+                    sector4Config,
+                    0.5f,
+                    odorSector4Neuron
+                );
 
-                Helpers.CreateNeuron(Constants.NeuronId.WorldSector8, nameof(Constants.NeuronId.WorldSector8)),
-                Helpers.CreateTerminal(Constants.NeuronId.WorldSector8, Constants.NeuronId.Rotate),
-                Helpers.CreateTerminal(Constants.NeuronId.WorldSector8, Constants.NeuronId.Clockwise),
-                Helpers.CreateTerminal(Constants.NeuronId.WorldSector8, Constants.NeuronId.Degrees45),
+                ns.CreateInputNeuron(
+                    sector5Config,
+                    0.5f,
+                    odorSector5Neuron
+                );
 
-                Helpers.CreateNeuron(Constants.NeuronId.OdorSector1, nameof(Constants.NeuronId.OdorSector1)),
-                Helpers.CreateTerminal(Constants.NeuronId.OdorSector1, Constants.NeuronId.Rotate),
-                Helpers.CreateTerminal(Constants.NeuronId.OdorSector1, Constants.NeuronId.Clockwise),
-                Helpers.CreateTerminal(Constants.NeuronId.OdorSector1, Constants.NeuronId.Degrees22_5),
+                ns.CreateInputNeuron(
+                    sector6Config,
+                    0.5f,
+                    odorSector6Neuron
+                );
 
-                Helpers.CreateNeuron(Constants.NeuronId.OdorSector2, nameof(Constants.NeuronId.OdorSector2)),
-                Helpers.CreateTerminal(Constants.NeuronId.OdorSector2, Constants.NeuronId.Rotate),
-                Helpers.CreateTerminal(Constants.NeuronId.OdorSector2, Constants.NeuronId.Clockwise),
-                Helpers.CreateTerminal(Constants.NeuronId.OdorSector2, Constants.NeuronId.Degrees45),
+                ns.CreateInputNeuron(
+                    sector7Config,
+                    0.5f,
+                    odorSector7Neuron,
+                    worldSector7Neuron
+                );
 
-                Helpers.CreateNeuron(Constants.NeuronId.OdorSector3, nameof(Constants.NeuronId.OdorSector3)),
-                Helpers.CreateTerminal(Constants.NeuronId.OdorSector3, Constants.NeuronId.Rotate),
-                Helpers.CreateTerminal(Constants.NeuronId.OdorSector3, Constants.NeuronId.Clockwise),
-                Helpers.CreateTerminal(Constants.NeuronId.OdorSector3, Constants.NeuronId.Degrees60),
+                ns.CreateInputNeuron(
+                    sector8Config,
+                    0.5f,
+                    odorSector8Neuron,
+                    worldSector8Neuron
+                );
 
-                Helpers.CreateNeuron(Constants.NeuronId.OdorSector4, nameof(Constants.NeuronId.OdorSector4)),
-                Helpers.CreateTerminal(Constants.NeuronId.OdorSector4, Constants.NeuronId.Rotate),
-                Helpers.CreateTerminal(Constants.NeuronId.OdorSector4, Constants.NeuronId.Clockwise),
-                Helpers.CreateTerminal(Constants.NeuronId.OdorSector4, Constants.NeuronId.Degrees70),
-
-                Helpers.CreateNeuron(Constants.NeuronId.OdorSector5, nameof(Constants.NeuronId.OdorSector5)),
-                Helpers.CreateTerminal(Constants.NeuronId.OdorSector5, Constants.NeuronId.Rotate),
-                Helpers.CreateTerminal(Constants.NeuronId.OdorSector5, Constants.NeuronId.CounterClockwise),
-                Helpers.CreateTerminal(Constants.NeuronId.OdorSector5, Constants.NeuronId.Degrees70),
-
-                Helpers.CreateNeuron(Constants.NeuronId.OdorSector6, nameof(Constants.NeuronId.OdorSector6)),
-                Helpers.CreateTerminal(Constants.NeuronId.OdorSector6, Constants.NeuronId.Rotate),
-                Helpers.CreateTerminal(Constants.NeuronId.OdorSector6, Constants.NeuronId.CounterClockwise),
-                Helpers.CreateTerminal(Constants.NeuronId.OdorSector6, Constants.NeuronId.Degrees60),
-
-                Helpers.CreateNeuron(Constants.NeuronId.OdorSector7, nameof(Constants.NeuronId.OdorSector7)),
-                Helpers.CreateTerminal(Constants.NeuronId.OdorSector7, Constants.NeuronId.Rotate),
-                Helpers.CreateTerminal(Constants.NeuronId.OdorSector7, Constants.NeuronId.CounterClockwise),
-                Helpers.CreateTerminal(Constants.NeuronId.OdorSector7, Constants.NeuronId.Degrees45),
-
-                Helpers.CreateNeuron(Constants.NeuronId.OdorSector8, nameof(Constants.NeuronId.OdorSector8)),
-                Helpers.CreateTerminal(Constants.NeuronId.OdorSector8, Constants.NeuronId.Rotate),
-                Helpers.CreateTerminal(Constants.NeuronId.OdorSector8, Constants.NeuronId.CounterClockwise),
-                Helpers.CreateTerminal(Constants.NeuronId.OdorSector8, Constants.NeuronId.Degrees22_5),
-
-                // Output neurons
-                Helpers.CreateNeuron(Constants.NeuronId.Rotate, nameof(Constants.NeuronId.Rotate)),
-                Helpers.CreateNeuron(Constants.NeuronId.Clockwise, nameof(Constants.NeuronId.Clockwise)),
-                Helpers.CreateNeuron(Constants.NeuronId.CounterClockwise, nameof(Constants.NeuronId.CounterClockwise)),
-                Helpers.CreateNeuron(Constants.NeuronId.Degrees22_5, nameof(Constants.NeuronId.Degrees22_5)),
-                Helpers.CreateNeuron(Constants.NeuronId.Degrees45, nameof(Constants.NeuronId.Degrees45)),
-                Helpers.CreateNeuron(Constants.NeuronId.Degrees60, nameof(Constants.NeuronId.Degrees60)),
-                Helpers.CreateNeuron(Constants.NeuronId.Degrees70, nameof(Constants.NeuronId.Degrees70))
-            };
-            nis.ToList().ForEach(ns.AddReplace);
-
-            // assign to all worms
-            foreach (var w in world.Components)
-                if (w is INeurULized n)
-                    n.Network = ns;
+                // assign to all worms
+                foreach (var w in world.Components)
+                    if (w is INeurULized n)
+                        n.Initialize(ns, settings.Mirrors);
+            }
 
             Application.Run(new Form1(world));
         }
