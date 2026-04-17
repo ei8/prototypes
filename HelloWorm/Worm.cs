@@ -1,11 +1,9 @@
 ﻿using ei8.Cortex.Coding;
 using ei8.Cortex.Coding.Mirrors;
 using ei8.Cortex.Coding.Model.Reflection;
-using ei8.Prototypes.HelloWorm.neurULization;
 using ei8.Prototypes.HelloWorm.Spiker;
 using neurUL.Common.Domain.Model;
 using System.Collections.Concurrent;
-using System.Diagnostics;
 using Timer = System.Threading.Timer;
 
 namespace ei8.Prototypes.HelloWorm
@@ -43,10 +41,10 @@ namespace ei8.Prototypes.HelloWorm
         private Network? network;
         private ConcurrentDictionary<DateTime, NeuronFireInfo> neuronFireInfos;
         private IEnumerable<MirrorConfig>? mirrorConfigs;
-        private IEnumerable<NeuronValueMap<RotationDirection>>? directionValueMap;
-        private IEnumerable<NeuronValueMap<RotationDegrees>>? degreesValueMap;
-        private IEnumerable<NeuronValueMap<SectorValues>>? sectorsValueMap;
-        private IEnumerable<NeuronValueMap<string>>? targetsValueMap;
+        private IDictionary<Guid, RotationDirection>? directionValueDictionary;
+        private IDictionary<Guid, RotationDegrees>? degreesValueDictionary;
+        private IDictionary<SectorValues, Guid>? sectorsValueDictionary;
+        private IDictionary<string, Guid>? targetsValueDictionary;
         private Neuron? rotationNeuron;
 
         public Worm() : this(0, 0, 0, 0)
@@ -71,10 +69,10 @@ namespace ei8.Prototypes.HelloWorm
             this.movementTriggerTimer = new Timer(this.WrapMove, null, 0, Constants.MovementTriggerTimerPeriod);
             this.neuronFireInfos = new ConcurrentDictionary<DateTime, NeuronFireInfo>();
             this.mirrorConfigs = null;
-            this.directionValueMap = null;
-            this.degreesValueMap = null;
-            this.sectorsValueMap = null;
-            this.targetsValueMap = null;
+            this.directionValueDictionary = null;
+            this.degreesValueDictionary = null;
+            this.sectorsValueDictionary = null;
+            this.targetsValueDictionary = null;
             this.rotationNeuron = null;
         }
 
@@ -127,8 +125,8 @@ namespace ei8.Prototypes.HelloWorm
                 this.rotationNeuron != null &&
                 this.neuronFireInfos.Values.TryFauxDeneurULizeInvoke(
                     this.rotationNeuron.Id,
-                    this.directionValueMap!,
-                    this.degreesValueMap!,
+                    this.directionValueDictionary!,
+                    this.degreesValueDictionary!,
                     out RotationDirection? parameter1,
                     out RotationDegrees? parameter2
                 )
@@ -211,21 +209,20 @@ namespace ei8.Prototypes.HelloWorm
                 if (
                     this.network != null &&
                     this.spikeService != null &&
-                    this.sectorsValueMap != null &&
-                    this.targetsValueMap != null
+                    this.sectorsValueDictionary != null &&
+                    this.targetsValueDictionary != null &&
+                    info.Target is not Food
                 )
                 {
-                    var sectorMatch = this.sectorsValueMap.SingleOrDefault(svm => svm.Value == Enum.Parse<SectorValues>("Sector" + sectorId));
-                    var targetMatch = this.targetsValueMap.SingleOrDefault(svm => svm.Value == info.Target.GetType().ToKeyString());
-                    if (sectorMatch != null && targetMatch != null)
-                    {
-                        this.spikeService.Spike(
-                            [
-                                sectorMatch.NeuronId,
-                                targetMatch.NeuronId
-                            ]
-                        );
-                    }
+                    var sectorMatch = this.sectorsValueDictionary[Enum.Parse<SectorValues>("Sector" + sectorId)];
+                    var targetMatch = this.targetsValueDictionary[info.Target.GetType().ToKeyString()];
+
+                    this.spikeService.Spike(
+                        [
+                            sectorMatch,
+                            targetMatch
+                        ]
+                    );
                 }
             }
 
@@ -253,9 +250,9 @@ namespace ei8.Prototypes.HelloWorm
 
             this.mirrorConfigs = mirrorConfigs;
 
-            this.directionValueMap = Enum.GetValues<RotationDirection>().ConvertToNeuronValueMap(this.mirrorConfigs, this.network);
-            this.degreesValueMap = Enum.GetValues<RotationDegrees>().ConvertToNeuronValueMap(this.mirrorConfigs, this.network);
-            this.sectorsValueMap = Enum.GetValues<SectorValues>().ConvertToNeuronValueMap(this.mirrorConfigs, this.network);
+            this.directionValueDictionary = Enum.GetValues<RotationDirection>().ConvertToNeuronValueMap(this.mirrorConfigs, this.network).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+            this.degreesValueDictionary = Enum.GetValues<RotationDegrees>().ConvertToNeuronValueMap(this.mirrorConfigs, this.network).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+            this.sectorsValueDictionary = Enum.GetValues<SectorValues>().ConvertToNeuronValueMap(this.mirrorConfigs, this.network).ToDictionary(kvp => kvp.Value, kvp => kvp.Key);
 
             if (this.MirrorConfigs != null && this.network != null)
             {
@@ -281,10 +278,10 @@ namespace ei8.Prototypes.HelloWorm
                     )
                 )
                 {
-                    this.targetsValueMap = [
-                        new NeuronValueMap<string>(worldNeuron.Id, typeof(World).ToKeyString()),
-                        new NeuronValueMap<string>(odorNeuron.Id, typeof(Odor).ToKeyString()),
-                    ];
+                    this.targetsValueDictionary = new Dictionary<string, Guid>{
+                        { typeof(World).ToKeyString(), worldNeuron.Id },
+                        { typeof(Odor).ToKeyString(), odorNeuron.Id },
+                    };
                 }
             }
         }

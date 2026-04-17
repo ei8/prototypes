@@ -1,7 +1,7 @@
-﻿using ei8.Cortex.Coding;
+﻿using BidirectionalMap;
+using ei8.Cortex.Coding;
 using ei8.Cortex.Coding.Mirrors;
 using ei8.Cortex.Coding.Model.Reflection;
-using ei8.Prototypes.HelloWorm.neurULization;
 using ei8.Prototypes.HelloWorm.Spiker;
 using neurUL.Common.Domain.Model;
 using System.Collections.Concurrent;
@@ -34,8 +34,8 @@ namespace ei8.Prototypes.HelloWorm
         internal static bool TryFauxDeneurULizeInvoke<T1, T2>(
             this IEnumerable<NeuronFireInfo> neuronFireInfos,
             Guid methodNeuronId,
-            IEnumerable<NeuronValueMap<T1>> param1ValueMap,
-            IEnumerable<NeuronValueMap<T2>> param2ValueMap,
+            IDictionary<Guid, T1> param1ValueMap,
+            IDictionary<Guid, T2> param2ValueMap,
             [NotNullWhen(true)] out T1? parameter1,
             [NotNullWhen(true)] out T2? parameter2
         )
@@ -54,8 +54,8 @@ namespace ei8.Prototypes.HelloWorm
                 latestFire != null &&
                 (
                     latestFire.Neuron.Id == methodNeuronId ||
-                    param1ValueMap.Any(p1vm => p1vm.NeuronId == latestFire.Neuron.Id) ||
-                    param2ValueMap.Any(p2vm => p2vm.NeuronId == latestFire.Neuron.Id)
+                    param1ValueMap.ContainsKey(latestFire.Neuron.Id) ||
+                    param2ValueMap.ContainsKey(latestFire.Neuron.Id)
                 )
             )
             {
@@ -77,9 +77,9 @@ namespace ei8.Prototypes.HelloWorm
                         // and specified method was fired
                         neuronFireInfos.Any(n => n.Neuron.Id == methodNeuronId) &&
                         // and any param1 was fired
-                        (parameter1 = param1ValueMap.FirstOrDefault(pvm => neuronFireInfos.Any(rf => pvm.NeuronId == rf.Neuron.Id))?.Value) != null &&
+                        neuronFireInfos.TryGetFiredParameter(param1ValueMap, out parameter1) &&
                         // and any param2 was fired
-                        (parameter2 = param2ValueMap.FirstOrDefault(pvm => neuronFireInfos.Any(rf => pvm.NeuronId == rf.Neuron.Id))?.Value) != null
+                        neuronFireInfos.TryGetFiredParameter(param2ValueMap, out parameter2)
                     )
                     {
                         result = true;
@@ -87,6 +87,20 @@ namespace ei8.Prototypes.HelloWorm
                 }
             }
             return result;
+        }
+
+        private static bool TryGetFiredParameter<T1>(this IEnumerable<NeuronFireInfo> neuronFireInfos, IDictionary<Guid, T1> paramValueMap, out T1? parameter) where T1 : struct
+        {
+            parameter = null;
+
+            foreach (var nfi in neuronFireInfos)
+                if (paramValueMap.ContainsKey(nfi.Neuron.Id))
+                {
+                    parameter = paramValueMap[nfi.Neuron.Id];
+                    break;
+                }
+
+            return parameter != null;
         }
 
         public static void Clean<T>(this ConcurrentDictionary<DateTime, T> concurrentDictionary, Func<T, DateTime> timestampRetriever, DateTime maxTimestamp)
@@ -194,23 +208,26 @@ namespace ei8.Prototypes.HelloWorm
             return result;
         }
 
-        public static IEnumerable<NeuronValueMap<T>> ConvertToNeuronValueMap<T>(this IEnumerable<T> values, IEnumerable<MirrorConfig> mirrorConfigs, Network network) where T : Enum
+        public static IDictionary<Guid, T> ConvertToNeuronValueMap<T>(this IEnumerable<T> values, IEnumerable<MirrorConfig> mirrorConfigs, Network network) where T : Enum
         {
-            return values.Select(p1v =>
+            var result = new Dictionary<Guid, T>();
+
+            foreach (var value in values) 
             {
-                Neuron? result = null;
+                Neuron? neuron = null;
                 if (
                     !mirrorConfigs.TryGetMirrorNeuron(
-                        p1v.ToEnumKeyString(),
+                        value.ToEnumKeyString(),
                         network,
-                        out result
+                        out neuron
                     )
                 )
-                    throw new InvalidOperationException($"Failed retrieving NeuronValueMap for {p1v.ToEnumKeyString()}");
+                    throw new InvalidOperationException($"Failed retrieving NeuronValueMap for {value.ToEnumKeyString()}");
 
-                return new NeuronValueMap<T>(result!.Id, p1v);
+                result.Add(neuron.Id, value);
             }
-            );
+
+            return result;
         }
 
         #region TODO: Promote to ei8.Cortex.Coding
