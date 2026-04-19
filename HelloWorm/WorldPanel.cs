@@ -4,21 +4,24 @@
     {
         private const float AngleOffset = 90;
         
-        private readonly World world;
+        private World? world;
 
-        
-
-        public WorldPanel(World world)
+        public WorldPanel()
         {
             this.DoubleBuffered = true;
-            this.world = world;
 
             this.SizeChanged += this.WorldPanel_SizeChanged;
         }
 
         private void WorldPanel_SizeChanged(object? sender, EventArgs e)
         {
-            this.world.Size = new Size(this.Size.Width - 17, this.Size.Height - 40);
+            this.UpdateSize();
+        }
+
+        private void UpdateSize()
+        {
+            if (this.world != null)
+                this.world.Size = new Size(this.Size.Width, this.Size.Height);
         }
 
         protected override void OnPaint(PaintEventArgs e)
@@ -28,99 +31,102 @@
 
             using Pen worldPen = new Pen(Color.Blue);
 
-            g.DrawRectangle(this.world, worldPen);
+            if (this.world != null)
+            { 
+                // g.DrawRectangle(this.world, worldPen);
 
-            if (Constants.ShouldDrawGrid)
-                g.DrawGrid(this.world.Size, 50);
+                if (Constants.ShouldDrawGrid)
+                    g.DrawGrid(this.world.Size, 50);
 
-            foreach (var p in this.world.Components)
-            {
-                using SolidBrush b = new(Color.Black);
-                using Pen pen = new(b);
-
-                if (p is IRectangular rc)
+                foreach (var p in this.world.Components)
                 {
-                    if (Constants.ShouldDrawRectangularRectangles)
-                    {
-                        using Pen rectPen = new Pen(Color.Red);
-                        g.DrawRectangle(rectPen, rc.GetRectangle());
-                    }
+                    using SolidBrush b = new(Color.Black);
+                    using Pen pen = new(b);
 
-                    var angleTranslator = new Func<float, float>((a) => a - WorldPanel.AngleOffset);
-                    if (p is IMovable pm)
+                    if (p is IRectangular rc)
                     {
-                        float ellipseCenterX = 0;
-                        float ellipseCenterY = 0;
-
-                        if (pm is Worm wm && wm.Components.OfType<Nose>().Any())
+                        if (Constants.ShouldDrawRectangularRectangles)
                         {
-                            ellipseCenterX = wm.Location.X + (rc.Size.Width / 2);
-                            ellipseCenterY = wm.Location.Y + (wm.Components.OfType<Nose>().Single().Size.Height / 2);
+                            using Pen rectPen = new Pen(Color.Red);
+                            g.DrawRectangle(rectPen, rc.GetRectangle());
+                        }
+
+                        var angleTranslator = new Func<float, float>((a) => a - WorldPanel.AngleOffset);
+                        if (p is IMovable pm)
+                        {
+                            float ellipseCenterX = 0;
+                            float ellipseCenterY = 0;
+
+                            if (pm is Worm wm && wm.Components.OfType<Nose>().Any())
+                            {
+                                ellipseCenterX = wm.Location.X + (rc.Size.Width / 2);
+                                ellipseCenterY = wm.Location.Y + (wm.Components.OfType<Nose>().Single().Size.Height / 2);
+                            }
+                            else
+                            {
+                                ellipseCenterX = rc.Location.X + (rc.Size.Width / 2);
+                                ellipseCenterY = rc.Location.Y + (rc.Size.Height / 2);
+                            }
+
+                            // Save the current graphics state
+                            System.Drawing.Drawing2D.Matrix originalMatrix = e.Graphics.Transform;
+
+                            // Translate the origin to the center of the ellipse, then rotate
+                            g.TranslateTransform(ellipseCenterX, ellipseCenterY);
+                            g.RotateTransform(pm.Direction + WorldPanel.AngleOffset);
+                            // Translate back to the original top-left corner position relative to the new origin
+                            g.TranslateTransform(-ellipseCenterX, -ellipseCenterY);
+
+                            if (Constants.ShouldDrawDirection)
+                            {
+                                Point hypoPoint = rc.GetRectangle().GetHypotenusePoint(180 - WorldPanel.AngleOffset, 10);
+                                g.DrawCenteredStringAtPoint(
+                                    pm.Direction.ToString(),
+                                    new Font("Arial", 8, FontStyle.Regular),
+                                    Brushes.Green,
+                                    hypoPoint
+                                );
+                            }
+
+                            if (Constants.ShouldDrawScore && p is Worm pw)
+                            {
+                                Point hypoPoint = rc.GetRectangle().GetHypotenusePoint(60 - WorldPanel.AngleOffset, 18);
+                                g.DrawCenteredStringAtPoint(
+                                    pw.Score.ToString(),
+                                    new Font("Arial", 10, FontStyle.Regular),
+                                    Brushes.Green,
+                                    hypoPoint
+                                );
+                                Point hypoPoint2 = rc.GetRectangle().GetHypotenusePoint(45 - WorldPanel.AngleOffset, 25);
+                                g.DrawCenteredStringAtPoint(
+                                    pw.Life.ToString(),
+                                    new Font("Arial", 7, FontStyle.Regular),
+                                    Brushes.Red,
+                                    hypoPoint2
+                                );
+                            }
+
+                            // Draw the ellipse
+                            g.DrawRectangular(rc, pen, angleTranslator);
+
+                            // Reset the graphics transform to the original state for other drawings
+                            g.Transform = originalMatrix;
                         }
                         else
                         {
-                            ellipseCenterX = rc.Location.X + (rc.Size.Width / 2);
-                            ellipseCenterY = rc.Location.Y + (rc.Size.Height / 2);
-                        }
+                            g.DrawRectangular(rc, pen, angleTranslator);
 
-                        // Save the current graphics state
-                        System.Drawing.Drawing2D.Matrix originalMatrix = e.Graphics.Transform;
-
-                        // Translate the origin to the center of the ellipse, then rotate
-                        g.TranslateTransform(ellipseCenterX, ellipseCenterY);
-                        g.RotateTransform(pm.Direction + WorldPanel.AngleOffset);
-                        // Translate back to the original top-left corner position relative to the new origin
-                        g.TranslateTransform(-ellipseCenterX, -ellipseCenterY);
-
-                        if (Constants.ShouldDrawDirection)
-                        {
-                            Point hypoPoint = rc.GetRectangle().GetHypotenusePoint(180 - WorldPanel.AngleOffset, 10);
-                            g.DrawCenteredStringAtPoint(
-                                pm.Direction.ToString(),
-                                new Font("Arial", 8, FontStyle.Regular),
-                                Brushes.Green,
-                                hypoPoint
-                            );
-                        }
-
-                        if (Constants.ShouldDrawScore && p is Worm pw)
-                        {
-                            Point hypoPoint = rc.GetRectangle().GetHypotenusePoint(60 - WorldPanel.AngleOffset, 18);
-                            g.DrawCenteredStringAtPoint(
-                                pw.Score.ToString(),
-                                new Font("Arial", 10, FontStyle.Regular),
-                                Brushes.Green,
-                                hypoPoint
-                            );
-                            Point hypoPoint2 = rc.GetRectangle().GetHypotenusePoint(45 - WorldPanel.AngleOffset, 25);
-                            g.DrawCenteredStringAtPoint(
-                                pw.Life.ToString(),
-                                new Font("Arial", 7, FontStyle.Regular),
-                                Brushes.Red,
-                                hypoPoint2
-                            );
-                        }
-
-                        // Draw the ellipse
-                        g.DrawRectangular(rc, pen, angleTranslator);
-
-                        // Reset the graphics transform to the original state for other drawings
-                        g.Transform = originalMatrix;
-                    }
-                    else
-                    {
-                        g.DrawRectangular(rc, pen, angleTranslator);
-
-                        if (rc is Food food)
-                        {
-                            var foodLoc = rc.GetRectangle().Location;
-                            Point hypoPoint2 = new Point(foodLoc.X + food.Size.Width + 10, foodLoc.Y + 4);
-                            g.DrawCenteredStringAtPoint(
-                                food.Life.ToString(),
-                                new Font("Arial", 7, FontStyle.Regular),
-                                Brushes.Red,
-                                hypoPoint2
-                            );
+                            if (rc is Food food)
+                            {
+                                var foodLoc = rc.GetRectangle().Location;
+                                Point hypoPoint2 = new Point(foodLoc.X + food.Size.Width + 10, foodLoc.Y + 4);
+                                g.DrawCenteredStringAtPoint(
+                                    food.Life.ToString(),
+                                    new Font("Arial", 7, FontStyle.Regular),
+                                    Brushes.Red,
+                                    hypoPoint2
+                                );
+                            }
                         }
                     }
                 }
@@ -129,6 +135,14 @@
             base.OnPaint(e);
         }
 
-        public World World => this.world;
+        public World? World
+        {
+            get => this.world;
+            set
+            {
+                this.world = value;
+                this.UpdateSize();
+            }
+        }
     }
 }

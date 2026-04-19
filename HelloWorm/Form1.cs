@@ -5,20 +5,13 @@ namespace ei8.Prototypes.HelloWorm
 {
     public partial class Form1 : Form
     {
-        private readonly WorldPanel worldPanel;
         private bool loading = true;
 
         public Form1(World world)
         {
             InitializeComponent();
 
-            this.worldPanel = new WorldPanel(world);
-            this.worldPanel.Left = 0;
-            this.worldPanel.Top = 0;
-            this.worldPanel.DoubleClick += this.WorldPanel_DoubleClick;
-            this.UpdatePanelSize();
-
-            this.Controls.Add(this.worldPanel);
+            this.worldPanel.World = world;
 
             this.loading = false;
         }
@@ -38,17 +31,14 @@ namespace ei8.Prototypes.HelloWorm
             //);
             //worm.Collide(new CollisionInfo(new Odor(), worm.Components.OfType<Nose>().Single().Components.OfType<Sector>().First(), 1));
 
-            var f = this.worldPanel.World.Components.OfType<Food>().FirstOrDefault();
-            if (f != null)
-                this.worldPanel.World.Remove(f);
-            else
-                this.worldPanel.World.Add(new Food().Create(this.worldPanel.World.Size));
-        }
-
-        private void UpdatePanelSize()
-        {
-            this.worldPanel.Height = this.Height;
-            this.worldPanel.Width = this.Width;
+            if (this.worldPanel.World != null)
+            {
+                var f = this.worldPanel.World.Components.OfType<Food>().FirstOrDefault();
+                if (f != null)
+                    this.worldPanel.World.Remove(f);
+                else
+                    this.worldPanel.World.Add(new Food().Create(this.worldPanel.World.Size));
+            }
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -58,13 +48,22 @@ namespace ei8.Prototypes.HelloWorm
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            this.worldPanel.InvalidateRectangularComposite(this.worldPanel.World);
-            // TODO: this.worldPanel.Invalidate();
+            if (this.worldPanel.World != null)
+                this.worldPanel.InvalidateRectangularComposite(this.worldPanel.World);
         }
 
-        private void Form1_ResizeEnd(object sender, EventArgs e)
+        private void mnuWormInitialize_Click(object sender, EventArgs e)
         {
-            this.UpdatePanelSize();
+            string avatarUrl = Form1.ShowDialog(this, "Avatar URL");
+        }
+
+        public static string ShowDialog(IWin32Window? owner, string caption)
+        {
+            using (InputBox prompt = new InputBox() { Text = caption, StartPosition = FormStartPosition.CenterScreen })
+            {
+                // ... add controls and configure ...
+                return prompt.ShowDialog(owner) == DialogResult.OK ? prompt.txtInput.Text : "";
+            }
         }
     }
 }
