@@ -1,6 +1,6 @@
 ﻿using ei8.Cortex.Coding.Mirrors;
 
-namespace HelloWorm
+namespace ei8.Prototypes.HelloWorm
 {
     public class Settings
     {

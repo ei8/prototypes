@@ -1,6 +1,6 @@
 ﻿namespace ei8.Prototypes.HelloWorm
 {
-    internal class MovingEventArgs : EventArgs
+    public class MovingEventArgs : EventArgs
     {
         public CollisionInfo? CollisionInfo { get; set; }
 

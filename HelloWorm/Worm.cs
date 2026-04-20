@@ -8,7 +8,7 @@ using Timer = System.Threading.Timer;
 
 namespace ei8.Prototypes.HelloWorm
 {
-    internal class Worm : IMovable, IRectangularComposite, IElliptical, IPerishable, IRegenerative, INeurULized
+    public class Worm : IMovable, IRectangularComposite, IElliptical, IPerishable, IRegenerative, INeurULized
     {
         public enum RotationDirection
         {
@@ -284,6 +284,11 @@ namespace ei8.Prototypes.HelloWorm
                     };
                 }
             }
+        }
+
+        public void Stop()
+        {
+            this.movementTriggerTimer.Change(Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
         }
 
         public ISpikeService? SpikeService => this.spikeService;

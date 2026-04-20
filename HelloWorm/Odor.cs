@@ -22,5 +22,10 @@ namespace ei8.Prototypes.HelloWorm
         public void Collide(CollisionInfo info) => this.Collided?.Invoke(this, new CollidedEventArgs(info.Target));
 
         public void OnMoving(MovingEventArgs e) => this.Moving?.Invoke(this, e);
+
+        public void Stop()
+        {
+            this.movementTriggerTimer.Change(Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
+        }
     }
 }

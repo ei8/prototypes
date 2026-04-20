@@ -5,7 +5,8 @@ namespace ei8.Prototypes.HelloWorm
 {
     public class World : IRectangularComposite
     {
-        // TODO: change to concurrentDictionary
+        public event EventHandler Added;
+
         private IImmutableList<IPhysical> components;
 
         public World()
@@ -13,6 +14,7 @@ namespace ei8.Prototypes.HelloWorm
             this.Location = Point.Empty;
             this.Size = Size.Empty;
             this.components = ImmutableList<IPhysical>.Empty;
+            this.Regenerate = true;
         }
 
         public void Add(IPhysical @object)
@@ -32,14 +34,11 @@ namespace ei8.Prototypes.HelloWorm
 
             if (@object is IEmitter emitter)
                 emitter.Emitted += this.Emitter_Emitted;
+
+            this.Added?.Invoke(this, EventArgs.Empty);
         }
 
         public void Remove(IPhysical @object)
-        {
-            this.RemoveCore(@object);
-        }
-
-        private void RemoveCore(IPhysical @object)
         {
             if (this.components.Contains(@object))
             {
@@ -52,7 +51,7 @@ namespace ei8.Prototypes.HelloWorm
                 }
             }
 
-            if (@object is IRegenerative regenerative)
+            if (@object is IRegenerative regenerative && this.Regenerate)
             {
                 var regen = regenerative.Create(this.Size);
                 this.Add(regen);
@@ -76,6 +75,7 @@ namespace ei8.Prototypes.HelloWorm
                 e.Target is World
             )
             {
+                odor.Stop();
                 this.Remove(odor);
             }
             else if (
@@ -158,5 +158,6 @@ namespace ei8.Prototypes.HelloWorm
         public Point Location { get; set; }
         public Size Size { get; set; }
         public IEnumerable<IPhysical> Components { get => this.components; set => throw new NotSupportedException(); }
+        public bool Regenerate { get; set; }
     }
 }
