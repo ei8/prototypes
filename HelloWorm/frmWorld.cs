@@ -39,7 +39,7 @@ namespace ei8.Prototypes.HelloWorm
 
         private void UpdateCount()
         {
-            if (this.worldPanel.World != null)
+            if (this.worldPanel.World != null && !this.Disposing)
             {
                 this.Invoke(() => this.tlblCount.Text = "Object(s): " + this.worldPanel.World.Components.Count());
             }

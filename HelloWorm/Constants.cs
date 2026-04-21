@@ -8,8 +8,8 @@
         public const bool ShouldDrawDirection = false;
         public const bool ShouldDrawScore = true;
 
-        public const int MovementTriggerTimerPeriod = 100;
-        public const int EmissionTriggerTimerPeriod = 500;
+        public const int TriggerTimerPeriod = 100;
+        public const int EmissionInterval = 500;
         public const int CircleDegreesCount = 360;
 
         public struct Spiker

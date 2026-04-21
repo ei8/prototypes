@@ -10,8 +10,8 @@ namespace ei8.Prototypes.HelloWorm
         public event EventHandler Removed;
 
         private IImmutableList<IPhysical> components;
-        private readonly Timer movementTriggerTimer;
-        private readonly Timer emissionTriggerTimer;
+        private readonly Timer triggerTimer;
+        private DateTime lastEmission;
 
         private object IndexLock { get; } = new();
 
@@ -21,30 +21,34 @@ namespace ei8.Prototypes.HelloWorm
             this.Size = Size.Empty;
             this.components = ImmutableList<IPhysical>.Empty;
             this.Regenerate = true;
+            this.lastEmission = DateTime.MinValue;
 
-            this.movementTriggerTimer = new Timer(this.WrapMove, null, 0, Constants.MovementTriggerTimerPeriod);
-            this.emissionTriggerTimer = new Timer(this.Emit, this, 0, Constants.EmissionTriggerTimerPeriod);
+            this.triggerTimer = new Timer(this.Timer_Ticked, null, 0, Constants.TriggerTimerPeriod);
         }
 
-        private void Emit(object? state)
+        private void Timer_Ticked(object? state)
         {
-            foreach (var e in this.components.OfType<IEmitter>())
+            var emissionIntervalTimestamp = DateTime.Now.Subtract(new TimeSpan(0, 0, 0, 0, Constants.EmissionInterval));
+            bool emit = this.lastEmission < emissionIntervalTimestamp;
+            if (emit) this.lastEmission = DateTime.Now;
+
+            foreach (var ph in this.components.OfType<IPhysical>())
             {
-                if (e is IPerishable perishable)
+                if (ph is IPerishable perishable)
+                {
                     perishable.Life--;
+                    if (perishable.Life < 0)
+                        this.Remove(perishable);
+                }
 
-                e.Emit();
-            }
-        }
+                if (ph is IMovable m)
+                    m.Move(state);
 
-        private void WrapMove(object? state)
-        {
-            foreach (var m in this.components.OfType<IMovable>())
-            {
-                if (m is IPerishable perishable)
-                    perishable.Life--;
-
-                m.Move(state);
+                if (ph is IEmitter e && emit)
+                {
+                    this.lastEmission = DateTime.Now;
+                    e.Emit();
+                }
             }
         }
 
@@ -167,22 +171,12 @@ namespace ei8.Prototypes.HelloWorm
                 if (collisionSector != null)
                     e.CollisionInfo = collisionSector;
             }
-
-            if (sender is IPerishable perishable && perishable.Life < 0)
-            {
-                this.Remove(perishable);
-            }
         }
 
         private void Emitter_Emitted(object? sender, EmittedEventArgs e)
         {
             foreach (var em in e.Emission)
                 this.Add(em);
-
-            if (sender is IPerishable perishable && perishable.Life < 0)
-            {
-                this.Remove(perishable);
-            }
         }
 
         public Point Location { get; set; }
