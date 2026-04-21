@@ -4,7 +4,6 @@ using ei8.Cortex.Coding.Model.Reflection;
 using ei8.Prototypes.HelloWorm.Spiker;
 using neurUL.Common.Domain.Model;
 using System.Collections.Concurrent;
-using Timer = System.Threading.Timer;
 
 namespace ei8.Prototypes.HelloWorm
 {
@@ -36,7 +35,6 @@ namespace ei8.Prototypes.HelloWorm
             Sector8
         }
 
-        private readonly Timer movementTriggerTimer;
         private ISpikeService? spikeService;
         private Network? network;
         private ConcurrentDictionary<DateTime, NeuronFireInfo> neuronFireInfos;
@@ -66,7 +64,6 @@ namespace ei8.Prototypes.HelloWorm
             ];
             this.UpdateSize(Constants.Worm.MinWidth);
 
-            this.movementTriggerTimer = new Timer(this.WrapMove, null, 0, Constants.MovementTriggerTimerPeriod);
             this.neuronFireInfos = new ConcurrentDictionary<DateTime, NeuronFireInfo>();
             this.mirrorConfigs = null;
             this.directionValueDictionary = null;
@@ -192,12 +189,6 @@ namespace ei8.Prototypes.HelloWorm
             this.Components.OfType<Nose>().Single().Size = new Size(width, width);
         }
 
-        private void WrapMove(object? state)
-        {
-            this.Life--;
-            this.Move(state);
-        }
-
         public void Collide(CollisionInfo info)
         {
             if (info.Source is ISectoral sector)
@@ -284,11 +275,6 @@ namespace ei8.Prototypes.HelloWorm
                     };
                 }
             }
-        }
-
-        public void Stop()
-        {
-            this.movementTriggerTimer.Change(Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
         }
 
         public ISpikeService? SpikeService => this.spikeService;

@@ -5,7 +5,7 @@ using static ei8.Prototypes.HelloWorm.Constants;
 
 namespace ei8.Prototypes.HelloWorm
 {
-    partial class Form1
+    partial class frmWorld
     {
         /// <summary>
         ///  Required designer variable.
@@ -186,9 +186,9 @@ namespace ei8.Prototypes.HelloWorm
             Controls.Add(menuStrip1);
             Controls.Add(statusStrip1);
             MainMenuStrip = menuStrip1;
-            Name = "Form1";
+            Name = "frmWorld";
             Text = "Hello Worm";
-            Load += Form1_Load;
+            Load += frmWorld_Load;
             menuStrip1.ResumeLayout(false);
             menuStrip1.PerformLayout();
             statusStrip1.ResumeLayout(false);

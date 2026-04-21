@@ -8,8 +8,6 @@ namespace ei8.Prototypes.HelloWorm
 
         int Speed { get; set; }
 
-        void Stop();
-
         void OnMoving(MovingEventArgs e);
 
         event EventHandler<MovingEventArgs> Moving;

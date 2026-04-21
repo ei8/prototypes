@@ -1,13 +1,20 @@
 using ei8.Cortex.Coding;
 using ei8.Cortex.Coding.Mirrors;
 using ei8.Cortex.Coding.Model.Reflection;
+using ei8.Cortex.Diary.Nucleus.Client.In;
+using ei8.Cortex.Library.Common;
 using neurUL.Common.Domain.Model;
+using neurUL.Common.Http;
+using Neuron = ei8.Cortex.Coding.Neuron;
+using Terminal = ei8.Cortex.Coding.Terminal;
 
 namespace ei8.Prototypes.HelloWorm
 {
-    public partial class Form1 : Form
+    public partial class frmWorld : Form
     {
-        public Form1(World world)
+        private readonly Settings settings;
+
+        public frmWorld(World world)
         {
             InitializeComponent();
 
@@ -15,6 +22,14 @@ namespace ei8.Prototypes.HelloWorm
             this.mnuSettingsWorldRegenerate.Checked = this.worldPanel.World.Regenerate;
 
             this.worldPanel.World.Added += this.World_Added;
+            this.worldPanel.World.Removed += this.World_Removed;
+
+            this.settings = System.Text.Json.JsonSerializer.Deserialize<Settings>(File.ReadAllText("customSettings.json"))!;
+        }
+
+        private void World_Removed(object? sender, EventArgs e)
+        {
+            this.UpdateCount();
         }
 
         private void World_Added(object? sender, EventArgs e)
@@ -25,24 +40,13 @@ namespace ei8.Prototypes.HelloWorm
         private void UpdateCount()
         {
             if (this.worldPanel.World != null)
-                this.tlblCount.Text = "Object(s): " + this.worldPanel.World.Components.Count();
+            {
+                this.Invoke(() => this.tlblCount.Text = "Object(s): " + this.worldPanel.World.Components.Count());
+            }
         }
 
         private void WorldPanel_DoubleClick(object? sender, EventArgs e)
         {
-            //var worm = this.worldPanel.World.Components.OfType<Worm>().Single();
-            //if (
-            //    worm.Network!.TryGetByMirrorUrl(worm.MirrorConfigs!.Single(mc => mc.Keys.Contains(Worm.SectorValues.Sector1.ToEnumKeyString())).Url, out Neuron? sectorNeuron) &&
-            //    worm.Network!.TryGetByMirrorUrl(worm.MirrorConfigs!.Single(mc => mc.Keys.Contains(typeof(Odor).ToKeyString())).Url, out Neuron? odorNeuron)
-            //)
-            //worm.SpikeService!.Spike(
-            //    [
-            //        sectorNeuron.Id,
-            //        odorNeuron.Id
-            //    ]
-            //);
-            //worm.Collide(new CollisionInfo(new Odor(), worm.Components.OfType<Nose>().Single().Components.OfType<Sector>().First(), 1));
-
             if (this.worldPanel.World != null)
             {
                 var f = this.worldPanel.World.Components.OfType<Food>().FirstOrDefault();
@@ -53,7 +57,7 @@ namespace ei8.Prototypes.HelloWorm
             }
         }
 
-        private void Form1_Load(object sender, EventArgs e)
+        private void frmWorld_Load(object sender, EventArgs e)
         {
             this.worldPanel.Invalidate();
         }
@@ -79,11 +83,42 @@ namespace ei8.Prototypes.HelloWorm
                 this.worldPanel.World.Regenerate = this.mnuSettingsWorldRegenerate.Checked;
         }
 
-        private void mnuObjectsCreateWorm_Click(object sender, EventArgs e)
+        private async void mnuObjectsCreateWorm_Click(object sender, EventArgs e)
         {
-            string avatarUrl = Form1.ShowDialog(this, "Avatar URL");
+            string avatarUrl = InputBox.ShowDialog(this, "Avatar URL", "http://fibona.cc/worm1/av8r/");
 
-            var settings = System.Text.Json.JsonSerializer.Deserialize<Settings>(File.ReadAllText("customSettings.json"));
+            if (
+                this.worldPanel.World != null &&
+                settings.Mirrors != null &&
+                !string.IsNullOrEmpty(avatarUrl)
+            ) {
+                var rp = new RequestProvider();
+                rp.SetHttpClientHandler(new HttpClientHandler());
+                var client = new ei8.Cortex.Library.Client.Out.HttpNeuronQueryClient(rp);
+                var queryResult = await client.GetNeurons(
+                    avatarUrl,
+                    new NeuronQuery()
+                    {
+                        SortOrder = SortOrderValue.Descending,
+                        SortBy = SortByValue.NeuronCreationTimestamp,
+                        PageSize = 29,
+                        Depth = 5,
+                        DirectionValues = DirectionValues.Outbound
+                    },
+                    "Guest"
+                );
+               
+                var worm = (Worm)new Worm().Create(this.worldPanel.World.Size);
+                worm.Initialize(queryResult.ToNetwork(), settings.Mirrors);
+                this.worldPanel.World.Add(worm);
+            }
+        }
+
+        private async void mnuToolsInitializeAvatar_Click(object sender, EventArgs e)
+        {
+            string avatarUrl = InputBox.ShowDialog(this, "Avatar URL", "http://fibona.cc/worm1/av8r/");
+
+            var settings = System.Text.Json.JsonSerializer.Deserialize<Settings>(System.IO.File.ReadAllText("customSettings.json"));
             AssertionConcern.AssertStateTrue(settings != null && settings.Mirrors != null, "Mirror Configs required.");
 
             if (
@@ -210,25 +245,33 @@ namespace ei8.Prototypes.HelloWorm
                     worldSector8Neuron
                 );
 
-                var worm = (Worm)new Worm().Create(this.worldPanel.World.Size);
-                worm.Initialize(ns, settings.Mirrors);
-                this.worldPanel.World.Add(worm);
-            }
-        }
+                // Create neurons
+                var rp = new RequestProvider();
+                rp.SetHttpClientHandler(new HttpClientHandler());
+                var neuronClient = new HttpNeuronClient(rp);
 
-        private void mnuToolsInitializeAvatar_Click(object sender, EventArgs e)
-        {
-            string avatarUrl = Form1.ShowDialog(this, "Avatar URL");
+                foreach(var n in ns.GetItems<Neuron>())
+                    await neuronClient.CreateNeuron(
+                        avatarUrl,
+                        n.Id.ToString(),
+                        n.Tag,
+                        null,
+                        n.MirrorUrl,
+                        "bearerToken"
+                    );
 
-
-        }
-
-        public static string ShowDialog(IWin32Window? owner, string caption)
-        {
-            using (InputBox prompt = new InputBox() { Text = caption, StartPosition = FormStartPosition.CenterScreen })
-            {
-                // ... add controls and configure ...
-                return prompt.ShowDialog(owner) == DialogResult.OK ? prompt.txtInput.Text : "";
+                var terminalClient = new HttpTerminalClient(rp);
+                foreach(var t in ns.GetItems<Terminal>())
+                    await terminalClient.CreateTerminal(
+                        avatarUrl,
+                        t.Id.ToString(),
+                        t.PresynapticNeuronId.ToString(),
+                        t.PostsynapticNeuronId.ToString(),
+                        Enum.Parse<neurUL.Cortex.Common.NeurotransmitterEffect>(t.Effect.ToString()),
+                        t.Strength,
+                        null,
+                        "bearerToken"
+                    );
             }
         }
     }

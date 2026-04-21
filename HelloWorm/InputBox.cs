@@ -6,5 +6,15 @@
         {
             InitializeComponent();
         }
+
+        public static string ShowDialog(IWin32Window? owner, string caption, string @default)
+        {
+            using (InputBox prompt = new InputBox() { Text = caption, StartPosition = FormStartPosition.CenterScreen })
+            {
+                prompt.txtInput.Text = @default;
+                // ... add controls and configure
+                return prompt.ShowDialog(owner) == DialogResult.OK ? prompt.txtInput.Text : "";
+            }
+        }
     }
 }

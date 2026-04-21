@@ -1,30 +1,59 @@
 ﻿using neurUL.Common.Domain.Model;
 using System.Collections.Immutable;
+using Timer = System.Threading.Timer;
 
 namespace ei8.Prototypes.HelloWorm
 {
     public class World : IRectangularComposite
     {
         public event EventHandler Added;
+        public event EventHandler Removed;
 
         private IImmutableList<IPhysical> components;
+        private readonly Timer movementTriggerTimer;
+        private readonly Timer emissionTriggerTimer;
+
+        private object IndexLock { get; } = new();
 
         public World()
         {
-            this.Location = Point.Empty;
+            this.Location = new Point(0, 0);
             this.Size = Size.Empty;
             this.components = ImmutableList<IPhysical>.Empty;
             this.Regenerate = true;
+
+            this.movementTriggerTimer = new Timer(this.WrapMove, null, 0, Constants.MovementTriggerTimerPeriod);
+            this.emissionTriggerTimer = new Timer(this.Emit, this, 0, Constants.EmissionTriggerTimerPeriod);
+        }
+
+        private void Emit(object? state)
+        {
+            foreach (var e in this.components.OfType<IEmitter>())
+            {
+                if (e is IPerishable perishable)
+                    perishable.Life--;
+
+                e.Emit();
+            }
+        }
+
+        private void WrapMove(object? state)
+        {
+            foreach (var m in this.components.OfType<IMovable>())
+            {
+                if (m is IPerishable perishable)
+                    perishable.Life--;
+
+                m.Move(state);
+            }
         }
 
         public void Add(IPhysical @object)
         {
-            this.AddCore(@object);
-        }
-
-        private void AddCore(IPhysical @object)
-        {
-            this.components = this.components.Add(@object);
+            lock (this.IndexLock)
+            {
+                this.components = this.components.Add(@object);
+            }
 
             if (@object is IMovable movable)
             {
@@ -40,15 +69,18 @@ namespace ei8.Prototypes.HelloWorm
 
         public void Remove(IPhysical @object)
         {
-            if (this.components.Contains(@object))
+            lock (this.IndexLock)
             {
-                this.components = this.components.Remove(@object);
-
-                if (@object is IMovable movable)
+                if (this.components.Contains(@object))
                 {
-                    movable.Moving -= this.Movable_Moving;
-                    movable.Collided -= this.Movable_Collided;
+                    this.components = this.components.Remove(@object);
                 }
+            }
+
+            if (@object is IMovable movable)
+            {
+                movable.Moving -= this.Movable_Moving;
+                movable.Collided -= this.Movable_Collided;
             }
 
             if (@object is IRegenerative regenerative && this.Regenerate)
@@ -66,16 +98,14 @@ namespace ei8.Prototypes.HelloWorm
 
             if (@object is IEmitter emitter)
                 emitter.Emitted -= this.Emitter_Emitted;
+
+            this.Removed?.Invoke(this, EventArgs.Empty);
         }
 
         private void Movable_Collided(object? sender, CollidedEventArgs e)
         {
-            if (
-                sender is Odor odor &&
-                e.Target is World
-            )
+            if (sender is Odor odor && e.Target is World)
             {
-                odor.Stop();
                 this.Remove(odor);
             }
             else if (
