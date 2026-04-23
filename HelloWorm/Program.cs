@@ -28,6 +28,7 @@ namespace ei8.Prototypes.HelloWorm
                     services.AddSingleton<ISelectionService, SelectionService>();
                     services.AddTransient<frmMain>();
                     services.AddTransient<frmWorld>();
+                    services.AddSingleton<frmToolbox>();
                     services.AddSingleton<frmProperties>();
                 });
         }

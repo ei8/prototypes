@@ -19,7 +19,7 @@ namespace ei8.Prototypes.HelloWorm
 
             this.settings = System.Text.Json.JsonSerializer.Deserialize<Settings>(File.ReadAllText("customSettings.json"))!;
 
-            this.dockPanel1.Theme = new VS2015DarkTheme();
+            this.dockPanel1.Theme = new VS2015LightTheme();
             this.dockPanel1.ActiveContentChanged += this.DockPanel1_ActiveContentChanged;
             this.serviceProvider = serviceProvider;
             this.selectionService = selectionService;
@@ -28,6 +28,9 @@ namespace ei8.Prototypes.HelloWorm
 
             var fp = this.serviceProvider.GetRequiredService<frmProperties>();
             fp.Show(this.dockPanel1, DockState.DockRight);
+
+            var tb = this.serviceProvider.GetRequiredService<frmToolbox>();
+            tb.Show(this.dockPanel1, DockState.DockLeft);
         }
 
         private void DockPanel1_ActiveContentChanged(object? sender, EventArgs e)
@@ -43,6 +46,27 @@ namespace ei8.Prototypes.HelloWorm
                 w.Added += this.World_Added;
                 w.Removed += this.World_Removed;
             }
+
+            if (this.selectionService.PrimarySelection is ITemporal t)
+            {
+                t.IsPlayingChanged += this.T_IsPlayingChanged;
+            }
+            this.UpdateTemporalToolbar();
+        }
+
+        private void UpdateTemporalToolbar()
+        {
+            if (this.selectionService.PrimarySelection is ITemporal t)
+            {
+                this.tsbTemporalPlay.Enabled = !t.IsPlaying;
+                this.tsbTemporalPause.Enabled = t.IsPlaying;
+            }
+            else
+            {
+                this.tsbTemporalPlay.Enabled = 
+                    this.tsbTemporalPause.Enabled = 
+                    false;
+            }
         }
 
         private void SelectionService_SelectionChanging(object? sender, EventArgs e)
@@ -52,6 +76,16 @@ namespace ei8.Prototypes.HelloWorm
                 w.Added -= this.World_Added;
                 w.Removed -= this.World_Removed;
             }
+
+            if (this.selectionService.PrimarySelection is ITemporal t)
+            {
+                t.IsPlayingChanged -= this.T_IsPlayingChanged;
+            }
+        }
+
+        private void T_IsPlayingChanged(object? sender, EventArgs e)
+        {
+            this.UpdateTemporalToolbar();
         }
 
         private void UpdateObjectCount(World? world)
@@ -60,9 +94,9 @@ namespace ei8.Prototypes.HelloWorm
                 this.Invoke(() => this.tslblCount.Text = $"Object(s): {w.Components.Count()}");
         }
 
-        private void World_Removed(object? sender, EventArgs e) => this.UpdateObjectCount((World?) sender);
+        private void World_Removed(object? sender, EventArgs e) => this.UpdateObjectCount((World?)sender);
 
-        private void World_Added(object? sender, EventArgs e) => this.UpdateObjectCount((World?) sender);
+        private void World_Added(object? sender, EventArgs e) => this.UpdateObjectCount((World?)sender);
 
         private void mnuFileOpenAvatar_Click(object sender, EventArgs e)
         {
@@ -114,6 +148,18 @@ namespace ei8.Prototypes.HelloWorm
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
             this.Close();
+        }
+
+        private void tsbTemporalPlay_Click(object sender, EventArgs e)
+        {
+            if (this.selectionService.PrimarySelection is ITemporal t)
+                t.Play();
+        }
+
+        private void tsbTemporalPause_Click(object sender, EventArgs e)
+        {
+            if (this.selectionService.PrimarySelection is ITemporal t)
+                t.Pause();
         }
     }
 }

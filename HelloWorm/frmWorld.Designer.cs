@@ -60,7 +60,7 @@ namespace ei8.Prototypes.HelloWorm
             ClientSize = new Size(800, 450);
             Controls.Add(worldPanel);
             Name = "frmWorld";
-            Text = "Hello Worm";
+            Text = "Dish";
             Load += frmWorld_Load;
             ResumeLayout(false);
         }

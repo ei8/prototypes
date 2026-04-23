@@ -28,8 +28,11 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmMain));
             dockPanel1 = new WeifenLuo.WinFormsUI.Docking.DockPanel();
             statusStrip1 = new StatusStrip();
+            tslblStatus = new ToolStripStatusLabel();
+            tslblCount = new ToolStripStatusLabel();
             toolStripContainer1 = new ToolStripContainer();
             menuStrip1 = new MenuStrip();
             toolStripMenuItem3 = new ToolStripMenuItem();
@@ -46,13 +49,15 @@
             mnuToolsInitializeAvatar = new ToolStripMenuItem();
             helpToolStripMenuItem = new ToolStripMenuItem();
             aboutHelloWormToolStripMenuItem = new ToolStripMenuItem();
-            tslblStatus = new ToolStripStatusLabel();
-            tslblCount = new ToolStripStatusLabel();
+            tsTemporal = new ToolStrip();
+            tsbTemporalPlay = new ToolStripButton();
+            tsbTemporalPause = new ToolStripButton();
             statusStrip1.SuspendLayout();
             toolStripContainer1.ContentPanel.SuspendLayout();
             toolStripContainer1.TopToolStripPanel.SuspendLayout();
             toolStripContainer1.SuspendLayout();
             menuStrip1.SuspendLayout();
+            tsTemporal.SuspendLayout();
             SuspendLayout();
             // 
             // dockPanel1
@@ -60,7 +65,7 @@
             dockPanel1.Dock = DockStyle.Fill;
             dockPanel1.Location = new Point(0, 0);
             dockPanel1.Name = "dockPanel1";
-            dockPanel1.Size = new Size(800, 404);
+            dockPanel1.Size = new Size(800, 379);
             dockPanel1.TabIndex = 7;
             // 
             // statusStrip1
@@ -72,13 +77,24 @@
             statusStrip1.TabIndex = 9;
             statusStrip1.Text = "statusStrip1";
             // 
+            // tslblStatus
+            // 
+            tslblStatus.Name = "tslblStatus";
+            tslblStatus.Size = new Size(785, 17);
+            tslblStatus.Spring = true;
+            // 
+            // tslblCount
+            // 
+            tslblCount.Name = "tslblCount";
+            tslblCount.Size = new Size(0, 17);
+            // 
             // toolStripContainer1
             // 
             // 
             // toolStripContainer1.ContentPanel
             // 
             toolStripContainer1.ContentPanel.Controls.Add(dockPanel1);
-            toolStripContainer1.ContentPanel.Size = new Size(800, 404);
+            toolStripContainer1.ContentPanel.Size = new Size(800, 379);
             toolStripContainer1.Dock = DockStyle.Fill;
             toolStripContainer1.Location = new Point(0, 0);
             toolStripContainer1.Name = "toolStripContainer1";
@@ -89,6 +105,7 @@
             // toolStripContainer1.TopToolStripPanel
             // 
             toolStripContainer1.TopToolStripPanel.Controls.Add(menuStrip1);
+            toolStripContainer1.TopToolStripPanel.Controls.Add(tsTemporal);
             // 
             // menuStrip1
             // 
@@ -110,19 +127,19 @@
             // mnuFileOpenAvatar
             // 
             mnuFileOpenAvatar.Name = "mnuFileOpenAvatar";
-            mnuFileOpenAvatar.Size = new Size(149, 22);
-            mnuFileOpenAvatar.Text = "Open Avatar...";
+            mnuFileOpenAvatar.Size = new Size(122, 22);
+            mnuFileOpenAvatar.Text = "Add &Dish";
             mnuFileOpenAvatar.Click += mnuFileOpenAvatar_Click;
             // 
             // toolStripMenuItem5
             // 
             toolStripMenuItem5.Name = "toolStripMenuItem5";
-            toolStripMenuItem5.Size = new Size(146, 6);
+            toolStripMenuItem5.Size = new Size(119, 6);
             // 
             // exitToolStripMenuItem
             // 
             exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            exitToolStripMenuItem.Size = new Size(149, 22);
+            exitToolStripMenuItem.Size = new Size(122, 22);
             exitToolStripMenuItem.Text = "E&xit";
             exitToolStripMenuItem.Click += exitToolStripMenuItem_Click;
             // 
@@ -136,32 +153,32 @@
             // 
             mnuWorld.DropDownItems.AddRange(new ToolStripItem[] { mnuObjectsCreateFood, mnuObjectsCreateWorm, toolStripMenuItem4, prropertiesToolStripMenuItem });
             mnuWorld.Name = "mnuWorld";
-            mnuWorld.Size = new Size(51, 20);
-            mnuWorld.Text = "&World";
+            mnuWorld.Size = new Size(42, 20);
+            mnuWorld.Text = "&Dish";
             // 
             // mnuObjectsCreateFood
             // 
             mnuObjectsCreateFood.Name = "mnuObjectsCreateFood";
-            mnuObjectsCreateFood.Size = new Size(180, 22);
+            mnuObjectsCreateFood.Size = new Size(141, 22);
             mnuObjectsCreateFood.Text = "Add &Food";
             mnuObjectsCreateFood.Click += mnuObjectsCreateFood_Click;
             // 
             // mnuObjectsCreateWorm
             // 
             mnuObjectsCreateWorm.Name = "mnuObjectsCreateWorm";
-            mnuObjectsCreateWorm.Size = new Size(180, 22);
+            mnuObjectsCreateWorm.Size = new Size(141, 22);
             mnuObjectsCreateWorm.Text = "Add &Worm...";
             mnuObjectsCreateWorm.Click += mnuObjectsCreateWorm_Click;
             // 
             // toolStripMenuItem4
             // 
             toolStripMenuItem4.Name = "toolStripMenuItem4";
-            toolStripMenuItem4.Size = new Size(177, 6);
+            toolStripMenuItem4.Size = new Size(138, 6);
             // 
             // prropertiesToolStripMenuItem
             // 
             prropertiesToolStripMenuItem.Name = "prropertiesToolStripMenuItem";
-            prropertiesToolStripMenuItem.Size = new Size(180, 22);
+            prropertiesToolStripMenuItem.Size = new Size(141, 22);
             prropertiesToolStripMenuItem.Text = "Prroperties";
             // 
             // toolStripMenuItem1
@@ -190,16 +207,34 @@
             aboutHelloWormToolStripMenuItem.Size = new Size(174, 22);
             aboutHelloWormToolStripMenuItem.Text = "&About Hello Worm";
             // 
-            // tslblStatus
+            // tsTemporal
             // 
-            tslblStatus.Name = "tslblStatus";
-            tslblStatus.Size = new Size(785, 17);
-            tslblStatus.Spring = true;
+            tsTemporal.Dock = DockStyle.None;
+            tsTemporal.Items.AddRange(new ToolStripItem[] { tsbTemporalPlay, tsbTemporalPause });
+            tsTemporal.Location = new Point(3, 24);
+            tsTemporal.Name = "tsTemporal";
+            tsTemporal.Size = new Size(58, 25);
+            tsTemporal.TabIndex = 7;
             // 
-            // tslblCount
+            // tsbTemporalPlay
             // 
-            tslblCount.Name = "tslblCount";
-            tslblCount.Size = new Size(0, 17);
+            tsbTemporalPlay.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            tsbTemporalPlay.Image = (Image)resources.GetObject("tsbTemporalPlay.Image");
+            tsbTemporalPlay.ImageTransparentColor = Color.Magenta;
+            tsbTemporalPlay.Name = "tsbTemporalPlay";
+            tsbTemporalPlay.Size = new Size(23, 22);
+            tsbTemporalPlay.Text = "Play";
+            tsbTemporalPlay.Click += tsbTemporalPlay_Click;
+            // 
+            // tsbTemporalPause
+            // 
+            tsbTemporalPause.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            tsbTemporalPause.Image = (Image)resources.GetObject("tsbTemporalPause.Image");
+            tsbTemporalPause.ImageTransparentColor = Color.Magenta;
+            tsbTemporalPause.Name = "tsbTemporalPause";
+            tsbTemporalPause.Size = new Size(23, 22);
+            tsbTemporalPause.Text = "toolStripButton1";
+            tsbTemporalPause.Click += tsbTemporalPause_Click;
             // 
             // frmMain
             // 
@@ -220,6 +255,8 @@
             toolStripContainer1.PerformLayout();
             menuStrip1.ResumeLayout(false);
             menuStrip1.PerformLayout();
+            tsTemporal.ResumeLayout(false);
+            tsTemporal.PerformLayout();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -245,5 +282,8 @@
         private ToolStripMenuItem exitToolStripMenuItem;
         private ToolStripStatusLabel tslblStatus;
         private ToolStripStatusLabel tslblCount;
+        private ToolStrip tsTemporal;
+        private ToolStripButton tsbTemporalPlay;
+        private ToolStripButton tsbTemporalPause;
     }
 }

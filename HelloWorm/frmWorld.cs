@@ -44,6 +44,7 @@ namespace ei8.Prototypes.HelloWorm
                 this.worldPanel.InvalidateRectangularComposite(this.worldPanel.World);
         }
 
+        // TODO: transfer
         private async void mnuToolsInitializeAvatar_Click(object sender, EventArgs e)
         {
             string avatarUrl = InputBox.ShowDialog(this, "Avatar URL", "http://fibona.cc/worm1/av8r/");

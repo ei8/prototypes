@@ -4,14 +4,17 @@ using Timer = System.Threading.Timer;
 
 namespace ei8.Prototypes.HelloWorm
 {
-    public class World : IRectangularComposite
+    public class World : IRectangularComposite, ITemporal
     {
         public event EventHandler Added;
         public event EventHandler Removed;
+        public event EventHandler IsPlayingChanged;
 
         private IImmutableList<IPhysical> components;
-        private readonly Timer triggerTimer;
         private DateTime lastEmission;
+
+        private readonly Timer triggerTimer;
+        private bool isPlaying;
 
         private object IndexLock { get; } = new();
 
@@ -23,7 +26,8 @@ namespace ei8.Prototypes.HelloWorm
             this.Regenerate = true;
             this.lastEmission = DateTime.MinValue;
 
-            this.triggerTimer = new Timer(this.Timer_Ticked, null, 0, Constants.TriggerTimerPeriod);
+            this.triggerTimer = new Timer(this.Timer_Ticked, null, Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
+            this.isPlaying = false;
         }
 
         private void Timer_Ticked(object? state)
@@ -179,9 +183,33 @@ namespace ei8.Prototypes.HelloWorm
                 this.Add(em);
         }
 
+        public void Play()
+        {
+            this.triggerTimer.Change(0, Constants.TriggerTimerPeriod);
+            this.IsPlaying = true;
+        }
+
+        public void Pause()
+        {
+            this.triggerTimer.Change(Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
+            this.IsPlaying = false;
+        }
+
         public Point Location { get; set; }
         public Size Size { get; set; }
         public IEnumerable<IPhysical> Components { get => this.components; set => throw new NotSupportedException(); }
         public bool Regenerate { get; set; }
+        public bool IsPlaying 
+        {
+            get => this.isPlaying;
+            set
+            {
+                if (this.isPlaying != value)
+                {
+                    this.isPlaying = value;
+                    this.IsPlayingChanged?.Invoke(this, EventArgs.Empty);
+                }
+            }
+        }
     }
 }
