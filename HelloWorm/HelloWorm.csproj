@@ -6,13 +6,18 @@
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>ei8.Prototypes.HelloWorm</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="DockPanelSuite" Version="3.1.1" />
+    <PackageReference Include="DockPanelSuite.ThemeVS2015" Version="3.1.1" />
     <PackageReference Include="ei8.Cortex.Coding" Version="0.3.4" />
     <PackageReference Include="ei8.Cortex.Coding.Persistence" Version="0.3.8" />
     <PackageReference Include="ei8.Cortex.Diary.Nucleus.Client" Version="0.2.9" />
     <PackageReference Include="ei8.Cortex.Library.Client" Version="0.4.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.7" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.7" />
   </ItemGroup>
 
   <ItemGroup>

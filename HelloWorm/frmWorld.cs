@@ -2,48 +2,24 @@ using ei8.Cortex.Coding;
 using ei8.Cortex.Coding.Mirrors;
 using ei8.Cortex.Coding.Model.Reflection;
 using ei8.Cortex.Diary.Nucleus.Client.In;
-using ei8.Cortex.Library.Common;
 using neurUL.Common.Domain.Model;
 using neurUL.Common.Http;
+using WeifenLuo.WinFormsUI.Docking;
 using Neuron = ei8.Cortex.Coding.Neuron;
 using Terminal = ei8.Cortex.Coding.Terminal;
 
 namespace ei8.Prototypes.HelloWorm
 {
-    public partial class frmWorld : Form
+    public partial class frmWorld : DockContent
     {
-        private readonly Settings settings;
-
-        public frmWorld(World world)
+        public frmWorld()
         {
             InitializeComponent();
 
-            this.worldPanel.World = world;
-            this.mnuSettingsWorldRegenerate.Checked = this.worldPanel.World.Regenerate;
-
-            this.worldPanel.World.Added += this.World_Added;
-            this.worldPanel.World.Removed += this.World_Removed;
-
-            this.settings = System.Text.Json.JsonSerializer.Deserialize<Settings>(File.ReadAllText("customSettings.json"))!;
+            this.worldPanel.World = new World();
         }
 
-        private void World_Removed(object? sender, EventArgs e)
-        {
-            this.UpdateCount();
-        }
-
-        private void World_Added(object? sender, EventArgs e)
-        {
-            this.UpdateCount();
-        }
-
-        private void UpdateCount()
-        {
-            if (this.worldPanel.World != null && !this.Disposing)
-            {
-                this.Invoke(() => this.tlblCount.Text = "Object(s): " + this.worldPanel.World.Components.Count());
-            }
-        }
+        public World World => this.worldPanel.World!;
 
         private void WorldPanel_DoubleClick(object? sender, EventArgs e)
         {
@@ -66,52 +42,6 @@ namespace ei8.Prototypes.HelloWorm
         {
             if (this.worldPanel.World != null)
                 this.worldPanel.InvalidateRectangularComposite(this.worldPanel.World);
-        }
-
-
-        private void mnuObjectsCreateFood_Click(object sender, EventArgs e)
-        {
-            if (this.worldPanel.World != null)
-                this.worldPanel.World.Add(new Food().Create(this.worldPanel.World.Size));
-        }
-
-        private void mnuSettingsWorldRegenerate_Click(object sender, EventArgs e)
-        {
-            this.mnuSettingsWorldRegenerate.Checked = !this.mnuSettingsWorldRegenerate.Checked;
-
-            if (this.worldPanel.World != null)
-                this.worldPanel.World.Regenerate = this.mnuSettingsWorldRegenerate.Checked;
-        }
-
-        private async void mnuObjectsCreateWorm_Click(object sender, EventArgs e)
-        {
-            string avatarUrl = InputBox.ShowDialog(this, "Avatar URL", "http://fibona.cc/worm1/av8r/");
-
-            if (
-                this.worldPanel.World != null &&
-                settings.Mirrors != null &&
-                !string.IsNullOrEmpty(avatarUrl)
-            ) {
-                var rp = new RequestProvider();
-                rp.SetHttpClientHandler(new HttpClientHandler());
-                var client = new ei8.Cortex.Library.Client.Out.HttpNeuronQueryClient(rp);
-                var queryResult = await client.GetNeurons(
-                    avatarUrl,
-                    new NeuronQuery()
-                    {
-                        SortOrder = SortOrderValue.Descending,
-                        SortBy = SortByValue.NeuronCreationTimestamp,
-                        PageSize = 29,
-                        Depth = 5,
-                        DirectionValues = DirectionValues.Outbound
-                    },
-                    "Guest"
-                );
-               
-                var worm = (Worm)new Worm().Create(this.worldPanel.World.Size);
-                worm.Initialize(queryResult.ToNetwork(), settings.Mirrors);
-                this.worldPanel.World.Add(worm);
-            }
         }
 
         private async void mnuToolsInitializeAvatar_Click(object sender, EventArgs e)

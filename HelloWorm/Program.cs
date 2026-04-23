@@ -1,3 +1,8 @@
+
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using System.ComponentModel.Design;
+
 namespace ei8.Prototypes.HelloWorm
 {
     internal static class Program
@@ -11,8 +16,20 @@ namespace ei8.Prototypes.HelloWorm
             // To customize application configuration such as set high DPI settings or default font,
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
+            var host = CreateHostBuilder().Build();
+            Application.Run(host.Services.GetRequiredService<frmMain>());
+        }
 
-            Application.Run(new frmWorld(new World()));
+        private static IHostBuilder CreateHostBuilder()
+        {
+            return Host.CreateDefaultBuilder()
+                .ConfigureServices((context, services) =>
+                {
+                    services.AddSingleton<ISelectionService, SelectionService>();
+                    services.AddTransient<frmMain>();
+                    services.AddTransient<frmWorld>();
+                    services.AddSingleton<frmProperties>();
+                });
         }
     }
 }
