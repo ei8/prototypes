@@ -36,15 +36,10 @@
             toolStripContainer1 = new ToolStripContainer();
             menuStrip1 = new MenuStrip();
             toolStripMenuItem3 = new ToolStripMenuItem();
-            mnuFileOpenAvatar = new ToolStripMenuItem();
-            toolStripMenuItem5 = new ToolStripSeparator();
             exitToolStripMenuItem = new ToolStripMenuItem();
             toolStripMenuItem2 = new ToolStripMenuItem();
-            mnuWorld = new ToolStripMenuItem();
-            mnuObjectsCreateFood = new ToolStripMenuItem();
-            mnuObjectsCreateWorm = new ToolStripMenuItem();
-            toolStripMenuItem4 = new ToolStripSeparator();
-            prropertiesToolStripMenuItem = new ToolStripMenuItem();
+            mnuProject = new ToolStripMenuItem();
+            mnuProjectSettings = new ToolStripMenuItem();
             toolStripMenuItem1 = new ToolStripMenuItem();
             mnuToolsInitializeAvatar = new ToolStripMenuItem();
             helpToolStripMenuItem = new ToolStripMenuItem();
@@ -52,6 +47,8 @@
             tsTemporal = new ToolStrip();
             tsbTemporalPlay = new ToolStripButton();
             tsbTemporalPause = new ToolStripButton();
+            mnuProjectAddDish = new ToolStripMenuItem();
+            toolStripSeparator1 = new ToolStripSeparator();
             statusStrip1.SuspendLayout();
             toolStripContainer1.ContentPanel.SuspendLayout();
             toolStripContainer1.TopToolStripPanel.SuspendLayout();
@@ -110,7 +107,7 @@
             // menuStrip1
             // 
             menuStrip1.Dock = DockStyle.None;
-            menuStrip1.Items.AddRange(new ToolStripItem[] { toolStripMenuItem3, toolStripMenuItem2, mnuWorld, toolStripMenuItem1, helpToolStripMenuItem });
+            menuStrip1.Items.AddRange(new ToolStripItem[] { toolStripMenuItem3, toolStripMenuItem2, mnuProject, toolStripMenuItem1, helpToolStripMenuItem });
             menuStrip1.Location = new Point(0, 0);
             menuStrip1.Name = "menuStrip1";
             menuStrip1.Size = new Size(800, 24);
@@ -119,27 +116,15 @@
             // 
             // toolStripMenuItem3
             // 
-            toolStripMenuItem3.DropDownItems.AddRange(new ToolStripItem[] { mnuFileOpenAvatar, toolStripMenuItem5, exitToolStripMenuItem });
+            toolStripMenuItem3.DropDownItems.AddRange(new ToolStripItem[] { exitToolStripMenuItem });
             toolStripMenuItem3.Name = "toolStripMenuItem3";
             toolStripMenuItem3.Size = new Size(37, 20);
             toolStripMenuItem3.Text = "&FIle";
             // 
-            // mnuFileOpenAvatar
-            // 
-            mnuFileOpenAvatar.Name = "mnuFileOpenAvatar";
-            mnuFileOpenAvatar.Size = new Size(122, 22);
-            mnuFileOpenAvatar.Text = "Add &Dish";
-            mnuFileOpenAvatar.Click += mnuFileOpenAvatar_Click;
-            // 
-            // toolStripMenuItem5
-            // 
-            toolStripMenuItem5.Name = "toolStripMenuItem5";
-            toolStripMenuItem5.Size = new Size(119, 6);
-            // 
             // exitToolStripMenuItem
             // 
             exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            exitToolStripMenuItem.Size = new Size(122, 22);
+            exitToolStripMenuItem.Size = new Size(93, 22);
             exitToolStripMenuItem.Text = "E&xit";
             exitToolStripMenuItem.Click += exitToolStripMenuItem_Click;
             // 
@@ -149,37 +134,19 @@
             toolStripMenuItem2.Size = new Size(44, 20);
             toolStripMenuItem2.Text = "&View";
             // 
-            // mnuWorld
+            // mnuProject
             // 
-            mnuWorld.DropDownItems.AddRange(new ToolStripItem[] { mnuObjectsCreateFood, mnuObjectsCreateWorm, toolStripMenuItem4, prropertiesToolStripMenuItem });
-            mnuWorld.Name = "mnuWorld";
-            mnuWorld.Size = new Size(42, 20);
-            mnuWorld.Text = "&Dish";
+            mnuProject.DropDownItems.AddRange(new ToolStripItem[] { mnuProjectAddDish, toolStripSeparator1, mnuProjectSettings });
+            mnuProject.Name = "mnuProject";
+            mnuProject.Size = new Size(56, 20);
+            mnuProject.Text = "&Project";
             // 
-            // mnuObjectsCreateFood
+            // mnuProjectSettings
             // 
-            mnuObjectsCreateFood.Name = "mnuObjectsCreateFood";
-            mnuObjectsCreateFood.Size = new Size(141, 22);
-            mnuObjectsCreateFood.Text = "Add &Food";
-            mnuObjectsCreateFood.Click += mnuObjectsCreateFood_Click;
-            // 
-            // mnuObjectsCreateWorm
-            // 
-            mnuObjectsCreateWorm.Name = "mnuObjectsCreateWorm";
-            mnuObjectsCreateWorm.Size = new Size(141, 22);
-            mnuObjectsCreateWorm.Text = "Add &Worm...";
-            mnuObjectsCreateWorm.Click += mnuObjectsCreateWorm_Click;
-            // 
-            // toolStripMenuItem4
-            // 
-            toolStripMenuItem4.Name = "toolStripMenuItem4";
-            toolStripMenuItem4.Size = new Size(138, 6);
-            // 
-            // prropertiesToolStripMenuItem
-            // 
-            prropertiesToolStripMenuItem.Name = "prropertiesToolStripMenuItem";
-            prropertiesToolStripMenuItem.Size = new Size(141, 22);
-            prropertiesToolStripMenuItem.Text = "Prroperties";
+            mnuProjectSettings.Name = "mnuProjectSettings";
+            mnuProjectSettings.Size = new Size(180, 22);
+            mnuProjectSettings.Text = "&Settings";
+            mnuProjectSettings.Click += mnuProjectSettings_Click;
             // 
             // toolStripMenuItem1
             // 
@@ -193,6 +160,7 @@
             mnuToolsInitializeAvatar.Name = "mnuToolsInitializeAvatar";
             mnuToolsInitializeAvatar.Size = new Size(163, 22);
             mnuToolsInitializeAvatar.Text = "&Initialize Avatar...";
+            mnuToolsInitializeAvatar.Click += mnuToolsInitializeAvatar_Click;
             // 
             // helpToolStripMenuItem
             // 
@@ -236,6 +204,18 @@
             tsbTemporalPause.Text = "toolStripButton1";
             tsbTemporalPause.Click += tsbTemporalPause_Click;
             // 
+            // mnuProjectAddDish
+            // 
+            mnuProjectAddDish.Name = "mnuProjectAddDish";
+            mnuProjectAddDish.Size = new Size(180, 22);
+            mnuProjectAddDish.Text = "Add &Dish";
+            mnuProjectAddDish.Click += mnuProjectAddDish_Click;
+            // 
+            // toolStripSeparator1
+            // 
+            toolStripSeparator1.Name = "toolStripSeparator1";
+            toolStripSeparator1.Size = new Size(177, 6);
+            // 
             // frmMain
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -246,6 +226,7 @@
             IsMdiContainer = true;
             Name = "frmMain";
             Text = "Hello Worm - ei8.io";
+            Load += frmMain_Load;
             statusStrip1.ResumeLayout(false);
             statusStrip1.PerformLayout();
             toolStripContainer1.ContentPanel.ResumeLayout(false);
@@ -267,23 +248,20 @@
         private ToolStripContainer toolStripContainer1;
         private MenuStrip menuStrip1;
         private ToolStripMenuItem toolStripMenuItem3;
-        private ToolStripMenuItem mnuFileOpenAvatar;
         private ToolStripMenuItem toolStripMenuItem2;
-        private ToolStripMenuItem mnuWorld;
-        private ToolStripMenuItem mnuObjectsCreateFood;
-        private ToolStripMenuItem mnuObjectsCreateWorm;
-        private ToolStripSeparator toolStripMenuItem4;
-        private ToolStripMenuItem prropertiesToolStripMenuItem;
         private ToolStripMenuItem toolStripMenuItem1;
         private ToolStripMenuItem mnuToolsInitializeAvatar;
         private ToolStripMenuItem helpToolStripMenuItem;
         private ToolStripMenuItem aboutHelloWormToolStripMenuItem;
-        private ToolStripSeparator toolStripMenuItem5;
         private ToolStripMenuItem exitToolStripMenuItem;
         private ToolStripStatusLabel tslblStatus;
         private ToolStripStatusLabel tslblCount;
         private ToolStrip tsTemporal;
         private ToolStripButton tsbTemporalPlay;
         private ToolStripButton tsbTemporalPause;
+        private ToolStripMenuItem mnuProject;
+        private ToolStripMenuItem mnuProjectSettings;
+        private ToolStripMenuItem mnuProjectAddDish;
+        private ToolStripSeparator toolStripSeparator1;
     }
 }

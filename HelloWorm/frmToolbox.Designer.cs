@@ -30,8 +30,9 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmToolbox));
             toolStrip1 = new ToolStrip();
-            toolStripButton1 = new ToolStripButton();
-            toolStripButton2 = new ToolStripButton();
+            tsbFood = new ToolStripButton();
+            tsbWorm = new ToolStripButton();
+            tslblNoUsableControls = new ToolStripLabel();
             toolStrip1.SuspendLayout();
             SuspendLayout();
             // 
@@ -39,30 +40,40 @@
             // 
             toolStrip1.Dock = DockStyle.Fill;
             toolStrip1.GripStyle = ToolStripGripStyle.Hidden;
-            toolStrip1.Items.AddRange(new ToolStripItem[] { toolStripButton1, toolStripButton2 });
+            toolStrip1.Items.AddRange(new ToolStripItem[] { tsbFood, tsbWorm, tslblNoUsableControls });
             toolStrip1.LayoutStyle = ToolStripLayoutStyle.VerticalStackWithOverflow;
             toolStrip1.Location = new Point(0, 0);
             toolStrip1.Name = "toolStrip1";
             toolStrip1.Size = new Size(800, 450);
             toolStrip1.TabIndex = 1;
             // 
-            // toolStripButton1
+            // tsbFood
             // 
-            toolStripButton1.Image = (Image)resources.GetObject("toolStripButton1.Image");
-            toolStripButton1.ImageAlign = ContentAlignment.MiddleLeft;
-            toolStripButton1.ImageTransparentColor = Color.Magenta;
-            toolStripButton1.Name = "toolStripButton1";
-            toolStripButton1.Size = new Size(798, 20);
-            toolStripButton1.Text = "Food";
+            tsbFood.DoubleClickEnabled = true;
+            tsbFood.Image = (Image)resources.GetObject("tsbFood.Image");
+            tsbFood.ImageAlign = ContentAlignment.MiddleLeft;
+            tsbFood.ImageTransparentColor = Color.Magenta;
+            tsbFood.Name = "tsbFood";
+            tsbFood.Size = new Size(798, 20);
+            tsbFood.Text = "Food";
+            tsbFood.DoubleClick += tsbFood_DoubleClick;
             // 
-            // toolStripButton2
+            // tsbWorm
             // 
-            toolStripButton2.Image = (Image)resources.GetObject("toolStripButton2.Image");
-            toolStripButton2.ImageAlign = ContentAlignment.MiddleLeft;
-            toolStripButton2.ImageTransparentColor = Color.Magenta;
-            toolStripButton2.Name = "toolStripButton2";
-            toolStripButton2.Size = new Size(798, 20);
-            toolStripButton2.Text = "Worm";
+            tsbWorm.DoubleClickEnabled = true;
+            tsbWorm.Image = (Image)resources.GetObject("tsbWorm.Image");
+            tsbWorm.ImageAlign = ContentAlignment.MiddleLeft;
+            tsbWorm.ImageTransparentColor = Color.Magenta;
+            tsbWorm.Name = "tsbWorm";
+            tsbWorm.Size = new Size(798, 20);
+            tsbWorm.Text = "Worm";
+            tsbWorm.DoubleClick += tsbWorm_DoubleClick;
+            // 
+            // tslblNoUsableControls
+            // 
+            tslblNoUsableControls.Name = "tslblNoUsableControls";
+            tslblNoUsableControls.Size = new Size(798, 15);
+            tslblNoUsableControls.Text = "No usable controls.";
             // 
             // frmToolbox
             // 
@@ -81,7 +92,8 @@
         #endregion
 
         private ToolStrip toolStrip1;
-        private ToolStripButton toolStripButton1;
-        private ToolStripButton toolStripButton2;
+        private ToolStripButton tsbFood;
+        private ToolStripButton tsbWorm;
+        private ToolStripLabel tslblNoUsableControls;
     }
 }

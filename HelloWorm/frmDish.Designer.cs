@@ -5,7 +5,7 @@ using static ei8.Prototypes.HelloWorm.Constants;
 
 namespace ei8.Prototypes.HelloWorm
 {
-    partial class frmWorld
+    partial class frmDish
     {
         /// <summary>
         ///  Required designer variable.
@@ -34,39 +34,38 @@ namespace ei8.Prototypes.HelloWorm
         private void InitializeComponent()
         {
             components = new System.ComponentModel.Container();
+            dishPanel = new DishPanel();
             timer1 = new System.Windows.Forms.Timer(components);
-            worldPanel = new WorldPanel();
             SuspendLayout();
+            // 
+            // dishPanel
+            // 
+            dishPanel.Dish = null;
+            dishPanel.Dock = DockStyle.Fill;
+            dishPanel.Location = new Point(0, 0);
+            dishPanel.Name = "dishPanel";
+            dishPanel.Size = new Size(800, 450);
+            dishPanel.TabIndex = 1;
+            dishPanel.DoubleClick += DishPanel_DoubleClick;
             // 
             // timer1
             // 
-            timer1.Enabled = true;
-            timer1.Tick += timer1_Tick;
+            timer1.Tick += Timer1_Tick;
             // 
-            // worldPanel
-            // 
-            worldPanel.Dock = DockStyle.Fill;
-            worldPanel.Location = new Point(0, 0);
-            worldPanel.Name = "worldPanel";
-            worldPanel.Size = new Size(800, 450);
-            worldPanel.TabIndex = 1;
-            worldPanel.World = null;
-            worldPanel.DoubleClick += WorldPanel_DoubleClick;
-            // 
-            // frmWorld
+            // frmDish
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
-            Controls.Add(worldPanel);
-            Name = "frmWorld";
+            Controls.Add(dishPanel);
+            Name = "frmDish";
             Text = "Dish";
-            Load += frmWorld_Load;
+            Load += frmDish_Load;
             ResumeLayout(false);
         }
 
         #endregion
-        private WorldPanel worldPanel;
+        private DishPanel dishPanel;
         private System.Windows.Forms.Timer timer1;
     }
 }

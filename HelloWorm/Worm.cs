@@ -221,11 +221,11 @@ namespace ei8.Prototypes.HelloWorm
         }
         public void OnMoving(MovingEventArgs e) => this.Moving?.Invoke(this, e);
 
-        public IPhysical Create(Size worldSize)
+        public IPhysical Create(Size dishSize)
         {
             var r = new Random();
             var size = Constants.Worm.MinWidth;
-            var center = worldSize / 2;
+            var center = dishSize / 2;
             return new Worm(r.Next(Constants.CircleDegreesCount), center.Width, center.Height, size);
         }
 
@@ -258,9 +258,9 @@ namespace ei8.Prototypes.HelloWorm
 
                 if (
                     this.mirrorConfigs.TryGetMirrorNeuron(
-                        typeof(World).ToKeyString(),
+                        typeof(Dish).ToKeyString(),
                         this.network,
-                        out Neuron? worldNeuron
+                        out Neuron? dishNeuron
                     ) &&
                     this.mirrorConfigs.TryGetMirrorNeuron(
                         typeof(Odor).ToKeyString(),
@@ -270,7 +270,7 @@ namespace ei8.Prototypes.HelloWorm
                 )
                 {
                     this.targetsValueDictionary = new Dictionary<string, Guid>{
-                        { typeof(World).ToKeyString(), worldNeuron.Id },
+                        { typeof(Dish).ToKeyString(), dishNeuron.Id },
                         { typeof(Odor).ToKeyString(), odorNeuron.Id },
                     };
                 }

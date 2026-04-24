@@ -2,6 +2,6 @@
 {
     public interface ICreatable : IPhysical
     {
-        IPhysical Create(Size worldSize);
+        IPhysical Create(Size dishSize);
     }
 }

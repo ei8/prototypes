@@ -417,7 +417,7 @@ namespace ei8.Prototypes.HelloWorm
         internal static int GetSectorId(this IRectangularComposite rectangularComposite, ISectoral sectoral) =>
             rectangularComposite.Components.TakeWhile(s => s != sectoral).Count() + 1;
 
-        internal static void Move(this IMovable movable, object? state)
+        internal static void Move(this IMovable movable)
         {
             ArgumentNullException.ThrowIfNull(movable);
 
@@ -466,32 +466,40 @@ namespace ei8.Prototypes.HelloWorm
 
         #region Drawing
 
-        public static void InvalidateRectangularComposite(this WorldPanel worldPanel, IRectangularComposite rc)
+        public static void InvalidateDish(this DishPanel dishPanel)
+        {
+            if (dishPanel.Dish == null)
+                throw new ArgumentNullException(nameof(dishPanel.Dish));
+
+            dishPanel.InvalidateRectangularComposite(dishPanel.Dish);
+        }
+
+        public static void InvalidateRectangularComposite(this DishPanel dishPanel, IRectangularComposite rc)
         {
             foreach (var c in rc.Components)
             {
                 if (c is IRectangularComposite composite)
                 {
-                    worldPanel.InvalidateRectangularComposite(composite);
+                    dishPanel.InvalidateRectangularComposite(composite);
                 }
                 else if (c is IRectangular r)
                 {
-                    worldPanel.InvalidateRectangle(r, Constants.Render.RegularOffset);
+                    dishPanel.InvalidateRectangle(r, Constants.Render.RegularOffset);
                 }
             }
 
-            if (rc is not World)
+            if (rc is not Dish)
             {
                 var offset = rc is Worm w ? (w.Size.Width * 2) : Constants.Render.RegularOffset;
-                worldPanel.InvalidateRectangle(rc, offset);
+                dishPanel.InvalidateRectangle(rc, offset);
             }
         }
 
-        private static void InvalidateRectangle(this WorldPanel worldPanel, IRectangular r, int offset)
+        private static void InvalidateRectangle(this DishPanel dishPanel, IRectangular r, int offset)
         {
             var cr = r.GetRectangle();
             cr = cr.Resize(offset);
-            worldPanel.Invalidate(cr, false);
+            dishPanel.Invalidate(cr, false);
         }
 
         private static Rectangle Resize(this Rectangle cr, int offset)
@@ -564,14 +572,14 @@ namespace ei8.Prototypes.HelloWorm
             g.DrawString(text, font, brush, layoutRect, sf);
         }
 
-        internal static void DrawGrid(this Graphics g, Size worldSize, int gap)
+        internal static void DrawGrid(this Graphics g, Size dishSize, int gap)
         {
             using Pen gridPen = new Pen(Color.Gray);
-            for (int i = gap; i <= worldSize.Width; i += gap)
-                g.DrawLine(gridPen, new Point(i, 0), new Point(i, worldSize.Height));
+            for (int i = gap; i <= dishSize.Width; i += gap)
+                g.DrawLine(gridPen, new Point(i, 0), new Point(i, dishSize.Height));
 
-            for (int i = gap; i <= worldSize.Height; i += gap)
-                g.DrawLine(gridPen, new Point(0, i), new Point(worldSize.Width, i));
+            for (int i = gap; i <= dishSize.Height; i += gap)
+                g.DrawLine(gridPen, new Point(0, i), new Point(dishSize.Width, i));
         }
 
         internal static void DrawRectangleBound(
@@ -579,6 +587,7 @@ namespace ei8.Prototypes.HelloWorm
             IRectangleBound rectangleBound, 
             IRectangularComposite parent, 
             Func<float, float> angleTranslator,
+            bool showSectorIds,
             params Func<Point, Point>[] locationTranslators
         )
         {
@@ -591,7 +600,7 @@ namespace ei8.Prototypes.HelloWorm
                 Brush rb = ExtensionMethods.GetRandomBrushColor(2);
                 g.FillPie(rb, parentRectangle, angleTranslator(sectoral.StartAngle), sectoral.SweepAngle);
 
-                if (Constants.ShouldDrawSectorIds)
+                if (showSectorIds)
                 {
                     Point hypoPoint = parentRectangle.GetHypotenusePoint(
                         angleTranslator(sectoral.StartAngle - 1 + (sectoral.SweepAngle / 2)),
@@ -612,6 +621,7 @@ namespace ei8.Prototypes.HelloWorm
             IRectangular rectangular, 
             Pen pen,
             Func<float, float> angleTranslator,
+            bool showSectorIds,
             params Func<Point, Point>[] locationTranslators
         )
         {
@@ -625,7 +635,7 @@ namespace ei8.Prototypes.HelloWorm
             );
 
             if (rectangular is IRectangularComposite rectangularComposite)
-                g.DrawRectangularComposite(rectangularComposite, pen, angleTranslator, locationTranslators);
+                g.DrawRectangularComposite(rectangularComposite, pen, angleTranslator, showSectorIds, locationTranslators);
         }
 
         internal static void DrawRectangularComposite(
@@ -633,6 +643,7 @@ namespace ei8.Prototypes.HelloWorm
             IRectangularComposite rectangularComposite, 
             Pen pen, 
             Func<float, float> angleTranslator,
+            bool showSectorIds,
             params Func<Point, Point>[] locationTranslators
         )
         {
@@ -644,6 +655,7 @@ namespace ei8.Prototypes.HelloWorm
                         rectangularComponent,
                         pen,
                         angleTranslator,
+                        showSectorIds,
                         (pt) => pt.Translate(
                             locationTranslators.Prepend((point) => point.Add(rectangularComposite.Location))
                         )
@@ -655,6 +667,7 @@ namespace ei8.Prototypes.HelloWorm
                         rectangleBound,
                         rectangularComposite, 
                         angleTranslator,
+                        showSectorIds,
                         locationTranslators
                     );
                 }

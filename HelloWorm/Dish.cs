@@ -1,24 +1,27 @@
 ﻿using neurUL.Common.Domain.Model;
 using System.Collections.Immutable;
-using Timer = System.Threading.Timer;
+using System.ComponentModel;
 
 namespace ei8.Prototypes.HelloWorm
 {
-    public class World : IRectangularComposite, ITemporal
+    public class Dish : IRectangularComposite, ITemporal, INamed, INotifyPropertyChanged
     {
-        public event EventHandler Added;
-        public event EventHandler Removed;
-        public event EventHandler IsPlayingChanged;
+        public event EventHandler? Added;
+        public event EventHandler? Removed;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         private IImmutableList<IPhysical> components;
         private DateTime lastEmission;
 
-        private readonly Timer triggerTimer;
         private bool isPlaying;
+
+        private string name;
+
+        private int timerResolution;
 
         private object IndexLock { get; } = new();
 
-        public World()
+        public Dish()
         {
             this.Location = new Point(0, 0);
             this.Size = Size.Empty;
@@ -26,13 +29,24 @@ namespace ei8.Prototypes.HelloWorm
             this.Regenerate = true;
             this.lastEmission = DateTime.MinValue;
 
-            this.triggerTimer = new Timer(this.Timer_Ticked, null, Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
             this.isPlaying = false;
+
+            this.name = string.Empty;
+
+            this.ShowGrid = false;
+            this.ShowRectangularRectangles = false;
+            this.ShowSectorIds = false;
+            this.ShowDirection = false;
+            this.ShowScore = true;
+            this.ShowLife = true;
+
+            this.TimerResolution = 50;
+            this.EmissionInterval = 500;
         }
 
-        private void Timer_Ticked(object? state)
+        public void ProcessTick()
         {
-            var emissionIntervalTimestamp = DateTime.Now.Subtract(new TimeSpan(0, 0, 0, 0, Constants.EmissionInterval));
+            var emissionIntervalTimestamp = DateTime.Now.Subtract(new TimeSpan(0, 0, 0, 0, this.EmissionInterval));
             bool emit = this.lastEmission < emissionIntervalTimestamp;
             if (emit) this.lastEmission = DateTime.Now;
 
@@ -46,7 +60,7 @@ namespace ei8.Prototypes.HelloWorm
                 }
 
                 if (ph is IMovable m)
-                    m.Move(state);
+                    m.Move();
 
                 if (ph is IEmitter e && emit)
                 {
@@ -112,7 +126,7 @@ namespace ei8.Prototypes.HelloWorm
 
         private void Movable_Collided(object? sender, CollidedEventArgs e)
         {
-            if (sender is Odor odor && e.Target is World)
+            if (sender is Odor odor && e.Target is Dish)
             {
                 this.Remove(odor);
             }
@@ -155,7 +169,7 @@ namespace ei8.Prototypes.HelloWorm
 
                         var sectorId = nose.GetSectorId(sp.Sector);
                         var spCount = 0;
-                        //  ...world
+                        //  ...dish
                         if ((sectorId < 3 || sectorId > 6) && (spCount = sp.CircumferencePoints.Count(spp => !this.GetRectangle().Contains(spp))) > 0)
                             result = new(this, sp.Sector, spCount);
 
@@ -185,13 +199,11 @@ namespace ei8.Prototypes.HelloWorm
 
         public void Play()
         {
-            this.triggerTimer.Change(0, Constants.TriggerTimerPeriod);
             this.IsPlaying = true;
         }
 
         public void Pause()
         {
-            this.triggerTimer.Change(Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
             this.IsPlaying = false;
         }
 
@@ -207,9 +219,57 @@ namespace ei8.Prototypes.HelloWorm
                 if (this.isPlaying != value)
                 {
                     this.isPlaying = value;
-                    this.IsPlayingChanged?.Invoke(this, EventArgs.Empty);
+                    this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsPlaying)));
                 }
             }
         }
+
+        public string Name
+        {
+            get => this.name;
+            set
+            {
+                if (this.name != value)
+                {
+                    this.name = value;
+                    this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Name)));
+                }
+            }
+        }
+
+        [Category(nameof(Constants.PropertyCategory.Appearance))]
+        public bool ShowGrid { get; set; }
+
+        [Category(nameof(Constants.PropertyCategory.Appearance))]
+        public bool ShowRectangularRectangles { get; set; }
+
+        [Category(nameof(Constants.PropertyCategory.Appearance))]
+        public bool ShowSectorIds { get; set; }
+
+        [Category(nameof(Constants.PropertyCategory.Appearance))]
+        public bool ShowDirection { get; set; }
+
+        [Category(nameof(Constants.PropertyCategory.Appearance))]
+        public bool ShowScore { get; set; }
+
+        [Category(nameof(Constants.PropertyCategory.Appearance))]
+        public bool ShowLife { get; set; }
+
+        [Category(nameof(Constants.PropertyCategory.Time))]
+        public int TimerResolution
+        {
+            get => this.timerResolution;
+            set
+            {
+                if (this.timerResolution != value)
+                {
+                    this.timerResolution = value;
+                    this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TimerResolution)));
+                }
+            }
+        }
+
+        [Category(nameof(Constants.PropertyCategory.Time))]
+        public int EmissionInterval { get; set; }
     }
 }

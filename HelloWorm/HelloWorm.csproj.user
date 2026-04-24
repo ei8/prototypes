@@ -10,18 +10,18 @@
     <Compile Update="frmToolbox.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Update="frmWorld.cs">
+    <Compile Update="frmDish.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Update="InputBox.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Update="WorldPanel.cs">
+    <Compile Update="DishPanel.cs">
       <SubType>Component</SubType>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Update="frmWorld.resx">
+    <EmbeddedResource Update="frmDish.resx">
       <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>

@@ -36,12 +36,12 @@
             this.Emitted?.Invoke(this, new EmittedEventArgs(newOdors));
         }
         
-        public IPhysical Create(Size worldSize)
+        public IPhysical Create(Size dishSize)
         {
             var r = new Random();
             return new Food()
             {
-                Location = new Point(r.Next(worldSize.Width), r.Next(worldSize.Height)),
+                Location = new Point(r.Next(dishSize.Width), r.Next(dishSize.Height)),
                 Size = new Size(5, 5),
                 StartAngle = r.Next(Constants.CircleDegreesCount),
                 SweepAngle = 90 + r.Next(135),

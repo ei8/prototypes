@@ -1,27 +1,27 @@
 ﻿namespace ei8.Prototypes.HelloWorm
 {
-    internal class WorldPanel : Panel
+    internal class DishPanel : Panel
     {
         private const float AngleOffset = 90;
         
-        private World? world;
+        private Dish? dish;
 
-        public WorldPanel()
+        public DishPanel()
         {
             this.DoubleBuffered = true;
 
-            this.SizeChanged += this.WorldPanel_SizeChanged;
+            this.SizeChanged += this.DishPanel_SizeChanged;
         }
 
-        private void WorldPanel_SizeChanged(object? sender, EventArgs e)
+        private void DishPanel_SizeChanged(object? sender, EventArgs e)
         {
             this.UpdateSize();
         }
 
         private void UpdateSize()
         {
-            if (this.world != null)
-                this.world.Size = new Size(this.Size.Width, this.Size.Height);
+            if (this.dish != null)
+                this.dish.Size = new Size(this.Size.Width, this.Size.Height);
         }
 
         protected override void OnPaint(PaintEventArgs e)
@@ -29,29 +29,27 @@
             var g = e.Graphics;
             g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
 
-            using Pen worldPen = new Pen(Color.Blue);
+            using Pen dishPen = new Pen(Color.Blue);
 
-            if (this.world != null)
+            if (this.dish != null)
             { 
-                // g.DrawRectangle(this.world, worldPen);
+                if (this.dish.ShowGrid)
+                    g.DrawGrid(this.dish.Size, 50);
 
-                if (Constants.ShouldDrawGrid)
-                    g.DrawGrid(this.world.Size, 50);
-
-                foreach (var p in this.world.Components)
+                foreach (var p in this.dish.Components)
                 {
                     using SolidBrush b = new(Color.Black);
                     using Pen pen = new(b);
 
                     if (p is IRectangular rc)
                     {
-                        if (Constants.ShouldDrawRectangularRectangles)
+                        if (this.dish.ShowRectangularRectangles)
                         {
                             using Pen rectPen = new Pen(Color.Red);
                             g.DrawRectangle(rectPen, rc.GetRectangle());
                         }
 
-                        var angleTranslator = new Func<float, float>((a) => a - WorldPanel.AngleOffset);
+                        var angleTranslator = new Func<float, float>((a) => a - DishPanel.AngleOffset);
                         if (p is IMovable pm)
                         {
                             float ellipseCenterX = 0;
@@ -73,13 +71,13 @@
 
                             // Translate the origin to the center of the ellipse, then rotate
                             g.TranslateTransform(ellipseCenterX, ellipseCenterY);
-                            g.RotateTransform(pm.Direction + WorldPanel.AngleOffset);
+                            g.RotateTransform(pm.Direction + DishPanel.AngleOffset);
                             // Translate back to the original top-left corner position relative to the new origin
                             g.TranslateTransform(-ellipseCenterX, -ellipseCenterY);
 
-                            if (Constants.ShouldDrawDirection)
+                            if (this.dish.ShowDirection)
                             {
-                                Point hypoPoint = rc.GetRectangle().GetHypotenusePoint(180 - WorldPanel.AngleOffset, 10);
+                                Point hypoPoint = rc.GetRectangle().GetHypotenusePoint(180 - DishPanel.AngleOffset, 10);
                                 g.DrawCenteredStringAtPoint(
                                     pm.Direction.ToString(),
                                     new Font("Arial", 8, FontStyle.Regular),
@@ -88,35 +86,42 @@
                                 );
                             }
 
-                            if (Constants.ShouldDrawScore && p is Worm pw)
+                            if (p is Worm pw)
                             {
-                                Point hypoPoint = rc.GetRectangle().GetHypotenusePoint(60 - WorldPanel.AngleOffset, 18);
-                                g.DrawCenteredStringAtPoint(
-                                    pw.Score.ToString(),
-                                    new Font("Arial", 10, FontStyle.Regular),
-                                    Brushes.Green,
-                                    hypoPoint
-                                );
-                                Point hypoPoint2 = rc.GetRectangle().GetHypotenusePoint(45 - WorldPanel.AngleOffset, 25);
-                                g.DrawCenteredStringAtPoint(
-                                    pw.Life.ToString(),
-                                    new Font("Arial", 7, FontStyle.Regular),
-                                    Brushes.Red,
-                                    hypoPoint2
-                                );
+                                if (this.dish.ShowScore)
+                                {
+                                    Point hypoPoint = rc.GetRectangle().GetHypotenusePoint(60 - DishPanel.AngleOffset, 18);
+                                    g.DrawCenteredStringAtPoint(
+                                        pw.Score.ToString(),
+                                        new Font("Arial", 10, FontStyle.Regular),
+                                        Brushes.Green,
+                                        hypoPoint
+                                    );
+                                }
+
+                                if (this.dish.ShowLife)
+                                {
+                                    Point hypoPoint2 = rc.GetRectangle().GetHypotenusePoint(45 - DishPanel.AngleOffset, 25);
+                                    g.DrawCenteredStringAtPoint(
+                                        pw.Life.ToString(),
+                                        new Font("Arial", 7, FontStyle.Regular),
+                                        Brushes.Red,
+                                        hypoPoint2
+                                    );
+                                }
                             }
 
                             // Draw the ellipse
-                            g.DrawRectangular(rc, pen, angleTranslator);
+                            g.DrawRectangular(rc, pen, angleTranslator, this.dish.ShowSectorIds);
 
                             // Reset the graphics transform to the original state for other drawings
                             g.Transform = originalMatrix;
                         }
                         else
                         {
-                            g.DrawRectangular(rc, pen, angleTranslator);
+                            g.DrawRectangular(rc, pen, angleTranslator, this.dish.ShowSectorIds);
 
-                            if (rc is Food food)
+                            if (rc is Food food && this.dish.ShowLife)
                             {
                                 var foodLoc = rc.GetRectangle().Location;
                                 Point hypoPoint2 = new Point(foodLoc.X + food.Size.Width + 10, foodLoc.Y + 4);
@@ -135,14 +140,26 @@
             base.OnPaint(e);
         }
 
-        public World? World
+        public Dish? Dish
         {
-            get => this.world;
+            get => this.dish;
             set
             {
-                this.world = value;
+                this.dish = value;
+
+                if (this.dish != null)
+                {
+                    this.dish.Added += this.Dish_Added;
+                }
+
                 this.UpdateSize();
             }
+        }
+
+        private void Dish_Added(object? sender, EventArgs e)
+        {
+            if (!((Dish)sender!).IsPlaying)
+                this.InvalidateDish();
         }
     }
 }

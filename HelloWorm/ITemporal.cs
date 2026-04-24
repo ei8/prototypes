@@ -2,7 +2,7 @@
 {
     internal interface ITemporal
     {
-        event EventHandler IsPlayingChanged;
+        void ProcessTick();
 
         bool IsPlaying { get; }
         

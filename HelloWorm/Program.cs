@@ -26,8 +26,9 @@ namespace ei8.Prototypes.HelloWorm
                 .ConfigureServices((context, services) =>
                 {
                     services.AddSingleton<ISelectionService, SelectionService>();
+                    services.AddSingleton<ISettingsService, SettingsService>();
                     services.AddTransient<frmMain>();
-                    services.AddTransient<frmWorld>();
+                    services.AddTransient<frmDish>();
                     services.AddSingleton<frmToolbox>();
                     services.AddSingleton<frmProperties>();
                 });
