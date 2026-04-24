@@ -39,6 +39,8 @@
             exitToolStripMenuItem = new ToolStripMenuItem();
             toolStripMenuItem2 = new ToolStripMenuItem();
             mnuProject = new ToolStripMenuItem();
+            mnuProjectAddDish = new ToolStripMenuItem();
+            toolStripSeparator1 = new ToolStripSeparator();
             mnuProjectSettings = new ToolStripMenuItem();
             toolStripMenuItem1 = new ToolStripMenuItem();
             mnuToolsInitializeAvatar = new ToolStripMenuItem();
@@ -47,8 +49,6 @@
             tsTemporal = new ToolStrip();
             tsbTemporalPlay = new ToolStripButton();
             tsbTemporalPause = new ToolStripButton();
-            mnuProjectAddDish = new ToolStripMenuItem();
-            toolStripSeparator1 = new ToolStripSeparator();
             statusStrip1.SuspendLayout();
             toolStripContainer1.ContentPanel.SuspendLayout();
             toolStripContainer1.TopToolStripPanel.SuspendLayout();
@@ -124,7 +124,7 @@
             // exitToolStripMenuItem
             // 
             exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            exitToolStripMenuItem.Size = new Size(93, 22);
+            exitToolStripMenuItem.Size = new Size(180, 22);
             exitToolStripMenuItem.Text = "E&xit";
             exitToolStripMenuItem.Click += exitToolStripMenuItem_Click;
             // 
@@ -140,6 +140,18 @@
             mnuProject.Name = "mnuProject";
             mnuProject.Size = new Size(56, 20);
             mnuProject.Text = "&Project";
+            // 
+            // mnuProjectAddDish
+            // 
+            mnuProjectAddDish.Name = "mnuProjectAddDish";
+            mnuProjectAddDish.Size = new Size(180, 22);
+            mnuProjectAddDish.Text = "Add &Dish";
+            mnuProjectAddDish.Click += mnuProjectAddDish_Click;
+            // 
+            // toolStripSeparator1
+            // 
+            toolStripSeparator1.Name = "toolStripSeparator1";
+            toolStripSeparator1.Size = new Size(177, 6);
             // 
             // mnuProjectSettings
             // 
@@ -204,18 +216,6 @@
             tsbTemporalPause.Text = "toolStripButton1";
             tsbTemporalPause.Click += tsbTemporalPause_Click;
             // 
-            // mnuProjectAddDish
-            // 
-            mnuProjectAddDish.Name = "mnuProjectAddDish";
-            mnuProjectAddDish.Size = new Size(180, 22);
-            mnuProjectAddDish.Text = "Add &Dish";
-            mnuProjectAddDish.Click += mnuProjectAddDish_Click;
-            // 
-            // toolStripSeparator1
-            // 
-            toolStripSeparator1.Name = "toolStripSeparator1";
-            toolStripSeparator1.Size = new Size(177, 6);
-            // 
             // frmMain
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -223,6 +223,7 @@
             ClientSize = new Size(800, 450);
             Controls.Add(toolStripContainer1);
             Controls.Add(statusStrip1);
+            Icon = (Icon)resources.GetObject("$this.Icon");
             IsMdiContainer = true;
             Name = "frmMain";
             Text = "Hello Worm - ei8.io";

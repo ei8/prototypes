@@ -36,7 +36,7 @@
 
         public struct Food
         {
-            public const int InitialLife = 200;
+            public const int InitialLife = 500;
         }
 
         public struct Odor
