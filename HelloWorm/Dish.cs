@@ -1,14 +1,14 @@
-﻿using neurUL.Common.Domain.Model;
+﻿using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Immutable;
+using System.Collections.Specialized;
 using System.ComponentModel;
 
 namespace ei8.Prototypes.HelloWorm
 {
     public class Dish : IRectangularComposite, ITemporal, INamed, INotifyPropertyChanged
     {
-        public event EventHandler? Added;
-        public event EventHandler? Removed;
         public event PropertyChangedEventHandler? PropertyChanged;
+        public event NotifyCollectionChangedEventHandler? NotifyCollectionChanged;
 
         private IImmutableList<IPhysical> components;
         private DateTime lastEmission;
@@ -18,10 +18,11 @@ namespace ei8.Prototypes.HelloWorm
         private string name;
 
         private int timerResolution;
+        private readonly IServiceProvider serviceProvider;
 
         private object IndexLock { get; } = new();
 
-        public Dish()
+        public Dish(IServiceProvider serviceProvider)
         {
             this.Location = new Point(0, 0);
             this.Size = Size.Empty;
@@ -42,6 +43,7 @@ namespace ei8.Prototypes.HelloWorm
 
             this.TimerResolution = 50;
             this.EmissionInterval = 500;
+            this.serviceProvider = serviceProvider;
         }
 
         public void ProcessTick()
@@ -86,7 +88,13 @@ namespace ei8.Prototypes.HelloWorm
             if (@object is IEmitter emitter)
                 emitter.Emitted += this.Emitter_Emitted;
 
-            this.Added?.Invoke(this, EventArgs.Empty);
+            this.NotifyCollectionChanged?.Invoke(
+                this,
+                new NotifyCollectionChangedEventArgs(
+                    NotifyCollectionChangedAction.Add,
+                    @object
+                )
+            );
         }
 
         public void Remove(IPhysical @object)
@@ -105,23 +113,27 @@ namespace ei8.Prototypes.HelloWorm
                 movable.Collided -= this.Movable_Collided;
             }
 
-            if (@object is IRegenerative regenerative && this.Regenerate)
-            {
-                var regen = regenerative.Create(this.Size);
-                this.Add(regen);
-
-                if (regenerative is INeurULized neurULized)
-                {
-                    AssertionConcern.AssertArgumentValid(n => n.Network != null && n.MirrorConfigs != null, neurULized, "neurULized object should be initialized adequately.", nameof(@object));
-
-                    ((INeurULized)regen).Initialize(neurULized.Network!, neurULized.MirrorConfigs!);
-                }
-            }
-
             if (@object is IEmitter emitter)
                 emitter.Emitted -= this.Emitter_Emitted;
 
-            this.Removed?.Invoke(this, EventArgs.Empty);
+            if (
+                @object is IRegenerative original &&
+                this.Regenerate
+            )
+            {
+                var regen = (IRegenerative)this.serviceProvider.GetRequiredService(original.GetType());
+                regen.Initialize(this.Size);
+                regen.Inherit(original);
+                this.Add(regen);
+            }
+
+            this.NotifyCollectionChanged?.Invoke(
+                this, 
+                new NotifyCollectionChangedEventArgs(
+                     NotifyCollectionChangedAction.Remove,
+                     @object
+                )
+            );
         }
 
         private void Movable_Collided(object? sender, CollidedEventArgs e)

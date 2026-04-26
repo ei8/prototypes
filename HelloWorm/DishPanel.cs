@@ -149,14 +149,14 @@
 
                 if (this.dish != null)
                 {
-                    this.dish.Added += this.Dish_Added;
+                    this.dish.NotifyCollectionChanged += this.Dish_NotifyCollectionChanged;
                 }
 
                 this.UpdateSize();
             }
         }
 
-        private void Dish_Added(object? sender, EventArgs e)
+        private void Dish_NotifyCollectionChanged(object? sender, EventArgs e)
         {
             if (!((Dish)sender!).IsPlaying)
                 this.InvalidateDish();

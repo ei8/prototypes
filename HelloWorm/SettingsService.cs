@@ -13,13 +13,14 @@ namespace ei8.Prototypes.HelloWorm
             {
                 JsonElement rootElement = jsonDocument.RootElement;
                 JsonElement jsonElement = rootElement.GetProperty("Mirrors");
-                string mirrors = jsonElement.ToString();
-                this.Mirrors = System.Text.Json.JsonSerializer.Deserialize<IEnumerable<MirrorConfig>>(mirrors);
+                string mirrorsString = jsonElement.ToString();
+                var mirrors = System.Text.Json.JsonSerializer.Deserialize<IEnumerable<MirrorConfig>>(mirrorsString);
+                AssertionConcern.AssertStateTrue(mirrors != null, "Mirror Configs required.");
 
-                AssertionConcern.AssertStateTrue(this.Mirrors != null, "Mirror Configs required.");
+                this.Mirrors = mirrors!;
             }
         }
 
-        public IEnumerable<MirrorConfig>? Mirrors { get; set; }
+        public IEnumerable<MirrorConfig> Mirrors { get; set; }
     }
 }

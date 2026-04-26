@@ -2,5 +2,6 @@
 {
     public interface IRegenerative : ICreatable
     {
+        void Inherit(IRegenerative original);
     }
 }

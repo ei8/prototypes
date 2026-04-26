@@ -1,9 +1,10 @@
 ﻿using ei8.Cortex.Coding;
-using ei8.Cortex.Coding.Mirrors;
 using ei8.Cortex.Coding.Model.Reflection;
 using ei8.Prototypes.HelloWorm.Spiker;
+using Microsoft.Extensions.Logging;
 using neurUL.Common.Domain.Model;
 using System.Collections.Concurrent;
+using System.Collections.Specialized;
 
 namespace ei8.Prototypes.HelloWorm
 {
@@ -35,25 +36,26 @@ namespace ei8.Prototypes.HelloWorm
             Sector8
         }
 
-        private ISpikeService? spikeService;
-        private Network? network;
+        private Size size;
+
+        // TODO: Extricate from Worm
+        private ISpikeService spikeService;
+        private Network network;
         private ConcurrentDictionary<DateTime, NeuronFireInfo> neuronFireInfos;
-        private IEnumerable<MirrorConfig>? mirrorConfigs;
         private IDictionary<Guid, RotationDirection>? directionValueDictionary;
         private IDictionary<Guid, RotationDegrees>? degreesValueDictionary;
         private IDictionary<SectorValues, Guid>? sectorsValueDictionary;
         private IDictionary<string, Guid>? targetsValueDictionary;
         private Neuron? rotationNeuron;
+        private readonly ILogger<Worm> logger;
 
-        public Worm() : this(0, 0, 0, 0)
-        {
-        }
+        // TODO: Extricate from Worm
+        private readonly ISettingsService settingsService;
 
-        public Worm(int direction, int x, int y, int width)
+        public Worm(ILogger<Worm> logger, ISpikeService spikeService, ISettingsService settingsService)
         {
-            this.Direction = direction;
-            this.Location = new Point(x, y);
-            this.Life = Constants.Worm.InitialLife;
+            this.Direction = 0;
+            this.Location = new Point(0, 0);
             this.Components = [
                 new Nose()
                 {
@@ -62,15 +64,20 @@ namespace ei8.Prototypes.HelloWorm
                     Components = Worm.InitializeSectors()
                 }
             ];
-            this.UpdateSize(Constants.Worm.MinWidth);
 
             this.neuronFireInfos = new ConcurrentDictionary<DateTime, NeuronFireInfo>();
-            this.mirrorConfigs = null;
             this.directionValueDictionary = null;
             this.degreesValueDictionary = null;
             this.sectorsValueDictionary = null;
             this.targetsValueDictionary = null;
             this.rotationNeuron = null;
+            
+            this.logger = logger;
+            this.spikeService = spikeService;
+            this.settingsService = settingsService;
+
+            this.spikeService.Triggered += this.SpikeService_Triggered;
+            this.spikeService.Fired += this.SpikeService_Fired;
         }
 
         private static IEnumerable<Sector> InitializeSectors()
@@ -88,14 +95,69 @@ namespace ei8.Prototypes.HelloWorm
         }
 
         public Point Location { get; set; }
-        public Size Size { get; set; }
+        public Size Size 
+        { 
+            get => this.size;
+            set
+            {
+                if (this.size != value)
+                {
+                    this.size = value;
+                    this.Components.OfType<Nose>().Single().Size = new Size(value.Width, value.Width);
+                }
+            }
+        }
         public float Direction { get; set; }
         public int Speed { get; set; }
         public int Score { get; set; }
         public int Life { get; set; }
         public IEnumerable<IPhysical> Components { get; set; }
         
-        public Network? Network => this.network;
+        public Network Network 
+        {
+            get => this.network;
+            set
+            {
+                if (this.network != value)
+                {
+                    AssertionConcern.AssertArgumentNotNull(value, nameof(value));
+
+                    this.network = value;
+
+                    this.directionValueDictionary = Enum.GetValues<RotationDirection>().ConvertToNeuronValueMap(this.settingsService.Mirrors, this.network).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+                    this.degreesValueDictionary = Enum.GetValues<RotationDegrees>().ConvertToNeuronValueMap(this.settingsService.Mirrors, this.network).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+                    this.sectorsValueDictionary = Enum.GetValues<SectorValues>().ConvertToNeuronValueMap(this.settingsService.Mirrors, this.network).ToDictionary(kvp => kvp.Value, kvp => kvp.Key);
+
+                    if (
+                        this.settingsService.Mirrors.TryGetMirrorNeuron(
+                            typeof(Worm).ToMethodKeyString("Rotate", typeof(RotationDirection), typeof(RotationDegrees)),
+                            this.network,
+                            out Neuron? rotationNeuron
+                        )
+                    )
+                        this.rotationNeuron = rotationNeuron;
+
+                    if (
+                        this.settingsService.Mirrors.TryGetMirrorNeuron(
+                            typeof(Dish).ToKeyString(),
+                            this.network,
+                            out Neuron? dishNeuron
+                        ) &&
+                        this.settingsService.Mirrors.TryGetMirrorNeuron(
+                            typeof(Odor).ToKeyString(),
+                            this.network,
+                            out Neuron? odorNeuron
+                        )
+                    )
+                    {
+                        this.targetsValueDictionary = new Dictionary<string, Guid>{
+                            { typeof(Dish).ToKeyString(), dishNeuron.Id },
+                            { typeof(Odor).ToKeyString(), odorNeuron.Id },
+                        };
+                    }
+                }
+            }
+        }
         
         private void SpikeService_Triggered(object? sender, TriggeredEventArgs e)
         {
@@ -142,52 +204,59 @@ namespace ei8.Prototypes.HelloWorm
 
         public event EventHandler<MovingEventArgs>? Moving;
         public event EventHandler<CollidedEventArgs>? Collided;
+        public event NotifyCollectionChangedEventHandler? NotifyCollectionChanged;
 
         public void Grow()
         {
             this.Score++;
             this.Life += Constants.Worm.InitialLife;
             if (this.Size.Width < Constants.Worm.MaxWidth)
-                this.UpdateSize(this.Size.Width + 2);
+            {
+                int newWidth = this.Size.Width + 2;
+                this.Size = Worm.GetSizeByWidth(newWidth);
+                this.Speed = Worm.GetSpeedByWidth(newWidth);
+            }
         }
 
-        private void UpdateSize(int width)
+        public static Size GetSizeByWidth(int width)
         {
-            float pctMax = 
-                ((float)(width - Constants.Worm.MinWidth)) / 
-                (Constants.Worm.MaxWidth - Constants.Worm.MinWidth);
-            this.Size = new Size(
-                width, 
+            return new Size(
+                width,
                 (int)
                 (
-                    Constants.Worm.MinLength + 
+                    Constants.Worm.MinLength +
                     (
                         (
-                            Constants.Worm.MaxLength - 
+                            Constants.Worm.MaxLength -
                             Constants.Worm.MinLength
-                        ) * 
-                        pctMax
+                        ) *
+                        Worm.GetGrowthPercentageByWidth(width)
                     )
                 )
             );
-            this.Speed = 
-                (int)
-                (
-                    Constants.Worm.MinSpeed + 
-                    (
-                        Constants.Worm.MaxSpeed - 
-                        Constants.Worm.MinSpeed - 
-                        (
-                            (
-                                Constants.Worm.MaxSpeed - 
-                                Constants.Worm.MinSpeed
-                            ) * 
-                            pctMax
-                        )
-                    )
-                );
-            this.Components.OfType<Nose>().Single().Size = new Size(width, width);
         }
+
+        public static int GetSpeedByWidth(int width)
+        {
+            return (int)
+            (
+                Constants.Worm.MinSpeed +
+                (
+                    Constants.Worm.MaxSpeed -
+                    Constants.Worm.MinSpeed -
+                    (
+                        (
+                            Constants.Worm.MaxSpeed -
+                            Constants.Worm.MinSpeed
+                        ) *
+                        Worm.GetGrowthPercentageByWidth(width)
+                    )
+                )
+            );
+        }
+
+        private static float GetGrowthPercentageByWidth(int width) =>
+            ((float)(width - Constants.Worm.MinWidth)) / (Constants.Worm.MaxWidth - Constants.Worm.MinWidth);
 
         public void Collide(CollisionInfo info)
         {
@@ -212,7 +281,8 @@ namespace ei8.Prototypes.HelloWorm
                         [
                             sectorMatch,
                             targetMatch
-                        ]
+                        ],
+                        this.network
                     );
                 }
             }
@@ -221,64 +291,21 @@ namespace ei8.Prototypes.HelloWorm
         }
         public void OnMoving(MovingEventArgs e) => this.Moving?.Invoke(this, e);
 
-        public IPhysical Create(Size dishSize)
+        public void Inherit(IRegenerative original)
+        {
+            this.Network = ((Worm)original).Network;
+        }
+
+        public void Initialize(Size dishSize)
         {
             var r = new Random();
-            var size = Constants.Worm.MinWidth;
+            var wormWidth = Constants.Worm.MinWidth;
             var center = dishSize / 2;
-            return new Worm(r.Next(Constants.CircleDegreesCount), center.Width, center.Height, size);
+            this.Life = Constants.Worm.InitialLife;
+            this.Direction = r.Next(Constants.CircleDegreesCount);
+            this.Location = new Point(center.Width, center.Height);
+            this.Size = Worm.GetSizeByWidth(wormWidth);
+            this.Speed = Worm.GetSpeedByWidth(wormWidth);
         }
-
-        public void Initialize(Network network, IEnumerable<MirrorConfig> mirrorConfigs)
-        {
-            AssertionConcern.AssertArgumentNotNull(network, nameof(network));
-            AssertionConcern.AssertArgumentNotNull(mirrorConfigs, nameof(mirrorConfigs));
-
-            this.network = network;
-            this.spikeService = new SpikeService(this.network);
-            this.spikeService.Triggered += this.SpikeService_Triggered;
-            this.spikeService.Fired += this.SpikeService_Fired;
-
-            this.mirrorConfigs = mirrorConfigs;
-
-            this.directionValueDictionary = Enum.GetValues<RotationDirection>().ConvertToNeuronValueMap(this.mirrorConfigs, this.network).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
-            this.degreesValueDictionary = Enum.GetValues<RotationDegrees>().ConvertToNeuronValueMap(this.mirrorConfigs, this.network).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
-            this.sectorsValueDictionary = Enum.GetValues<SectorValues>().ConvertToNeuronValueMap(this.mirrorConfigs, this.network).ToDictionary(kvp => kvp.Value, kvp => kvp.Key);
-
-            if (this.MirrorConfigs != null && this.network != null)
-            {
-                if (
-                    this.mirrorConfigs.TryGetMirrorNeuron(
-                        typeof(Worm).ToMethodKeyString("Rotate", typeof(RotationDirection), typeof(RotationDegrees)),
-                        this.network,
-                        out Neuron? rotationNeuron
-                    )
-                )
-                    this.rotationNeuron = rotationNeuron;
-
-                if (
-                    this.mirrorConfigs.TryGetMirrorNeuron(
-                        typeof(Dish).ToKeyString(),
-                        this.network,
-                        out Neuron? dishNeuron
-                    ) &&
-                    this.mirrorConfigs.TryGetMirrorNeuron(
-                        typeof(Odor).ToKeyString(),
-                        this.network,
-                        out Neuron? odorNeuron
-                    )
-                )
-                {
-                    this.targetsValueDictionary = new Dictionary<string, Guid>{
-                        { typeof(Dish).ToKeyString(), dishNeuron.Id },
-                        { typeof(Odor).ToKeyString(), odorNeuron.Id },
-                    };
-                }
-            }
-        }
-
-        public ISpikeService? SpikeService => this.spikeService;
-
-        public IEnumerable<MirrorConfig>? MirrorConfigs => this.mirrorConfigs;
     }
 }

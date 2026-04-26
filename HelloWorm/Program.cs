@@ -1,6 +1,8 @@
 
+using ei8.Prototypes.HelloWorm.Spiker;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using System.ComponentModel.Design;
 
 namespace ei8.Prototypes.HelloWorm
@@ -25,12 +27,18 @@ namespace ei8.Prototypes.HelloWorm
             return Host.CreateDefaultBuilder()
                 .ConfigureServices((context, services) =>
                 {
+                    services.AddLogging(logging => logging.AddConsole());
                     services.AddSingleton<ISelectionService, SelectionService>();
                     services.AddSingleton<ISettingsService, SettingsService>();
                     services.AddTransient<frmMain>();
                     services.AddTransient<frmDish>();
                     services.AddSingleton<frmToolbox>();
                     services.AddSingleton<frmProperties>();
+                    services.AddSingleton<frmOutput>();
+                    services.AddTransient<ISpikeService, SpikeService>();
+                    services.AddTransient<Worm>();
+                    services.AddTransient<Food>();
+                    services.AddTransient<Dish>();
                 });
         }
     }

@@ -8,6 +8,8 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing.Drawing2D;
 using System.Reflection;
+using Neuron = ei8.Cortex.Coding.Neuron;
+using Terminal = ei8.Cortex.Coding.Terminal;
 
 namespace ei8.Prototypes.HelloWorm
 {

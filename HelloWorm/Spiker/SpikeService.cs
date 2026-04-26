@@ -16,7 +16,8 @@ namespace ei8.Prototypes.HelloWorm.Spiker
             SpikeOrigin origin, 
             TriggerInfo trigger, 
             IEnumerable<FireInfo> path, 
-            SpikeService spikeService
+            SpikeService spikeService,
+            Network network
         )
         {
             public Neuron Target { get; } = target;
@@ -28,15 +29,17 @@ namespace ei8.Prototypes.HelloWorm.Spiker
             public IEnumerable<FireInfo> Path { get; } = path;
 
             public SpikeService SpikeService { get; } = spikeService;
+
+            public Network Network { get; } = network;
         }
         
         private int spikeCount = 1;
-        private readonly Network network;
+
+        // TODO: transfer to Worm to make SpikeService stateless
         private readonly ConcurrentDictionary<Guid, SpikeInfo> spikes;
 
-        public SpikeService(Network network)
+        public SpikeService()
         {
-            this.network = network;
             this.spikes = new ConcurrentDictionary<Guid, SpikeInfo>();
         }
 
@@ -45,7 +48,7 @@ namespace ei8.Prototypes.HelloWorm.Spiker
             spikeCount = value;
         }
 
-        public void Spike(IEnumerable<Guid> targets)
+        public void Spike(IEnumerable<Guid> targets, Network network)
         {
             for (int i = 1; i <= spikeCount; i++)
             {
@@ -59,7 +62,8 @@ namespace ei8.Prototypes.HelloWorm.Spiker
                             new SpikeOrigin(Guid.NewGuid()),
                             new TriggerInfo(DateTime.Now, NeurotransmitterEffect.Excite, 1f, Guid.Empty),
                             Array.Empty<FireInfo>(),
-                            this
+                            this,
+                            network
                         )
                     );
                 }
@@ -106,15 +110,16 @@ namespace ei8.Prototypes.HelloWorm.Spiker
                         new FiredEventArgs(parameters.Target, spikeResultingFireInfo, sumCharge)
                     );
 
-                    parameters.SpikeService.network.GetTerminals(parameters.Target.Id).ToList().ForEach(
+                    parameters.Network.GetTerminals(parameters.Target.Id).ToList().ForEach(
                         t =>
                         {
                             var sp = new SpikeParameters(
-                                parameters.SpikeService.network.ValidateGet(t.PostsynapticNeuronId),
+                                parameters.Network.ValidateGet(t.PostsynapticNeuronId),
                                 parameters.Origin,
                                 new TriggerInfo(DateTime.Now, t.Effect, t.Strength, parameters.Target.Id),
                                 parameters.Path.Concat([spikeResultingFireInfo]),
-                                parameters.SpikeService
+                                parameters.SpikeService,
+                                parameters.Network
                             );
                             if (!ThreadPool.QueueUserWorkItem(SpikeService.SpikeCore, sp))
                                 Debug.WriteLine($"Unable to queue work item for: {sp.Target}");

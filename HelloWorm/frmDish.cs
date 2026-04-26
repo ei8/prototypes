@@ -1,17 +1,21 @@
+using Microsoft.Extensions.DependencyInjection;
 using WeifenLuo.WinFormsUI.Docking;
 
 namespace ei8.Prototypes.HelloWorm
 {
     public partial class frmDish : DockContent
     {
-        public frmDish()
+        private readonly IServiceProvider serviceProvider;
+
+        public frmDish(IServiceProvider serviceProvider)
         {
             InitializeComponent();
 
-            this.dishPanel.Dish = new Dish();
+            this.dishPanel.Dish = serviceProvider.GetRequiredService<Dish>();
             this.dishPanel.Dish.PropertyChanged += this.Dish_PropertyChanged;
 
             this.timer1.Interval = this.dishPanel.Dish.TimerResolution;
+            this.serviceProvider = serviceProvider;
         }
 
         private void Dish_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -44,7 +48,11 @@ namespace ei8.Prototypes.HelloWorm
                 if (f != null)
                     this.dishPanel.Dish.Remove(f);
                 else
-                    this.dishPanel.Dish.Add(new Food().Create(this.dishPanel.Dish.Size));
+                {
+                    var newFood = this.serviceProvider.GetRequiredService<Food>();
+                    newFood.Initialize(this.dishPanel.Dish.Size);
+                    this.dishPanel.Dish.Add(newFood);
+                }
             }
         }
 

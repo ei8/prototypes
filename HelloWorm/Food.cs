@@ -35,18 +35,17 @@
 
             this.Emitted?.Invoke(this, new EmittedEventArgs(newOdors));
         }
-        
-        public IPhysical Create(Size dishSize)
+
+        public void Inherit(IRegenerative target) { }
+
+        public void Initialize(Size dishSize)
         {
             var r = new Random();
-            return new Food()
-            {
-                Location = new Point(r.Next(dishSize.Width), r.Next(dishSize.Height)),
-                Size = new Size(5, 5),
-                StartAngle = r.Next(Constants.CircleDegreesCount),
-                SweepAngle = 90 + r.Next(135),
-                Life = Constants.Food.InitialLife
-            };
+            this.Location = new Point(r.Next(dishSize.Width), r.Next(dishSize.Height));
+            this.Size = new Size(5, 5);
+            this.StartAngle = r.Next(Constants.CircleDegreesCount);
+            this.SweepAngle = 90 + r.Next(135);
+            this.Life = Constants.Food.InitialLife;
         }
     }
 }

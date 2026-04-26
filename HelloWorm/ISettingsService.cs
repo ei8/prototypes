@@ -4,6 +4,6 @@ namespace ei8.Prototypes.HelloWorm
 {
     public interface ISettingsService
     {
-        IEnumerable<MirrorConfig>? Mirrors { get; set; }
+        IEnumerable<MirrorConfig> Mirrors { get; set; }
     }
 }

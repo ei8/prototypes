@@ -33,6 +33,9 @@ namespace ei8.Prototypes.HelloWorm
 
             var tb = this.serviceProvider.GetRequiredService<frmToolbox>();
             tb.Show(this.dockPanel1, DockState.DockLeft);
+
+            var o = this.serviceProvider.GetRequiredService<frmOutput>();
+            o.Show(this.dockPanel1, DockState.DockBottom);
         }
 
         private void DockPanel1_ActiveContentChanged(object? sender, EventArgs e)
@@ -43,11 +46,8 @@ namespace ei8.Prototypes.HelloWorm
 
         private void SelectionService_SelectionChanged(object? sender, EventArgs e)
         {
-            if (this.selectionService.PrimarySelection is Dish w)
-            {
-                w.Added += this.Dish_Added;
-                w.Removed += this.Dish_Removed;
-            }
+            if (this.selectionService.PrimarySelection is Dish d)
+                d.NotifyCollectionChanged += this.Dish_NotifyCollectionChanged;
 
             if (this.selectionService.PrimarySelection is INotifyPropertyChanged t)
             {
@@ -83,11 +83,8 @@ namespace ei8.Prototypes.HelloWorm
 
         private void SelectionService_SelectionChanging(object? sender, EventArgs e)
         {
-            if (this.selectionService.PrimarySelection is Dish w)
-            {
-                w.Added -= this.Dish_Added;
-                w.Removed -= this.Dish_Removed;
-            }
+            if (this.selectionService.PrimarySelection is Dish d)
+                d.NotifyCollectionChanged -= this.Dish_NotifyCollectionChanged;
 
             if (this.selectionService.PrimarySelection is INotifyPropertyChanged t)
             {
@@ -101,9 +98,7 @@ namespace ei8.Prototypes.HelloWorm
                 this.tslblCount.Text = $"Object(s): {dish.Components.Count()}";
         }
 
-        private void Dish_Removed(object? sender, EventArgs e) => this.UpdateObjectCount((Dish?)sender);
-
-        private void Dish_Added(object? sender, EventArgs e) => this.UpdateObjectCount((Dish?)sender);
+        private void Dish_NotifyCollectionChanged(object? sender, EventArgs e) => this.UpdateObjectCount((Dish?)sender);
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
