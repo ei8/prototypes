@@ -1,8 +1,10 @@
 
+using ei8.Cortex.Library.Client.Out;
 using ei8.Prototypes.HelloWorm.Spiker;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using neurUL.Common.Http;
 using System.ComponentModel.Design;
 
 namespace ei8.Prototypes.HelloWorm
@@ -28,6 +30,14 @@ namespace ei8.Prototypes.HelloWorm
                 .ConfigureServices((context, services) =>
                 {
                     services.AddLogging(logging => logging.AddConsole());
+                    services.AddTransient<IRequestProvider>((sp) =>
+                        {
+                            var rp = new RequestProvider();
+                            rp.SetHttpClientHandler(new HttpClientHandler());
+                            return rp;
+                        }
+                    );
+                    services.AddTransient<INeuronQueryClient, HttpNeuronQueryClient>();
                     services.AddSingleton<ISelectionService, SelectionService>();
                     services.AddSingleton<ISettingsService, SettingsService>();
                     services.AddSingleton<frmMain>();

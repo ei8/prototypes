@@ -42,7 +42,8 @@
         public struct Odor
         {
             public const int Size = 2;
-            public const int Speed = 5;
+            public const int MinSpeed = 3;
+            public const int MaxSpeed = 5;
             public const int DeployMin = 3;
             public const int DeployExtra = 2;
         }

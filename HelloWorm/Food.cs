@@ -29,7 +29,7 @@
                     Location = this.Location,
                     Direction = this.StartAngle + sweep,
                     Size = new Size(Constants.Odor.Size, Constants.Odor.Size),
-                    Speed = Constants.Odor.Speed
+                    Speed = Constants.Odor.MinSpeed + r.Next(Constants.Odor.MaxSpeed - Constants.Odor.MinSpeed)
                 });
             }
 

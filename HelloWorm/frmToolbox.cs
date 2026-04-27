@@ -1,4 +1,5 @@
 ﻿using ei8.Cortex.Coding;
+using ei8.Cortex.Library.Client.Out;
 using ei8.Cortex.Library.Common;
 using Microsoft.Extensions.DependencyInjection;
 using neurUL.Common.Http;
@@ -12,11 +13,13 @@ namespace ei8.Prototypes.HelloWorm
         private readonly IServiceProvider serviceProvider;
         private readonly ISelectionService selectionService;
         private readonly ISettingsService settingsService;
+        private readonly INeuronQueryClient neuronQueryClient;
 
         public frmToolbox(
             IServiceProvider serviceProvider, 
             ISelectionService selectionService, 
-            ISettingsService settingsService
+            ISettingsService settingsService,
+            INeuronQueryClient neuronQueryClient
         )
         {
             InitializeComponent();
@@ -25,6 +28,7 @@ namespace ei8.Prototypes.HelloWorm
             this.selectionService.SelectionChanged += this.SelectionService_SelectionChanged;
 
             this.settingsService = settingsService;
+            this.neuronQueryClient = neuronQueryClient;
         }
 
         private void SelectionService_SelectionChanged(object? sender, EventArgs e)
@@ -58,11 +62,7 @@ namespace ei8.Prototypes.HelloWorm
 
                 if (!string.IsNullOrEmpty(avatarUrl))
                 {
-                    // TODO: use serviceProvider to instantiate these
-                    var rp = new RequestProvider();
-                    rp.SetHttpClientHandler(new HttpClientHandler());
-                    var client = new ei8.Cortex.Library.Client.Out.HttpNeuronQueryClient(rp);
-                    var queryResult = await client.GetNeurons(
+                    var queryResult = await this.neuronQueryClient.GetNeurons(
                         avatarUrl,
                         new NeuronQuery()
                         {
