@@ -32,10 +32,13 @@ namespace ei8.Prototypes.HelloWorm
             fp.Show(this.dockPanel1, DockState.DockRight);
 
             var tb = this.serviceProvider.GetRequiredService<frmToolbox>();
-            tb.Show(this.dockPanel1, DockState.DockLeft);
+            tb.Show(this.dockPanel1, DockState.DockLeftAutoHide);
 
             var o = this.serviceProvider.GetRequiredService<frmOutput>();
             o.Show(this.dockPanel1, DockState.DockBottom);
+
+            var pe = this.serviceProvider.GetRequiredService<frmProjectExplorer>();
+            pe.Show(this.dockPanel1.Panes[0], DockAlignment.Top, 0.50);
         }
 
         private void DockPanel1_ActiveContentChanged(object? sender, EventArgs e)

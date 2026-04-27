@@ -14,7 +14,7 @@ namespace ei8.Prototypes.HelloWorm
             this.tscbMin.Items.AddRange(NLog.LogLevel.AllLevels.Select(l => l.Name).ToArray());
             this.tscbMax.Items.AddRange(NLog.LogLevel.AllLevels.Select(l => l.Name).ToArray());
 
-            this.tscbMin.Tag = this.tscbMin.SelectedIndex = this.tscbMin.FindStringExact(NLog.LogLevel.Off.Name);
+            this.tscbMin.Tag = this.tscbMin.SelectedIndex = this.tscbMin.FindStringExact(NLog.LogLevel.Info.Name);
             this.tscbMax.Tag = this.tscbMax.SelectedIndex = this.tscbMax.FindStringExact(NLog.LogLevel.Off.Name);
 
             this.UpdateLogRange();

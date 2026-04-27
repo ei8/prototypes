@@ -1,6 +1,5 @@
 ﻿using ei8.Prototypes.HelloWorm.Spiker;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using NLog;
 using System.Collections.Immutable;
 using System.Collections.Specialized;
@@ -101,6 +100,9 @@ namespace ei8.Prototypes.HelloWorm
                 this.components = this.components.Add(@object);
             }
 
+            if (@object is not Odor)
+                Dish.logger.Info(new LogMessageGenerator(() => $"{this.name} - {@object.GetType()} added."));
+
             if (@object is IMovable movable)
             {
                 movable.Moving += this.Movable_Moving;
@@ -129,6 +131,9 @@ namespace ei8.Prototypes.HelloWorm
                 }
             }
 
+            if (@object is not Odor)
+                Dish.logger.Info(new LogMessageGenerator(() => $"{this.name} - {@object.GetType()} removed."));
+
             if (@object is IMovable movable)
             {
                 movable.Moving -= this.Movable_Moving;
@@ -143,6 +148,7 @@ namespace ei8.Prototypes.HelloWorm
                 this.Regenerate
             )
             {
+                Dish.logger.Info(new LogMessageGenerator(() => $"{this.name} - {@object.GetType()} regenerating..."));
                 var regen = (IRegenerative)this.serviceProvider.GetRequiredService(original.GetType());
                 regen.Initialize(this.Size);
                 regen.Inherit(original);

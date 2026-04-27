@@ -2,7 +2,6 @@
 using ei8.Cortex.Coding.Mirrors;
 using ei8.Cortex.Coding.Model.Reflection;
 using ei8.Prototypes.HelloWorm.Spiker;
-using Microsoft.Extensions.Logging;
 using neurUL.Common.Domain.Model;
 using System.Collections.Concurrent;
 using System.Collections.Specialized;

@@ -7,6 +7,9 @@
     <Compile Update="frmOutput.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Update="frmProjectExplorer.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Update="frmProperties.cs">
       <SubType>Form</SubType>
     </Compile>
