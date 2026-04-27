@@ -25,7 +25,7 @@ namespace ei8.Prototypes.HelloWorm
         /// </summary>
         /// <typeparam name="T1"></typeparam>
         /// <typeparam name="T2"></typeparam>
-        /// <param name="neuronFireInfos"></param>
+        /// <param name="fireInfos"></param>
         /// <param name="methodNeuronId"></param>
         /// <param name="param1ValueMap"></param>
         /// <param name="param2ValueMap"></param>
@@ -33,7 +33,7 @@ namespace ei8.Prototypes.HelloWorm
         /// <param name="parameter2"></param>
         /// <returns></returns>
         internal static bool TryFauxDeneurULizeInvoke<T1, T2>(
-            this IEnumerable<NeuronFireInfo> neuronFireInfos,
+            this IEnumerable<FireInfo> fireInfos,
             Guid methodNeuronId,
             IDictionary<Guid, T1> param1ValueMap,
             IDictionary<Guid, T2> param2ValueMap,
@@ -47,21 +47,21 @@ namespace ei8.Prototypes.HelloWorm
             parameter1 = default;
             parameter2 = default;
 
-            var latestFire = neuronFireInfos.LastOrDefault();
+            FireInfo? latestFire = fireInfos.LastOrDefault();
             // if last fired is one of the anticipated neurons
             // TODO: anticipated neurons can include instantiates grannies (eg. instantiates^methodParameter) to optimize recognition,
             // ie. no need to recognize all possible values
             if (
-                latestFire != null &&
+                latestFire.HasValue &&
                 (
-                    latestFire.Neuron.Id == methodNeuronId ||
-                    param1ValueMap.ContainsKey(latestFire.Neuron.Id) ||
-                    param2ValueMap.ContainsKey(latestFire.Neuron.Id)
+                    latestFire.Value.Target.Id == methodNeuronId ||
+                    param1ValueMap.ContainsKey(latestFire.Value.Target.Id) ||
+                    param2ValueMap.ContainsKey(latestFire.Value.Target.Id)
                 )
             )
             {
                 // if number of related fires equals method + 2 parameters
-                if (neuronFireInfos.Count() >= 3)
+                if (fireInfos.Count() >= 3)
                 {
 #if DEBUG
                     //Debug.WriteLine($"Related Fires (Micros): {string.Join(
@@ -76,11 +76,11 @@ namespace ei8.Prototypes.HelloWorm
 #endif
                     if (
                         // and specified method was fired
-                        neuronFireInfos.Any(n => n.Neuron.Id == methodNeuronId) &&
+                        fireInfos.Any(n => n.Target.Id == methodNeuronId) &&
                         // and any param1 was fired
-                        neuronFireInfos.TryGetFiredParameter(param1ValueMap, out parameter1) &&
+                        fireInfos.TryGetFiredParameter(param1ValueMap, out parameter1) &&
                         // and any param2 was fired
-                        neuronFireInfos.TryGetFiredParameter(param2ValueMap, out parameter2)
+                        fireInfos.TryGetFiredParameter(param2ValueMap, out parameter2)
                     )
                     {
                         result = true;
@@ -90,14 +90,14 @@ namespace ei8.Prototypes.HelloWorm
             return result;
         }
 
-        private static bool TryGetFiredParameter<T1>(this IEnumerable<NeuronFireInfo> neuronFireInfos, IDictionary<Guid, T1> paramValueMap, out T1? parameter) where T1 : struct
+        private static bool TryGetFiredParameter<T1>(this IEnumerable<FireInfo> fireInfos, IDictionary<Guid, T1> paramValueMap, out T1? parameter) where T1 : struct
         {
             parameter = null;
 
-            foreach (var nfi in neuronFireInfos)
-                if (paramValueMap.ContainsKey(nfi.Neuron.Id))
+            foreach (var nfi in fireInfos)
+                if (paramValueMap.ContainsKey(nfi.Target.Id))
                 {
-                    parameter = paramValueMap[nfi.Neuron.Id];
+                    parameter = paramValueMap[nfi.Target.Id];
                     break;
                 }
 
@@ -127,7 +127,7 @@ namespace ei8.Prototypes.HelloWorm
             return $"{neuron.Id}:Neuron '{neuron.Tag}'";
         }
 
-        public static bool TryGetAdd<TKey, TValue>(this ConcurrentDictionary<TKey, TValue> dictionary, TKey key, Func<TKey, TValue> valueCreator, out TValue? result)
+        public static bool TryGetAdd<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, Func<TKey, TValue> valueCreator, out TValue? result)
             where TKey : notnull
         {
             var bResult = false;
@@ -276,7 +276,13 @@ namespace ei8.Prototypes.HelloWorm
 
         public static string ToMethodKeyString(this Type type, string methodName, params Type[] parameterTypes)
         {
-            return type.GetMethod(methodName, BindingFlags.Instance | BindingFlags.NonPublic, null, parameterTypes, null)!.ToMethodKeyString();
+            return type.GetMethod(
+                methodName, 
+                BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public, 
+                null, 
+                parameterTypes, 
+                null
+            )!.ToMethodKeyString();
         }
 
         public static string ToMethodKeyString(this MethodInfo value)

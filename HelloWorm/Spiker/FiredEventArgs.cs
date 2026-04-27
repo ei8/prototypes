@@ -2,17 +2,10 @@
 
 namespace ei8.Prototypes.HelloWorm.Spiker
 {
-    public class FiredEventArgs : EventArgs
+    public class FiredEventArgs(ISpikable sender, FireInfo fireInfo, int charge) : EventArgs
     {
-        public FiredEventArgs(Neuron source, FireInfo fireInfo, int charge)
-        {
-            this.Source = source;
-            this.FireInfo = fireInfo;
-            this.Charge = charge;
-        }
-
-        public Neuron Source { get; }
-        public FireInfo FireInfo { get; private set; }
-        public int Charge { get; private set; }
+        public ISpikable Sender { get; } = sender;
+        public FireInfo FireInfo { get; } = fireInfo;
+        public int Charge { get; } = charge;
     }
 }

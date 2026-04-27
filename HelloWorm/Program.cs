@@ -30,12 +30,12 @@ namespace ei8.Prototypes.HelloWorm
                     services.AddLogging(logging => logging.AddConsole());
                     services.AddSingleton<ISelectionService, SelectionService>();
                     services.AddSingleton<ISettingsService, SettingsService>();
-                    services.AddTransient<frmMain>();
+                    services.AddSingleton<frmMain>();
                     services.AddTransient<frmDish>();
                     services.AddSingleton<frmToolbox>();
                     services.AddSingleton<frmProperties>();
                     services.AddSingleton<frmOutput>();
-                    services.AddTransient<ISpikeService, SpikeService>();
+                    services.AddSingleton<ISpikeService, SpikeService>();
                     services.AddTransient<Worm>();
                     services.AddTransient<Food>();
                     services.AddTransient<Dish>();

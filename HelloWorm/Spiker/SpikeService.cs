@@ -1,6 +1,5 @@
 ﻿using ei8.Cortex.Coding;
 using ei8.Prototypes.HelloWorm;
-using System.Collections.Concurrent;
 using System.Diagnostics;
 
 namespace ei8.Prototypes.HelloWorm.Spiker
@@ -10,14 +9,15 @@ namespace ei8.Prototypes.HelloWorm.Spiker
         public event EventHandler<TriggeredEventArgs>? Triggered;
 
         public event EventHandler<FiredEventArgs>? Fired;
- 
+
         private class SpikeParameters(
-            Neuron target, 
-            SpikeOrigin origin, 
-            TriggerInfo trigger, 
-            IEnumerable<FireInfo> path, 
-            SpikeService spikeService,
-            Network network
+            Neuron target,
+            SpikeOrigin origin,
+            TriggerInfo trigger,
+            IEnumerable<FireInfo> path,
+            ISpikable spikable,
+            Action<TriggeredEventArgs> triggeredCallback,
+            Action<FiredEventArgs> firedCallback
         )
         {
             public Neuron Target { get; } = target;
@@ -28,19 +28,17 @@ namespace ei8.Prototypes.HelloWorm.Spiker
 
             public IEnumerable<FireInfo> Path { get; } = path;
 
-            public SpikeService SpikeService { get; } = spikeService;
+            public ISpikable Spikable { get; } = spikable;
 
-            public Network Network { get; } = network;
+            public Action<TriggeredEventArgs> TriggeredCallback { get; } = triggeredCallback;
+
+            public Action<FiredEventArgs> FiredCallback { get; } = firedCallback;
         }
         
         private int spikeCount = 1;
 
-        // TODO: transfer to Worm to make SpikeService stateless
-        private readonly ConcurrentDictionary<Guid, SpikeInfo> spikes;
-
         public SpikeService()
         {
-            this.spikes = new ConcurrentDictionary<Guid, SpikeInfo>();
         }
 
         public void SetSpikeCount(int value)
@@ -48,36 +46,38 @@ namespace ei8.Prototypes.HelloWorm.Spiker
             spikeCount = value;
         }
 
-        public void Spike(IEnumerable<Guid> targets, Network network)
+        public void Spike(IEnumerable<Guid> targets, ISpikable spikable)
         {
-            for (int i = 1; i <= spikeCount; i++)
+            if (spikable.Network != null)
             {
-                var targetNeurons = targets.Select(network.ValidateGet);
-
-                foreach (Neuron target in targetNeurons)
+                for (int i = 1; i <= spikeCount; i++)
                 {
-                    SpikeService.SpikeCore(
-                        new SpikeParameters(
-                            target,
-                            new SpikeOrigin(Guid.NewGuid()),
-                            new TriggerInfo(DateTime.Now, NeurotransmitterEffect.Excite, 1f, Guid.Empty),
-                            Array.Empty<FireInfo>(),
-                            this,
-                            network
-                        )
-                    );
+                    var targetNeurons = targets.Select(spikable.Network.ValidateGet);
+
+                    foreach (Neuron target in targetNeurons)
+                    {
+                        SpikeService.SpikeCore(
+                            new SpikeParameters(
+                                target,
+                                new SpikeOrigin(Guid.NewGuid()),
+                                new TriggerInfo(DateTime.Now, NeurotransmitterEffect.Excite, 1f, Guid.Empty),
+                                Array.Empty<FireInfo>(),
+                                spikable,
+                                (tea) => this.Triggered?.Invoke(this, tea),
+                                (fea) => this.Fired?.Invoke(this, fea)
+                            )
+                        );
+                    }
                 }
             }
         }
-
+        
         private static void SpikeCore(object? stateInfo)
         {
             SpikeParameters parameters = (SpikeParameters)stateInfo!;
 
-            if (parameters.SpikeService.spikes.TryGetAdd(parameters.Target.Id, id => new SpikeInfo(id), out SpikeInfo? spikeInfo))
+            if (parameters.Spikable.SpikeHistory.TryGetAdd(parameters.Target.Id, id => new(), out SpikeInfo? spikeInfo))
             {
-                var spikeResultingFireInfo = FireInfo.Empty;
-
                 spikeInfo!.Triggers.Clean((ti) => ti.Timestamp, parameters.Trigger.Timestamp.Subtract(Constants.Spiker.RefractoryPeriod));
                 spikeInfo.Triggers.TryAdd(parameters.Trigger.Timestamp, parameters.Trigger);
 
@@ -85,9 +85,15 @@ namespace ei8.Prototypes.HelloWorm.Spiker
 
                 int sumCharge = SpikeService.GetSumCharge(triggers);
 
-                parameters.SpikeService.Triggered?.Invoke(
-                    parameters.SpikeService,
-                    new TriggeredEventArgs(parameters.Target, parameters.Origin, parameters.Trigger, sumCharge, parameters.Path)
+                parameters.TriggeredCallback(
+                    new TriggeredEventArgs(
+                        parameters.Spikable, 
+                        parameters.Target, 
+                        parameters.Origin, 
+                        parameters.Trigger, 
+                        sumCharge, 
+                        parameters.Path
+                    )
                 );
 
                 #region DEBUG
@@ -103,28 +109,34 @@ namespace ei8.Prototypes.HelloWorm.Spiker
                     )
                 )
                 {
-                    spikeResultingFireInfo = new FireInfo(DateTime.Now, triggers.ToArray());
+                    var spikeResultingFireInfo = new FireInfo(parameters.Target, DateTime.Now, triggers.ToArray());
                     spikeInfo.LastFire = spikeResultingFireInfo;
-                    parameters.SpikeService.Fired?.Invoke(
-                        parameters.SpikeService,
-                        new FiredEventArgs(parameters.Target, spikeResultingFireInfo, sumCharge)
+                    parameters.FiredCallback(
+                        new FiredEventArgs(
+                            parameters.Spikable,
+                            spikeResultingFireInfo, 
+                            sumCharge
+                        )
                     );
 
-                    parameters.Network.GetTerminals(parameters.Target.Id).ToList().ForEach(
-                        t =>
-                        {
-                            var sp = new SpikeParameters(
-                                parameters.Network.ValidateGet(t.PostsynapticNeuronId),
-                                parameters.Origin,
-                                new TriggerInfo(DateTime.Now, t.Effect, t.Strength, parameters.Target.Id),
-                                parameters.Path.Concat([spikeResultingFireInfo]),
-                                parameters.SpikeService,
-                                parameters.Network
-                            );
-                            if (!ThreadPool.QueueUserWorkItem(SpikeService.SpikeCore, sp))
-                                Debug.WriteLine($"Unable to queue work item for: {sp.Target}");
-                        }
-                    );
+                    if (parameters.Spikable.Network != null)
+                        // Trigger postsynaptics
+                        parameters.Spikable.Network.GetTerminals(parameters.Target.Id).ToList().ForEach(
+                            t =>
+                            {
+                                var sp = new SpikeParameters(
+                                    parameters.Spikable.Network.ValidateGet(t.PostsynapticNeuronId),
+                                    parameters.Origin,
+                                    new TriggerInfo(DateTime.Now, t.Effect, t.Strength, parameters.Target.Id),
+                                    parameters.Path.Concat([spikeResultingFireInfo]),
+                                    parameters.Spikable,
+                                    parameters.TriggeredCallback,
+                                    parameters.FiredCallback
+                                );
+                                if (!ThreadPool.QueueUserWorkItem(SpikeService.SpikeCore, sp))
+                                    Debug.WriteLine($"Unable to queue work item for: {sp.Target}");
+                            }
+                        );
                 }
             }
             else

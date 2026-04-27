@@ -128,7 +128,7 @@ namespace ei8.Prototypes.HelloWorm
 
             if (
                 this.settingsService.Mirrors != null &&
-                this.settingsService.Mirrors.TryGetByKey(typeof(Worm).ToMethodKeyString("Rotate", typeof(Worm.RotationDirection), typeof(Worm.RotationDegrees)), out MirrorConfig? rotateConfig) &&
+                this.settingsService.Mirrors.TryGetByKey(typeof(Worm).ToMethodKeyString(nameof(Worm.Rotate), typeof(Worm.RotationDirection), typeof(Worm.RotationDegrees)), out MirrorConfig? rotateConfig) &&
                 this.settingsService.Mirrors.TryGetByKey(Worm.RotationDirection.Clockwise.ToEnumKeyString(), out MirrorConfig? clockwiseConfig) &&
                 this.settingsService.Mirrors.TryGetByKey(Worm.RotationDirection.CounterClockwise.ToEnumKeyString(), out MirrorConfig? counterClockwiseConfig) &&
                 this.settingsService.Mirrors.TryGetByKey(Worm.RotationDegrees.Small.ToEnumKeyString(), out MirrorConfig? smallConfig) &&

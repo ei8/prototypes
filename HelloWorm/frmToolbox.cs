@@ -77,7 +77,7 @@ namespace ei8.Prototypes.HelloWorm
 
                     var newWorm = this.serviceProvider.GetRequiredService<Worm>();
                     newWorm.Initialize(d.Size);
-                    newWorm.Network = queryResult.ToNetwork();
+                    newWorm.Initialize(queryResult.ToNetwork(), this.settingsService.Mirrors);
                     d.Add(newWorm);
                 }
             }

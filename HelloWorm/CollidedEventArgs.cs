@@ -1,9 +1,7 @@
 ﻿namespace ei8.Prototypes.HelloWorm
 {
-    public class CollidedEventArgs : EventArgs
+    public class CollidedEventArgs(CollisionInfo info) : EventArgs
     {
-        public CollidedEventArgs(IPhysical target) => this.Target = target;
-
-        public IPhysical Target { get; private set; }
+        public CollisionInfo Info { get; } = info;
     }
 }

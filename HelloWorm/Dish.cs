@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using ei8.Prototypes.HelloWorm.Spiker;
+using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Immutable;
 using System.Collections.Specialized;
 using System.ComponentModel;
@@ -19,10 +20,11 @@ namespace ei8.Prototypes.HelloWorm
 
         private int timerResolution;
         private readonly IServiceProvider serviceProvider;
+        private readonly ISpikeService spikeService;
 
         private object IndexLock { get; } = new();
 
-        public Dish(IServiceProvider serviceProvider)
+        public Dish(IServiceProvider serviceProvider, ISpikeService spikeService)
         {
             this.Location = new Point(0, 0);
             this.Size = Size.Empty;
@@ -43,7 +45,28 @@ namespace ei8.Prototypes.HelloWorm
 
             this.TimerResolution = 50;
             this.EmissionInterval = 500;
+
             this.serviceProvider = serviceProvider;
+            this.spikeService = spikeService;
+            this.spikeService.Triggered += this.SpikeService_Triggered;
+            this.spikeService.Fired += this.SpikeService_Fired;
+        }
+
+        private void SpikeService_Triggered(object? sender, TriggeredEventArgs e)
+        {
+            #region DEBUG
+            //Debug.WriteLine("Triggered: " + ((Neuron)sender!).ToString());
+            #endregion
+        }
+
+        private void SpikeService_Fired(object? sender, FiredEventArgs e)
+        {
+            #region DEBUG
+            //            Debug.WriteLine("Fired: " + ((Neuron)sender!).ToString());
+            #endregion
+
+            if (e.Sender is ISpikable spikable)
+                spikable.ProcessFire(e.FireInfo);
         }
 
         public void ProcessTick()
@@ -138,24 +161,42 @@ namespace ei8.Prototypes.HelloWorm
 
         private void Movable_Collided(object? sender, CollidedEventArgs e)
         {
-            if (sender is Odor odor && e.Target is Dish)
+            if (sender is Odor odor && e.Info.Target is Dish)
             {
                 this.Remove(odor);
             }
             else if (
                 sender is Worm worm &&
-                e.Target is Odor odor2
+                e.Info.Target is Odor odor2
             )
             {
                 this.Remove(odor2);
             }
             else if (
                 sender is Worm worm2 &&
-                e.Target is Food food
+                e.Info.Target is Food food
             )
             {
                 this.Remove(food);
                 worm2.Grow();
+            }
+
+            if (
+                sender is ISpikable spikable &&
+                spikable.TryGetSpikeTargets(
+                    e.Info.Source,
+                    e.Info.Target,
+                    out IEnumerable<Guid>? spikeTargets
+                )
+            )
+            {
+#if DEBUG
+                // Debug.WriteLine($"{info.Target.GetType()} spiking Sector {sectorId}" + @"\\\\\\\\\\\\\\\\\\\\\\\\\\\\");
+#endif
+                this.spikeService.Spike(
+                    spikeTargets,
+                    spikable
+                );
             }
         }
 

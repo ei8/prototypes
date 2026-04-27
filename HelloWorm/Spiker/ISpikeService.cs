@@ -1,5 +1,4 @@
 ﻿using ei8.Cortex.Coding;
-using ei8.Prototypes.HelloWorm.Spiker;
 
 namespace ei8.Prototypes.HelloWorm.Spiker
 {
@@ -11,6 +10,9 @@ namespace ei8.Prototypes.HelloWorm.Spiker
 
         void SetSpikeCount(int value);
 
-        void Spike(IEnumerable<Guid> spikeTargets, Network network);
+        void Spike(
+            IEnumerable<Guid> spikeTargets, 
+            ISpikable spikable
+        );
     }
 }

@@ -1,20 +1,16 @@
-﻿namespace ei8.Prototypes.HelloWorm.Spiker
+﻿using ei8.Cortex.Coding;
+
+namespace ei8.Prototypes.HelloWorm.Spiker
 {
-    public struct FireInfo
+    public struct FireInfo(Neuron target, DateTime timestamp, IEnumerable<TriggerInfo> triggers)
     {
-        public static readonly FireInfo Empty = new FireInfo(DateTime.MinValue, new TriggerInfo[0]);
+        public Neuron Target { get; } = target;
 
-        public FireInfo(DateTime timestamp, TriggerInfo[] triggers)
-        {
-            this.Timestamp = timestamp;
-            this.Triggers = triggers;
-        }
+        public DateTime Timestamp { get; } = timestamp;
 
-        public DateTime Timestamp { get; private set; }
+        public IEnumerable<TriggerInfo> Triggers { get; } = triggers;
 
-        public TriggerInfo[] Triggers { get; private set; }
-
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             return obj is FireInfo && this == (FireInfo)obj;
         }

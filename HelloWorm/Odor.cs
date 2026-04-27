@@ -16,7 +16,7 @@ namespace ei8.Prototypes.HelloWorm
         public event EventHandler<MovingEventArgs>? Moving;
         public event EventHandler<CollidedEventArgs>? Collided;
 
-        public void Collide(CollisionInfo info) => this.Collided?.Invoke(this, new CollidedEventArgs(info.Target));
+        public void Collide(CollisionInfo info) => this.Collided?.Invoke(this, new CollidedEventArgs(info));
 
         public void OnMoving(MovingEventArgs e) => this.Moving?.Invoke(this, e);
     }
