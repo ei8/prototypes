@@ -1,5 +1,7 @@
 ﻿using ei8.Prototypes.HelloWorm.Spiker;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using NLog;
 using System.Collections.Immutable;
 using System.Collections.Specialized;
 using System.ComponentModel;
@@ -8,6 +10,7 @@ namespace ei8.Prototypes.HelloWorm
 {
     public class Dish : IRectangularComposite, ITemporal, INamed, INotifyPropertyChanged
     {
+        private static readonly NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
         public event PropertyChangedEventHandler? PropertyChanged;
         public event NotifyCollectionChangedEventHandler? NotifyCollectionChanged;
 
@@ -54,19 +57,15 @@ namespace ei8.Prototypes.HelloWorm
 
         private void SpikeService_Triggered(object? sender, TriggeredEventArgs e)
         {
-            #region DEBUG
-            //Debug.WriteLine("Triggered: " + ((Neuron)sender!).ToString());
-            #endregion
+            Dish.logger.Debug(new LogMessageGenerator(() => $"{this.Name} - Triggered: {e.Source.Id}:'{e.Source.Tag}'"));
         }
 
         private void SpikeService_Fired(object? sender, FiredEventArgs e)
         {
-            #region DEBUG
-            //            Debug.WriteLine("Fired: " + ((Neuron)sender!).ToString());
-            #endregion
-
             if (e.Sender is ISpikable spikable)
                 spikable.ProcessFire(e.FireInfo);
+
+            Dish.logger.Debug(new LogMessageGenerator(() => $"{this.Name} - Fired: {e.FireInfo.Target.Id}:'{e.FireInfo.Target.Tag}'"));
         }
 
         public void ProcessTick()

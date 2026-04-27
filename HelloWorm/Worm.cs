@@ -47,10 +47,8 @@ namespace ei8.Prototypes.HelloWorm
         private IDictionary<Guid, RotationDegrees>? degreesValueDictionary;
         private IDictionary<SectorValues, Guid>? sectorsValueDictionary;
         private IDictionary<string, Guid>? targetsValueDictionary;
-        
-        private readonly ILogger<Worm> logger;
 
-        public Worm(ILogger<Worm> logger)
+        public Worm()
         {
             this.Direction = 0;
             this.Location = new Point(0, 0);
@@ -73,8 +71,6 @@ namespace ei8.Prototypes.HelloWorm
             this.degreesValueDictionary = null;
             this.sectorsValueDictionary = null;
             this.targetsValueDictionary = null;
-
-            this.logger = logger;
         }
 
         private static IEnumerable<Sector> InitializeSectors()

@@ -9,7 +9,7 @@
 
         public static string ShowDialog(IWin32Window? owner, string caption, string @default)
         {
-            using (InputBox prompt = new InputBox() { Text = caption, StartPosition = FormStartPosition.CenterScreen })
+            using (InputBox prompt = new InputBox() { Text = caption, StartPosition = FormStartPosition.CenterParent })
             {
                 prompt.txtInput.Text = @default;
                 // ... add controls and configure

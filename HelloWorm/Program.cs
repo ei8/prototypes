@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using neurUL.Common.Http;
+using NLog.Extensions.Logging;
 using System.ComponentModel.Design;
 
 namespace ei8.Prototypes.HelloWorm
@@ -29,7 +30,6 @@ namespace ei8.Prototypes.HelloWorm
             return Host.CreateDefaultBuilder()
                 .ConfigureServices((context, services) =>
                 {
-                    services.AddLogging(logging => logging.AddConsole());
                     services.AddTransient<IRequestProvider>((sp) =>
                         {
                             var rp = new RequestProvider();
@@ -45,7 +45,7 @@ namespace ei8.Prototypes.HelloWorm
                     services.AddSingleton<frmToolbox>();
                     services.AddSingleton<frmProperties>();
                     services.AddSingleton<frmOutput>();
-                    services.AddSingleton<ISpikeService, SpikeService>();
+                    services.AddTransient<ISpikeService, SpikeService>();
                     services.AddTransient<Worm>();
                     services.AddTransient<Food>();
                     services.AddTransient<Dish>();
