@@ -1,4 +1,5 @@
 ﻿using ei8.Cortex.Coding;
+using ei8.Cortex.Library.Client;
 using ei8.Cortex.Library.Client.Out;
 using ei8.Cortex.Library.Common;
 using Microsoft.Extensions.DependencyInjection;
@@ -58,22 +59,18 @@ namespace ei8.Prototypes.HelloWorm
             if (
                 this.selectionService.PrimarySelection is Dish d &&
                 this.settingsService.Mirrors != null
-                )
+            )
             { 
-                string avatarUrl = InputBox.ShowDialog(this, "Avatar URL", "http://fibona.cc/worm1/av8r/");
-
-                if (!string.IsNullOrEmpty(avatarUrl))
+                string neuronQuery = InputBox.ShowDialog(this, "neurUL Query", "http://fibona.cc/worm1/av8r/cortex/neurons?sortorder=1&sortby=1&pagesize=29&depth=5&direction=1");
+                if (!string.IsNullOrEmpty(neuronQuery) && 
+                    neuronQuery.Contains('?') &&
+                    QueryUrl.TryParse(neuronQuery, out QueryUrl queryUrl) &&
+                    NeuronQuery.TryParse(queryUrl.QueryString, out NeuronQuery query)
+                )
                 {
                     var queryResult = await this.neuronQueryClient.GetNeurons(
-                        avatarUrl,
-                        new NeuronQuery()
-                        {
-                            SortOrder = SortOrderValue.Descending,
-                            SortBy = SortByValue.NeuronCreationTimestamp,
-                            PageSize = 29,
-                            Depth = 5,
-                            DirectionValues = DirectionValues.Outbound
-                        },
+                        queryUrl.AvatarUrl,
+                        query,
                         "Guest"
                     );
 
