@@ -45,7 +45,7 @@
             treeView.Indent = 19;
             treeView.Location = new Point(0, 25);
             treeView.Name = "treeView";
-            treeView.SelectedImageIndex = 0;
+            treeView.SelectedImageIndex = 4;
             treeView.ShowRootLines = false;
             treeView.Size = new Size(800, 425);
             treeView.TabIndex = 0;

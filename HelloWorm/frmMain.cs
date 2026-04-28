@@ -71,6 +71,8 @@ namespace ei8.Prototypes.HelloWorm
             if (this.selectionService.PrimarySelection is Dish d)
                 d.NotifyCollectionChanged += this.Dish_NotifyCollectionChanged;
 
+            this.mnuViewCode.Enabled = this.selectionService.PrimarySelection is Worm;
+
             if (this.selectionService.PrimarySelection is INotifyPropertyChanged t)
             {
                 t.PropertyChanged += this.T_PropertyChanged;
@@ -347,6 +349,12 @@ namespace ei8.Prototypes.HelloWorm
 
             var pe = this.serviceProvider.GetRequiredService<frmProjectExplorer>();
             pe.Show(this.dockPanel1.Panes[0], DockAlignment.Top, 0.50);
+        }
+
+        private void mnuViewCode_Click(object sender, EventArgs e)
+        {
+            var fc = this.serviceProvider.GetRequiredService<frmCode>();
+            fc.Show(this.dockPanel1, DockState.Document);
         }
     }
 }

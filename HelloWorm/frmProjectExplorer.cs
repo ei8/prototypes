@@ -106,7 +106,8 @@ namespace ei8.Prototypes.HelloWorm
                 var newNode = new TreeNode() { 
                     Text = textRetriever(@object, parent), 
                     Tag = @object, 
-                    ImageIndex = imageIndexRetriever(@object)
+                    ImageIndex = imageIndexRetriever(@object),
+                    SelectedImageIndex = imageIndexRetriever(@object)
                 };
                 if (parent == null)
                     treeView.Nodes.Add(newNode);

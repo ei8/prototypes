@@ -40,6 +40,8 @@
             toolStripSeparator2 = new ToolStripSeparator();
             exitToolStripMenuItem = new ToolStripMenuItem();
             mnuView = new ToolStripMenuItem();
+            mnuViewCode = new ToolStripMenuItem();
+            toolStripSeparator3 = new ToolStripSeparator();
             mnuViewResetPeripherals = new ToolStripMenuItem();
             mnuProject = new ToolStripMenuItem();
             mnuProjectAddDish = new ToolStripMenuItem();
@@ -128,28 +130,41 @@
             // 
             mnuFileNewProject.Image = (Image)resources.GetObject("mnuFileNewProject.Image");
             mnuFileNewProject.Name = "mnuFileNewProject";
-            mnuFileNewProject.Size = new Size(180, 22);
+            mnuFileNewProject.Size = new Size(138, 22);
             mnuFileNewProject.Text = "New &Project";
             mnuFileNewProject.Click += mnuFileNewProject_Click;
             // 
             // toolStripSeparator2
             // 
             toolStripSeparator2.Name = "toolStripSeparator2";
-            toolStripSeparator2.Size = new Size(177, 6);
+            toolStripSeparator2.Size = new Size(135, 6);
             // 
             // exitToolStripMenuItem
             // 
             exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            exitToolStripMenuItem.Size = new Size(180, 22);
+            exitToolStripMenuItem.Size = new Size(138, 22);
             exitToolStripMenuItem.Text = "E&xit";
             exitToolStripMenuItem.Click += exitToolStripMenuItem_Click;
             // 
             // mnuView
             // 
-            mnuView.DropDownItems.AddRange(new ToolStripItem[] { mnuViewResetPeripherals });
+            mnuView.DropDownItems.AddRange(new ToolStripItem[] { mnuViewCode, toolStripSeparator3, mnuViewResetPeripherals });
             mnuView.Name = "mnuView";
             mnuView.Size = new Size(44, 20);
             mnuView.Text = "&View";
+            // 
+            // mnuViewCode
+            // 
+            mnuViewCode.Enabled = false;
+            mnuViewCode.Name = "mnuViewCode";
+            mnuViewCode.Size = new Size(180, 22);
+            mnuViewCode.Text = "&Code";
+            mnuViewCode.Click += mnuViewCode_Click;
+            // 
+            // toolStripSeparator3
+            // 
+            toolStripSeparator3.Name = "toolStripSeparator3";
+            toolStripSeparator3.Size = new Size(177, 6);
             // 
             // mnuViewResetPeripherals
             // 
@@ -169,19 +184,19 @@
             // 
             mnuProjectAddDish.Image = (Image)resources.GetObject("mnuProjectAddDish.Image");
             mnuProjectAddDish.Name = "mnuProjectAddDish";
-            mnuProjectAddDish.Size = new Size(180, 22);
+            mnuProjectAddDish.Size = new Size(122, 22);
             mnuProjectAddDish.Text = "Add &Dish";
             mnuProjectAddDish.Click += mnuProjectAddDish_Click;
             // 
             // toolStripSeparator1
             // 
             toolStripSeparator1.Name = "toolStripSeparator1";
-            toolStripSeparator1.Size = new Size(177, 6);
+            toolStripSeparator1.Size = new Size(119, 6);
             // 
             // mnuProjectSettings
             // 
             mnuProjectSettings.Name = "mnuProjectSettings";
-            mnuProjectSettings.Size = new Size(180, 22);
+            mnuProjectSettings.Size = new Size(122, 22);
             mnuProjectSettings.Text = "&Settings";
             mnuProjectSettings.Click += mnuProjectSettings_Click;
             // 
@@ -195,7 +210,7 @@
             // mnuToolsInitializeAvatar
             // 
             mnuToolsInitializeAvatar.Name = "mnuToolsInitializeAvatar";
-            mnuToolsInitializeAvatar.Size = new Size(180, 22);
+            mnuToolsInitializeAvatar.Size = new Size(163, 22);
             mnuToolsInitializeAvatar.Text = "&Initialize Avatar...";
             mnuToolsInitializeAvatar.Click += mnuToolsInitializeAvatar_Click;
             // 
@@ -292,5 +307,7 @@
         private ToolStripMenuItem mnuFileNewProject;
         private ToolStripSeparator toolStripSeparator2;
         private ToolStripMenuItem mnuViewResetPeripherals;
+        private ToolStripMenuItem mnuViewCode;
+        private ToolStripSeparator toolStripSeparator3;
     }
 }
