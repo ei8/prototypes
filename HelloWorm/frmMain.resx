@@ -123,17 +123,38 @@
   <metadata name="menuStrip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>103, 17</value>
   </metadata>
+  <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  <data name="mnuFileNewProject.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+    <value>
+        iVBORw0KGgoAAAANSUhEUgAAAA8AAAAPCAYAAAA71pVKAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8
+        YQUAAAAJcEhZcwAACxIAAAsSAdLdfvwAAACKSURBVDhPzZAxCoAwEAQDgoKdjaCltbW1v7IS/YKdFn5H
+        tPFN7h0R1LgQsHFgODbchhBzYYCTh7LnMNqZ2Mk4927IYQY7TRxazmGviUPLEaw0cV7LC3z7oKey53De
+        GNrJoM9OYauJQ8ufPiyGtSYOLfvws/IMGw9lzyGAG9xhCYuLkuV8hbIHjDkAncsm2EfMtQQAAAAASUVO
+        RK5CYII=
+</value>
+  </data>
+  <data name="mnuProjectAddDish.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+    <value>
+        iVBORw0KGgoAAAANSUhEUgAAAA8AAAAPCAYAAAA71pVKAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8
+        YQUAAAAJcEhZcwAACxIAAAsSAdLdfvwAAAFfSURBVDhPddJJK0ZRGMDxkyEkbJQtMpR5a54iFpSF6QMo
+        WcuQKfMQQmzI0mex5hP5/497brzx1K97z/vec85znueEgijCMnaxjS1sYA9L8P8/oxFXaMMwNuHkdfSi
+        G9dowK9w4gGceIsJlMAohpM70Yoj5AuYiju24wQ1OIULpXChJhzCBfw+HsGzdOARq3hAD15xjjJM4x1m
+        4cQuLCAWZxQzuEQzTM3Uz1AFozp7TqEPzovV3Ed59hzEPeZhgfz9Z5QiFTO+uINhS3yvxwVcpBLGMd7g
+        2F3zye6YPqqF5x6Lo+9wsU98wKqbrfcg7GAEcw4KogJp0brMLDyzG+bVfobnGcAKJuER7mCfDf/3KHYj
+        Vjv12b6arpNsmR0Yhxn5sb2+gX22kPlV9YbZHi/KCxbh2byaXpw1PKElG1uDX+GVMwMnDcHKO7ay/fj3
+        bqcwFXdNrZBVdSHPmKcaQghfAYo7TEpDudoAAAAASUVORK5CYII=
+</value>
+  </data>
   <metadata name="tsTemporal.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>331, 17</value>
   </metadata>
-  <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <data name="tsbTemporalPlay.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
         iVBORw0KGgoAAAANSUhEUgAAAA8AAAAPCAYAAAA71pVKAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8
         YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAACTSURBVDhPY6AacNwbog5lkg4cNvn8st8fNtHjRDQfVIh4
-        4HAg/D8Y7wl75nggPI3hfz0TVIowgGuG49DTQJdYQKXxA0zN4f/t93v+dTgQtsj1aIwYVBl2gE0zEn4P
-        xPn2++1ZoMpRAZpirNh+f/gShv8MjFAtCIBNMRIm3Wby/bwv/BTpoU1WPFOSwihK26QBBgYAeKmig8zv
-        50AAAAAASUVORK5CYII=
+        4HAg/D8Y7wl75nggPI3hfz0TVIowgGuG49DTQJdYQKXxA0zN4f/t97v+dTgQtsj1aIwYVBl2gE0zEn4P
+        xPn2++1ZoMpRAZpirNh+f/gShv8MjFAtCIBNMRIm3Wby/bwv/BTpoU1WPFOSwihK26QBBgYAaoGiew7z
+        7kkAAAAASUVORK5CYII=
 </value>
   </data>
   <data name="tsbTemporalPause.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">

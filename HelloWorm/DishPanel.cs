@@ -41,7 +41,7 @@
                     using SolidBrush b = new(Color.Black);
                     using Pen pen = new(b);
 
-                    if (p is IRectangular rc)
+                    if (p is IRectangular rc && (p is not Odor || this.dish.ShowOdor))
                     {
                         if (this.dish.ShowRectangularRectangles)
                         {
@@ -110,7 +110,7 @@
                                     );
                                 }
                             }
-
+                            
                             // Draw the ellipse
                             g.DrawRectangular(rc, pen, angleTranslator, this.dish.ShowSectorIds);
 

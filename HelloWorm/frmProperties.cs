@@ -12,6 +12,8 @@ namespace ei8.Prototypes.HelloWorm
             InitializeComponent();
             this.selectionService = selectionService;
             this.selectionService.SelectionChanged += this.SelectionService_SelectionChanged;
+
+            this.HideOnClose = true;
         }
 
         private void SelectionService_SelectionChanged(object? sender, EventArgs e)

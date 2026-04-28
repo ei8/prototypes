@@ -1,11 +1,14 @@
 ﻿using System.Collections.Specialized;
-using System.ComponentModel;
 
 namespace ei8.Prototypes.HelloWorm
 {
-    public interface IComposite : IPhysical
-    { 
-        IEnumerable<IPhysical> Components { get; set; }
+    public interface IComposite : IObject
+    {
+        void Add(IObject @object);
+
+        void Remove(IObject @object);
+
+        IEnumerable<IObject> Components { get; }
 
         event NotifyCollectionChangedEventHandler? NotifyCollectionChanged;
     }

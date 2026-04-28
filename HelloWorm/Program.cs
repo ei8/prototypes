@@ -1,11 +1,8 @@
-
 using ei8.Cortex.Library.Client.Out;
 using ei8.Prototypes.HelloWorm.Spiker;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using neurUL.Common.Http;
-using NLog.Extensions.Logging;
 using System.ComponentModel.Design;
 
 namespace ei8.Prototypes.HelloWorm
@@ -50,6 +47,8 @@ namespace ei8.Prototypes.HelloWorm
                     services.AddTransient<Worm>();
                     services.AddTransient<Food>();
                     services.AddTransient<Dish>();
+                    services.AddSingleton<IProjectService, ProjectService>();
+                    services.AddTransient<Project>();
                 });
         }
     }

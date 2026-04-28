@@ -29,6 +29,8 @@ namespace ei8.Prototypes.HelloWorm
 
             this.settingsService = settingsService;
             this.neuronQueryClient = neuronQueryClient;
+
+            this.HideOnClose = true;
         }
 
         private void SelectionService_SelectionChanged(object? sender, EventArgs e)

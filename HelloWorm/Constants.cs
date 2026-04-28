@@ -27,7 +27,7 @@
             public const int MaxSpeed = 5;
             public const int MinLength = 80;
             public const int MaxLength = 150;
-            public const int MinWidth = 30;
+            public const int MinWidth = 35;
             public const int MaxWidth = 50;
             public const int SectorCount = 8;
             public const int SectorRenderCount = 8;

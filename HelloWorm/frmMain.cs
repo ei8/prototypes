@@ -3,7 +3,9 @@ using ei8.Cortex.Coding.Mirrors;
 using ei8.Cortex.Coding.Model.Reflection;
 using ei8.Cortex.Diary.Nucleus.Client.In;
 using Microsoft.Extensions.DependencyInjection;
+using neurUL.Common.Domain.Model;
 using neurUL.Common.Http;
+using NLog;
 using System.ComponentModel;
 using System.ComponentModel.Design;
 using WeifenLuo.WinFormsUI.Docking;
@@ -12,33 +14,50 @@ namespace ei8.Prototypes.HelloWorm
 {
     public partial class frmMain : Form
     {
+        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
+
         private readonly IServiceProvider serviceProvider;
+        private readonly IProjectService projectService;
         private readonly ISelectionService selectionService;
         private readonly ISettingsService settingsService;
 
-        public frmMain(IServiceProvider serviceProvider, ISelectionService selectionService, ISettingsService settingsService)
+        public frmMain(IServiceProvider serviceProvider, IProjectService projectService, ISelectionService selectionService, ISettingsService settingsService)
         {
             InitializeComponent();
 
             this.dockPanel1.Theme = new VS2015LightTheme();
             this.dockPanel1.ActiveContentChanged += this.DockPanel1_ActiveContentChanged;
             this.serviceProvider = serviceProvider;
+            this.projectService = projectService;
+            this.projectService.ProjectChanging  += this.ProjectService_ProjectChanging;
+            this.projectService.ProjectChanged += this.ProjectService_ProjectChanged;
             this.selectionService = selectionService;
             this.selectionService.SelectionChanging += this.SelectionService_SelectionChanging;
             this.selectionService.SelectionChanged += this.SelectionService_SelectionChanged;
             this.settingsService = settingsService;
 
-            var fp = this.serviceProvider.GetRequiredService<frmProperties>();
-            fp.Show(this.dockPanel1, DockState.DockRight);
+            this.mnuViewResetPeripherals_Click(this, EventArgs.Empty);
+            this.ProjectService_ProjectChanged(this, EventArgs.Empty);
+        }
 
-            var tb = this.serviceProvider.GetRequiredService<frmToolbox>();
-            tb.Show(this.dockPanel1, DockState.DockLeftAutoHide);
+        private void ProjectService_ProjectChanging(object? sender, EventArgs e)
+        {
+            if (this.dockPanel1.Panes.Any(p => p.DockState == DockState.Document))
+            {
+                // TODO: stop all dishes in current project (Dispose?)
+                frmMain.logger.Info(new LogMessageGenerator(() => "Project changing, closing all document(s)..."));
 
-            var o = this.serviceProvider.GetRequiredService<frmOutput>();
-            o.Show(this.dockPanel1, DockState.DockBottom);
+                foreach (var p in this.dockPanel1.Panes.Where(p => p.DockState == DockState.Document).ToArray())
+                    foreach (var d in p.Contents.ToArray())
+                        d.DockHandler.Close();
+            }
+        }
 
-            var pe = this.serviceProvider.GetRequiredService<frmProjectExplorer>();
-            pe.Show(this.dockPanel1.Panes[0], DockAlignment.Top, 0.50);
+        private void ProjectService_ProjectChanged(object? sender, EventArgs e)
+        {
+            var project = this.projectService.GetProject();
+
+            this.mnuProject.Enabled = project != null;
         }
 
         private void DockPanel1_ActiveContentChanged(object? sender, EventArgs e)
@@ -298,7 +317,36 @@ namespace ei8.Prototypes.HelloWorm
                     break;
                 }
             }
+
+            var proj = this.projectService.GetProject();
+            AssertionConcern.AssertArgumentNotNull(proj, nameof(proj));
+            proj!.Add(fp.Dish);
+
             fp.Show(this.dockPanel1, DockState.Document);
+        }
+
+        private void mnuFileNewProject_Click(object sender, EventArgs e)
+        {
+            this.projectService.SetProject(
+                this.serviceProvider.GetRequiredService<Project>()
+            );
+
+            frmMain.logger.Info(new LogMessageGenerator(() => "New Project created."));
+        }
+
+        private void mnuViewResetPeripherals_Click(object sender, EventArgs e)
+        {
+            var fp = this.serviceProvider.GetRequiredService<frmProperties>();
+            fp.Show(this.dockPanel1, DockState.DockRight);
+
+            var tb = this.serviceProvider.GetRequiredService<frmToolbox>();
+            tb.Show(this.dockPanel1, DockState.DockLeftAutoHide);
+
+            var o = this.serviceProvider.GetRequiredService<frmOutput>();
+            o.Show(this.dockPanel1, DockState.DockBottom);
+
+            var pe = this.serviceProvider.GetRequiredService<frmProjectExplorer>();
+            pe.Show(this.dockPanel1.Panes[0], DockAlignment.Top, 0.50);
         }
     }
 }

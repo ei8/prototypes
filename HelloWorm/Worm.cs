@@ -46,19 +46,24 @@ namespace ei8.Prototypes.HelloWorm
         private IDictionary<Guid, RotationDegrees>? degreesValueDictionary;
         private IDictionary<SectorValues, Guid>? sectorsValueDictionary;
         private IDictionary<string, Guid>? targetsValueDictionary;
+        private readonly IList<IObject> components;
 
         public Worm()
         {
             this.Direction = 0;
             this.Location = new Point(0, 0);
-            this.Components = [
-                new Nose()
-                {
-                    Location = new Point(0, 0),
-                    Size = new Size(1, 1),
-                    Components = Worm.InitializeSectors()
-                }
-            ];
+            this.components = new List<IObject>();
+
+            var nose = new Nose()
+            {
+                Location = new Point(0, 0),
+                Size = new Size(1, 1)
+            };
+            var sectors = Worm.InitializeSectors();
+            foreach (var s in sectors)
+                nose.Add(s);
+
+            this.Add(nose);
 
             this.network = null;
 
@@ -103,7 +108,7 @@ namespace ei8.Prototypes.HelloWorm
         public int Speed { get; set; }
         public int Score { get; set; }
         public int Life { get; set; }
-        public IEnumerable<IPhysical> Components { get; set; }
+        public IEnumerable<IObject> Components => this.components;
 
         public Network? Network => this.network;
 
@@ -342,6 +347,20 @@ namespace ei8.Prototypes.HelloWorm
 
                 this.network = network;
             }
+        }
+
+        public void Add(IObject @object)
+        {
+            this.components.Add(@object);
+
+            this.NotifyCollectionChanged?.Invoke(this, new(NotifyCollectionChangedAction.Add, @object));
+        }
+
+        public void Remove(IObject @object)
+        {
+            this.components.Remove(@object);
+
+            this.NotifyCollectionChanged?.Invoke(this, new(NotifyCollectionChangedAction.Remove, @object));
         }
     }
 }

@@ -9,11 +9,11 @@ namespace ei8.Prototypes.HelloWorm
 {
     public class Dish : IRectangularComposite, ITemporal, INamed, INotifyPropertyChanged
     {
-        private static readonly NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
+        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
         public event PropertyChangedEventHandler? PropertyChanged;
         public event NotifyCollectionChangedEventHandler? NotifyCollectionChanged;
 
-        private IImmutableList<IPhysical> components;
+        private IImmutableList<IObject> components;
         private DateTime lastEmission;
 
         private bool isPlaying;
@@ -30,7 +30,7 @@ namespace ei8.Prototypes.HelloWorm
         {
             this.Location = new Point(0, 0);
             this.Size = Size.Empty;
-            this.components = ImmutableList<IPhysical>.Empty;
+            this.components = ImmutableList<IObject>.Empty;
             this.Regenerate = true;
             this.lastEmission = DateTime.MinValue;
 
@@ -44,6 +44,7 @@ namespace ei8.Prototypes.HelloWorm
             this.ShowDirection = false;
             this.ShowScore = true;
             this.ShowLife = true;
+            this.ShowOdor = true;
 
             this.TimerResolution = 50;
             this.EmissionInterval = 500;
@@ -93,7 +94,7 @@ namespace ei8.Prototypes.HelloWorm
             }
         }
 
-        public void Add(IPhysical @object)
+        public void Add(IObject @object)
         {
             lock (this.IndexLock)
             {
@@ -121,7 +122,7 @@ namespace ei8.Prototypes.HelloWorm
             );
         }
 
-        public void Remove(IPhysical @object)
+        public void Remove(IObject @object)
         {
             lock (this.IndexLock)
             {
@@ -267,7 +268,7 @@ namespace ei8.Prototypes.HelloWorm
 
         public Point Location { get; set; }
         public Size Size { get; set; }
-        public IEnumerable<IPhysical> Components { get => this.components; set => throw new NotSupportedException(); }
+        public IEnumerable<IObject> Components => this.components; 
         public bool Regenerate { get; set; }
         public bool IsPlaying 
         {
@@ -278,6 +279,8 @@ namespace ei8.Prototypes.HelloWorm
                 {
                     this.isPlaying = value;
                     this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsPlaying)));
+
+                    Dish.logger.Info(new LogMessageGenerator(() => $"{this.name} - {(this.IsPlaying ? "played." : "paused.")}"));
                 }
             }
         }
@@ -312,6 +315,9 @@ namespace ei8.Prototypes.HelloWorm
 
         [Category(nameof(Constants.PropertyCategory.Appearance))]
         public bool ShowLife { get; set; }
+
+        [Category(nameof(Constants.PropertyCategory.Appearance))]
+        public bool ShowOdor { get; set; }
 
         [Category(nameof(Constants.PropertyCategory.Time))]
         public int TimerResolution

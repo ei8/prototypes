@@ -7,6 +7,8 @@ namespace ei8.Prototypes.HelloWorm
         public frmOutput()
         {
             InitializeComponent();
+
+            this.HideOnClose = true;
         }
 
         private void frmOutput_Load(object sender, EventArgs e)

@@ -15,6 +15,28 @@ namespace ei8.Prototypes.HelloWorm
 {
     internal static class ExtensionMethods
     {
+        #region Forms
+        public static List<TreeNode> GetAllNodes(this TreeView treeView)
+        {
+            List<TreeNode> result = new List<TreeNode>();
+            foreach (TreeNode child in treeView.Nodes)
+            {
+                result.AddRange(child.GetAllNodes());
+            }
+            return result;
+        }
+
+        public static List<TreeNode> GetAllNodes(this TreeNode treeNode)
+        {
+            List<TreeNode> result = [treeNode];
+            foreach (TreeNode child in treeNode.Nodes)
+            {
+                result.AddRange(child.GetAllNodes());
+            }
+            return result;
+        }
+        #endregion
+
         #region Spiker
         /// <summary>
         /// As indicated, this is a temporary approach. 

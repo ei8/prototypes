@@ -1,6 +1,4 @@
-﻿using Timer = System.Threading.Timer;
-
-namespace ei8.Prototypes.HelloWorm
+﻿namespace ei8.Prototypes.HelloWorm
 {
     internal class Odor : IMovable, IElliptical
     {
