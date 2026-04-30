@@ -254,6 +254,7 @@
             tsbTemporalPause.Name = "tsbTemporalPause";
             tsbTemporalPause.Size = new Size(23, 22);
             tsbTemporalPause.Text = "toolStripButton1";
+            tsbTemporalPause.ToolTipText = "Pause";
             tsbTemporalPause.Click += tsbTemporalPause_Click;
             // 
             // frmMain

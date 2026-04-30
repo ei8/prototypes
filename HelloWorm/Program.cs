@@ -50,6 +50,7 @@ namespace ei8.Prototypes.HelloWorm
                     services.AddTransient<Dish>();
                     services.AddSingleton<IProjectService, ProjectService>();
                     services.AddTransient<Project>();
+                    services.AddTransient<DishPanel>();
                 });
         }
     }

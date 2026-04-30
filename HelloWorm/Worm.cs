@@ -3,6 +3,7 @@ using ei8.Cortex.Coding.Mirrors;
 using ei8.Cortex.Coding.Model.Reflection;
 using ei8.Prototypes.HelloWorm.Spiker;
 using neurUL.Common.Domain.Model;
+using NLog;
 using System.Collections.Concurrent;
 using System.Collections.Specialized;
 using System.Diagnostics.CodeAnalysis;
@@ -11,6 +12,8 @@ namespace ei8.Prototypes.HelloWorm
 {
     public class Worm : IMovable, IRectangularComposite, IElliptical, IPerishable, IRegenerative, ISpikable
     {
+        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
+
         public enum RotationDirection
         {
             Clockwise,
@@ -112,7 +115,7 @@ namespace ei8.Prototypes.HelloWorm
 
         public Network? Network => this.network;
 
-        public IDictionary<Guid, SpikeInfo> SpikeHistory => this.spikeHistory;
+        public ConcurrentDictionary<Guid, SpikeInfo> SpikeHistory => this.spikeHistory;
 
         public void Rotate(RotationDirection direction, RotationDegrees degrees)
         {
@@ -179,7 +182,10 @@ namespace ei8.Prototypes.HelloWorm
         private static float GetGrowthPercentageByWidth(int width) =>
             ((float)(width - Constants.Worm.MinWidth)) / (Constants.Worm.MaxWidth - Constants.Worm.MinWidth);
 
-        public void Collide(CollisionInfo info) => this.Collided?.Invoke(this, new CollidedEventArgs(info));
+        public void Collide(CollisionInfo info)
+        {
+            this.Collided?.Invoke(this, new CollidedEventArgs(info));
+        }
 
         public void OnMoving(MovingEventArgs e) => this.Moving?.Invoke(this, e);
 

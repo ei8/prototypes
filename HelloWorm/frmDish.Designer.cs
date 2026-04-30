@@ -34,19 +34,8 @@ namespace ei8.Prototypes.HelloWorm
         private void InitializeComponent()
         {
             components = new System.ComponentModel.Container();
-            dishPanel = new DishPanel();
             timer1 = new System.Windows.Forms.Timer(components);
             SuspendLayout();
-            // 
-            // dishPanel
-            // 
-            dishPanel.Dish = null;
-            dishPanel.Dock = DockStyle.Fill;
-            dishPanel.Location = new Point(0, 0);
-            dishPanel.Name = "dishPanel";
-            dishPanel.Size = new Size(800, 450);
-            dishPanel.TabIndex = 1;
-            dishPanel.DoubleClick += DishPanel_DoubleClick;
             // 
             // timer1
             // 
@@ -57,7 +46,6 @@ namespace ei8.Prototypes.HelloWorm
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
-            Controls.Add(dishPanel);
             Name = "frmDish";
             Text = "Dish";
             Load += frmDish_Load;
@@ -65,7 +53,6 @@ namespace ei8.Prototypes.HelloWorm
         }
 
         #endregion
-        private DishPanel dishPanel;
         private System.Windows.Forms.Timer timer1;
     }
 }

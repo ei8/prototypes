@@ -6,13 +6,22 @@ namespace ei8.Prototypes.HelloWorm
     public partial class frmDish : DockContent
     {
         private readonly IServiceProvider serviceProvider;
-
+        private readonly DishPanel dishPanel;
         public frmDish(IServiceProvider serviceProvider)
         {
             InitializeComponent();
 
+            this.dishPanel = serviceProvider.GetRequiredService<DishPanel>();
+            this.dishPanel.Dish = null;
+            this.dishPanel.Dock = DockStyle.Fill;
+            this.dishPanel.Location = new Point(0, 0);
+            this.dishPanel.Name = "dishPanel";
+            this.dishPanel.Size = new Size(800, 450);
+            this.dishPanel.TabIndex = 1;
+            this.dishPanel.DoubleClick += DishPanel_DoubleClick;
             this.dishPanel.Dish = serviceProvider.GetRequiredService<Dish>();
             this.dishPanel.Dish.PropertyChanged += this.Dish_PropertyChanged;
+            this.Controls.Add(dishPanel);
 
             this.timer1.Interval = this.dishPanel.Dish.TimerResolution;
             this.serviceProvider = serviceProvider;

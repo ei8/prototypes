@@ -149,7 +149,7 @@ namespace ei8.Prototypes.HelloWorm
             return $"{neuron.Id}:Neuron '{neuron.Tag}'";
         }
 
-        public static bool TryGetAdd<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, Func<TKey, TValue> valueCreator, out TValue? result)
+        public static bool TryGetAdd<TKey, TValue>(this ConcurrentDictionary<TKey, TValue> dictionary, TKey key, Func<TKey, TValue> valueCreator, out TValue? result)
             where TKey : notnull
         {
             var bResult = false;
@@ -520,7 +520,7 @@ namespace ei8.Prototypes.HelloWorm
 
             if (rc is not Dish)
             {
-                var offset = rc is Worm w ? (w.Size.Width * 2) : Constants.Render.RegularOffset;
+                var offset = rc is Worm w ? w.Size.Height : Constants.Render.RegularOffset;
                 dishPanel.InvalidateRectangle(rc, offset);
             }
         }

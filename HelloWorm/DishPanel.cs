@@ -1,16 +1,27 @@
-﻿namespace ei8.Prototypes.HelloWorm
+﻿using System.ComponentModel.Design;
+
+namespace ei8.Prototypes.HelloWorm
 {
     internal class DishPanel : Panel
     {
         private const float AngleOffset = 90;
-        
+        private const int FocusOffset = 10;
+        private readonly ISelectionService selectionService;
         private Dish? dish;
 
-        public DishPanel()
+        public DishPanel(ISelectionService selectionService)
         {
             this.DoubleBuffered = true;
 
             this.SizeChanged += this.DishPanel_SizeChanged;
+            this.selectionService = selectionService;
+            this.selectionService.SelectionChanged += this.SelectionService_SelectionChanged;
+        }
+
+        private void SelectionService_SelectionChanged(object? sender, EventArgs e)
+        {
+            if (this.dish != null && !this.dish.IsPlaying)
+                this.InvalidateDish();
         }
 
         private void DishPanel_SizeChanged(object? sender, EventArgs e)
@@ -43,12 +54,6 @@
 
                     if (p is IRectangular rc && (p is not Odor || this.dish.ShowOdor))
                     {
-                        if (this.dish.ShowRectangularRectangles)
-                        {
-                            using Pen rectPen = new Pen(Color.Red);
-                            g.DrawRectangle(rectPen, rc.GetRectangle());
-                        }
-
                         var angleTranslator = new Func<float, float>((a) => a - DishPanel.AngleOffset);
                         if (p is IMovable pm)
                         {
@@ -110,9 +115,11 @@
                                     );
                                 }
                             }
-                            
+
                             // Draw the ellipse
                             g.DrawRectangular(rc, pen, angleTranslator, this.dish.ShowSectorIds);
+
+                            this.RenderRectangles(g, p, rc);
 
                             // Reset the graphics transform to the original state for other drawings
                             g.Transform = originalMatrix;
@@ -120,6 +127,8 @@
                         else
                         {
                             g.DrawRectangular(rc, pen, angleTranslator, this.dish.ShowSectorIds);
+
+                            this.RenderRectangles(g, p, rc);
 
                             if (rc is Food food && this.dish.ShowLife)
                             {
@@ -138,6 +147,37 @@
             }
 
             base.OnPaint(e);
+        }
+
+        private void RenderRectangles(Graphics g, IObject p, IRectangular rc)
+        {
+            if (this.dish != null)
+            {
+                if (this.dish.ShowFocus)
+                {
+                    if (this.selectionService.PrimarySelection == p)
+                    {
+                        using Pen focusPen = new Pen(Color.Blue, 1);
+                        focusPen.DashPattern = [ 5, 5 ];
+                        var subjRect = rc.GetRectangle();
+                        g.DrawRectangle(
+                            focusPen,
+                            new Rectangle(
+                                subjRect.X - DishPanel.FocusOffset,
+                                subjRect.Y -  DishPanel.FocusOffset,
+                                subjRect.Width + (DishPanel.FocusOffset * 2),
+                                subjRect.Height + (DishPanel.FocusOffset * 2)
+                            )
+                        );
+                    }
+                }
+
+                if (this.dish.ShowRectangularRectangles)
+                {
+                    using Pen rectPen = new Pen(Color.Red);
+                    g.DrawRectangle(rectPen, rc.GetRectangle());
+                }
+            }
         }
 
         public Dish? Dish

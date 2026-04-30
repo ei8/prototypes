@@ -1,5 +1,6 @@
 ﻿using ei8.Cortex.Coding;
 using ei8.Cortex.Coding.Mirrors;
+using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 
 namespace ei8.Prototypes.HelloWorm.Spiker
@@ -10,7 +11,7 @@ namespace ei8.Prototypes.HelloWorm.Spiker
             where TS : notnull
             where TT : notnull;
 
-        IDictionary<Guid, SpikeInfo> SpikeHistory { get; }
+        ConcurrentDictionary<Guid, SpikeInfo> SpikeHistory { get; }
 
         bool ProcessFire(FireInfo fireInfo);
 

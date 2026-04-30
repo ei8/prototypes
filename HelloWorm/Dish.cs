@@ -45,6 +45,7 @@ namespace ei8.Prototypes.HelloWorm
             this.ShowScore = true;
             this.ShowLife = true;
             this.ShowOdor = true;
+            this.ShowFocus = true;
 
             this.TimerResolution = 50;
             this.EmissionInterval = 500;
@@ -318,6 +319,9 @@ namespace ei8.Prototypes.HelloWorm
 
         [Category(nameof(Constants.PropertyCategory.Appearance))]
         public bool ShowOdor { get; set; }
+        
+        [Category(nameof(Constants.PropertyCategory.Appearance))]
+        public bool ShowFocus { get; set; }
 
         [Category(nameof(Constants.PropertyCategory.Time))]
         public int TimerResolution
