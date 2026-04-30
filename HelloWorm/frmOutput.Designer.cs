@@ -104,7 +104,9 @@
             // 
             // tsbScrollToEnd
             // 
+            tsbScrollToEnd.Checked = true;
             tsbScrollToEnd.CheckOnClick = true;
+            tsbScrollToEnd.CheckState = CheckState.Checked;
             tsbScrollToEnd.DisplayStyle = ToolStripItemDisplayStyle.Image;
             tsbScrollToEnd.Image = (Image)resources.GetObject("tsbScrollToEnd.Image");
             tsbScrollToEnd.ImageTransparentColor = Color.Magenta;

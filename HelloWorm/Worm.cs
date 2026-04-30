@@ -40,6 +40,8 @@ namespace ei8.Prototypes.HelloWorm
             Sector8
         }
 
+        private int rotationCount;
+        private int collisionCount;
         private Size size;
         private Network? network;
         private readonly ConcurrentDictionary<DateTime, FireInfo> fireHistory;
@@ -53,6 +55,7 @@ namespace ei8.Prototypes.HelloWorm
 
         public Worm()
         {
+            this.collisionCount = 0;
             this.Direction = 0;
             this.Location = new Point(0, 0);
             this.components = new List<IObject>();
@@ -119,9 +122,13 @@ namespace ei8.Prototypes.HelloWorm
 
         public void Rotate(RotationDirection direction, RotationDegrees degrees)
         {
-#if DEBUG
-            // Debug.WriteLine($"Rotating {direction}{degrees}! ////////////////////////////");
-#endif
+            Worm.logger.Info(
+                new LogMessageGenerator(
+                    () => 
+                    $"Rotating {direction} {degrees}. [Total: {this.rotationCount++}; " +
+                    $"Processing ratio: { Math.Round(((float)this.rotationCount / (float)this.collisionCount) * 100f)}%]"
+                )
+           );
 
             this.Direction += ((int)degrees) * (direction == RotationDirection.Clockwise ? 1 : -1);
         }
@@ -184,6 +191,9 @@ namespace ei8.Prototypes.HelloWorm
 
         public void Collide(CollisionInfo info)
         {
+            if (info.Source is not Food)
+                Worm.logger.Info(new LogMessageGenerator(() => $"Rotation-requiring collision. [Total: {this.collisionCount++}]"));
+
             this.Collided?.Invoke(this, new CollidedEventArgs(info));
         }
 
