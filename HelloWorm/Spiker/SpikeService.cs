@@ -1,6 +1,5 @@
 ﻿using ei8.Cortex.Coding;
 using ei8.Prototypes.HelloWorm;
-using System.Diagnostics;
 
 namespace ei8.Prototypes.HelloWorm.Spiker
 {
@@ -10,7 +9,7 @@ namespace ei8.Prototypes.HelloWorm.Spiker
 
         public event EventHandler<FiredEventArgs>? Fired;
 
-        private class SpikeParameters(
+        private class SpikeCallbackParameters(
             Neuron target,
             SpikeOrigin origin,
             TriggerInfo trigger,
@@ -50,14 +49,14 @@ namespace ei8.Prototypes.HelloWorm.Spiker
         {
             if (spikable.Network != null)
             {
-                for (int i = 1; i <= spikeCount; i++)
+                for (int i = 1; i <= this.spikeCount; i++)
                 {
                     var targetNeurons = targets.Select(spikable.Network.ValidateGet);
 
-                    foreach (Neuron target in targetNeurons)
+                    foreach (var target in targetNeurons)
                     {
                         SpikeService.SpikeCore(
-                            new SpikeParameters(
+                            new SpikeCallbackParameters(
                                 target,
                                 new SpikeOrigin(Guid.NewGuid()),
                                 new TriggerInfo(DateTime.Now, NeurotransmitterEffect.Excite, 1f, Guid.Empty),
@@ -67,32 +66,30 @@ namespace ei8.Prototypes.HelloWorm.Spiker
                                 (fea) => this.Fired?.Invoke(this, fea)
                             )
                         );
-                    }
-                }
+                    };
+                };
             }
         }
         
-        private static void SpikeCore(object? stateInfo)
+        private static void SpikeCore(SpikeCallbackParameters state)
         {
-            SpikeParameters parameters = (SpikeParameters)stateInfo!;
-
-            if (parameters.Spikable.SpikeHistory.TryGetAdd(parameters.Target.Id, id => new(), out SpikeInfo? spikeInfo))
+            if (state.Spikable.SpikeHistory.TryGetAdd(state.Target.Id, id => new(), out SpikeInfo? spikeInfo))
             {
-                spikeInfo!.Triggers.Clean((ti) => ti.Timestamp, parameters.Trigger.Timestamp.Subtract(Constants.Spiker.RefractoryPeriod));
-                spikeInfo.Triggers.TryAdd(parameters.Trigger.Timestamp, parameters.Trigger);
+                spikeInfo!.Triggers.Clean((ti) => ti.Timestamp, state.Trigger.Timestamp.Subtract(state.Spikable.RefractoryPeriod));
+                spikeInfo.Triggers.TryAdd(state.Trigger.Timestamp, state.Trigger);
 
                 ICollection<TriggerInfo> triggers = spikeInfo.Triggers.Values;
 
                 int sumCharge = SpikeService.GetSumCharge(triggers);
 
-                parameters.TriggeredCallback(
+                state.TriggeredCallback(
                     new TriggeredEventArgs(
-                        parameters.Spikable, 
-                        parameters.Target, 
-                        parameters.Origin, 
-                        parameters.Trigger, 
-                        sumCharge, 
-                        parameters.Path
+                        state.Spikable,
+                        state.Target,
+                        state.Origin,
+                        state.Trigger,
+                        sumCharge,
+                        state.Path
                     )
                 );
 
@@ -105,42 +102,43 @@ namespace ei8.Prototypes.HelloWorm.Spiker
                     sumCharge >= Constants.Spiker.DefaultThreshold &&
                     (
                         !spikeInfo.LastFire.HasValue ||
-                        DateTime.Now > spikeInfo.LastFire.Value.Timestamp.Add(Constants.Spiker.RefractoryPeriod)
+                        DateTime.Now > spikeInfo.LastFire.Value.Timestamp.Add(state.Spikable.RefractoryPeriod)
                     )
                 )
                 {
-                    var spikeResultingFireInfo = new FireInfo(parameters.Target, DateTime.Now, triggers.ToArray());
+                    var spikeResultingFireInfo = new FireInfo(state.Target, DateTime.Now, [.. triggers]);
                     spikeInfo.LastFire = spikeResultingFireInfo;
-                    parameters.FiredCallback(
+                    state.FiredCallback(
                         new FiredEventArgs(
-                            parameters.Spikable,
-                            spikeResultingFireInfo, 
+                            state.Spikable,
+                            spikeResultingFireInfo,
                             sumCharge
                         )
                     );
 
-                    if (parameters.Spikable.Network != null)
-                        // Trigger postsynaptics
-                        parameters.Spikable.Network.GetTerminals(parameters.Target.Id).ToList().ForEach(
-                            t =>
-                            {
-                                var sp = new SpikeParameters(
-                                    parameters.Spikable.Network.ValidateGet(t.PostsynapticNeuronId),
-                                    parameters.Origin,
-                                    new TriggerInfo(DateTime.Now, t.Effect, t.Strength, parameters.Target.Id),
-                                    parameters.Path.Concat([spikeResultingFireInfo]),
-                                    parameters.Spikable,
-                                    parameters.TriggeredCallback,
-                                    parameters.FiredCallback
-                                );
-                                if (!ThreadPool.QueueUserWorkItem(SpikeService.SpikeCore, sp))
-                                    Debug.WriteLine($"Unable to queue work item for: {sp.Target}");
-                            }
-                        );
+                    if (state.Spikable.Network != null)
+                    {
+                        foreach (var t in state.Spikable.Network.GetTerminals(state.Target.Id).ToList())
+                        {
+                            Task.Run(() =>
+                                SpikeService.SpikeCore(
+                                    new SpikeCallbackParameters(
+                                        state.Spikable.Network.ValidateGet(t.PostsynapticNeuronId),
+                                        state.Origin,
+                                        new TriggerInfo(DateTime.Now, t.Effect, t.Strength, state.Target.Id),
+                                        state.Path.Concat([spikeResultingFireInfo]),
+                                        state.Spikable,
+                                        state.TriggeredCallback,
+                                        state.FiredCallback
+                                    )
+                                )
+                            );
+                        }
+                    }
                 }
             }
             else
-                throw new InvalidOperationException($"SpikeInfo for neuron '{parameters.Target.Id}' was not found.");
+                throw new InvalidOperationException($"SpikeInfo for neuron '{state.Target.Id}' was not found.");
         }
 
         private static int GetSumCharge(ICollection<TriggerInfo> tis)

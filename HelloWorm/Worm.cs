@@ -10,7 +10,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace ei8.Prototypes.HelloWorm
 {
-    public class Worm : IMovable, IRectangularComposite, IElliptical, IPerishable, IRegenerative, ISpikable
+    public class Worm : IMovable, IRectangularComposite, IElliptical, IPerishable, IRegenerative, ISpikableReporting
     {
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
@@ -51,6 +51,8 @@ namespace ei8.Prototypes.HelloWorm
         private IDictionary<Guid, RotationDegrees>? degreesValueDictionary;
         private IDictionary<SectorValues, Guid>? sectorsValueDictionary;
         private IDictionary<string, Guid>? targetsValueDictionary;
+        private TimeSpan refractoryPeriod;
+        private TimeSpan relativeSpikesPeriod;
         private readonly IList<IObject> components;
 
         public Worm()
@@ -58,6 +60,8 @@ namespace ei8.Prototypes.HelloWorm
             this.collisionCount = 0;
             this.Direction = 0;
             this.Location = new Point(0, 0);
+            this.refractoryPeriod = Constants.Spiker.InitialRefractoryPeriod;
+            this.relativeSpikesPeriod = Constants.Spiker.InitialRelativeSpikesPeriod;
             this.components = new List<IObject>();
 
             var nose = new Nose()
@@ -120,13 +124,19 @@ namespace ei8.Prototypes.HelloWorm
 
         public ConcurrentDictionary<Guid, SpikeInfo> SpikeHistory => this.spikeHistory;
 
+        public float ProcessingRatio => ((float)this.rotationCount / (float)this.collisionCount) * 100f;
+
+        public TimeSpan RefractoryPeriod { get => this.refractoryPeriod; set => this.refractoryPeriod = value; }
+
+        public TimeSpan RelativeSpikesPeriod { get => this.relativeSpikesPeriod; set => this.relativeSpikesPeriod = value; }
+
         public void Rotate(RotationDirection direction, RotationDegrees degrees)
         {
             Worm.logger.Info(
                 new LogMessageGenerator(
                     () => 
                     $"Rotating {direction} {degrees}. [Total: {this.rotationCount++}; " +
-                    $"Processing ratio: { Math.Round(((float)this.rotationCount / (float)this.collisionCount) * 100f)}%]"
+                    $"Processing ratio: { Math.Round(this.ProcessingRatio)}%]"
                 )
            );
 
@@ -266,7 +276,7 @@ namespace ei8.Prototypes.HelloWorm
 
             this.fireHistory.Clean(
                 (nfi) => nfi.Timestamp,
-                fireInfo.Timestamp.Subtract(Constants.Spiker.RelativeSpikesPeriod)
+                fireInfo.Timestamp.Subtract(this.relativeSpikesPeriod)
             );
 
             this.fireHistory.TryAdd(fireInfo.Timestamp, fireInfo);

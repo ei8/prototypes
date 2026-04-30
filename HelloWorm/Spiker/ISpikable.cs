@@ -16,5 +16,9 @@ namespace ei8.Prototypes.HelloWorm.Spiker
         bool ProcessFire(FireInfo fireInfo);
 
         void Initialize(Network? network, IEnumerable<MirrorConfig>? mirrorConfigs);
+
+        TimeSpan RefractoryPeriod { get; set; }
+
+        TimeSpan RelativeSpikesPeriod { get; set; }
     }
 }
