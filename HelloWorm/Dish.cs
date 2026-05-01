@@ -282,15 +282,6 @@ namespace ei8.Prototypes.HelloWorm
                 this.Add(em);
         }
 
-        // TODO: Transfer spikeService into ISpikable (Worm) then add ISpikable.SpikeService property
-        internal void TestSpike(IEnumerable<Guid> targets, ISpikable spikable)
-        {
-            this.spikeService.Spike(
-                targets,
-                spikable
-            );
-        }
-
         public void Play()
         {
             this.IsPlaying = true;
