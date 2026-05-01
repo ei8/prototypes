@@ -10,4 +10,9 @@
 
         void Pause();
     }
+
+    internal interface ITemporal<T> : ITemporal where T : Enum
+    {
+        T Mode { get; set; }
+    }
 }

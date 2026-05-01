@@ -1,5 +1,3 @@
-using ei8.Cortex.Coding;
-using ei8.Cortex.Coding.Model.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using WeifenLuo.WinFormsUI.Docking;
 
@@ -20,7 +18,6 @@ namespace ei8.Prototypes.HelloWorm
             this.dishPanel.Name = "dishPanel";
             this.dishPanel.Size = new Size(800, 450);
             this.dishPanel.TabIndex = 1;
-            this.dishPanel.DoubleClick += DishPanel_DoubleClick;
             this.dishPanel.Dish = serviceProvider.GetRequiredService<Dish>();
             this.dishPanel.Dish.PropertyChanged += this.Dish_PropertyChanged;
             this.Controls.Add(dishPanel);
@@ -51,25 +48,6 @@ namespace ei8.Prototypes.HelloWorm
 
         public Dish Dish => this.dishPanel.Dish!;
 
-        private void DishPanel_DoubleClick(object? sender, EventArgs e)
-        {
-            if (this.dishPanel.Dish != null)
-            {
-                // TODO: add as Tool menuitem
-                this.timer2.Enabled = true;
-
-                //var f = this.dishPanel.Dish.Components.OfType<Food>().FirstOrDefault();
-                //if (f != null)
-                //    this.dishPanel.Dish.Remove(f);
-                //else
-                //{
-                //    var newFood = this.serviceProvider.GetRequiredService<Food>();
-                //    newFood.Initialize(this.dishPanel.Dish.Size);
-                //    this.dishPanel.Dish.Add(newFood);
-                //}
-            }
-        }
-
         private void frmDish_Load(object sender, EventArgs e)
         {
             this.dishPanel.Invalidate();
@@ -79,19 +57,6 @@ namespace ei8.Prototypes.HelloWorm
         {
             this.dishPanel.Dish!.ProcessTick();
             this.dishPanel.InvalidateDish();
-        }
-
-        private void timer2_Tick(object sender, EventArgs e)
-        {
-            var worm = this.dishPanel.Dish!.Components.OfType<Worm>().Single();
-            
-            worm.Collide(
-                new CollisionInfo(
-                    new Odor(),
-                    worm.Components.OfType<Nose>().Single().Components.OfType<Sector>().First(),
-                    1
-                )
-            );
         }
     }
 }

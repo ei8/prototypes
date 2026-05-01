@@ -7,8 +7,14 @@ using System.ComponentModel;
 
 namespace ei8.Prototypes.HelloWorm
 {
-    public class Dish : IRectangularComposite, ITemporal, INamed, INotifyPropertyChanged
+    public class Dish : IRectangularComposite, ITemporal<Dish.ModeValue>, INamed, INotifyPropertyChanged
     {
+        public enum ModeValue
+        {
+            Forage,
+            RotationTest
+        }
+
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
         public event PropertyChangedEventHandler? PropertyChanged;
         public event NotifyCollectionChangedEventHandler? NotifyCollectionChanged;
@@ -17,6 +23,7 @@ namespace ei8.Prototypes.HelloWorm
         private DateTime lastEmission;
 
         private bool isPlaying;
+        private ModeValue mode;
 
         private string name;
 
@@ -35,6 +42,7 @@ namespace ei8.Prototypes.HelloWorm
             this.lastEmission = DateTime.MinValue;
 
             this.isPlaying = false;
+            this.mode = ModeValue.Forage;
 
             this.name = string.Empty;
 
@@ -71,27 +79,44 @@ namespace ei8.Prototypes.HelloWorm
 
         public void ProcessTick()
         {
-            var emissionIntervalTimestamp = DateTime.Now.Subtract(new TimeSpan(0, 0, 0, 0, this.EmissionInterval));
-            bool emit = this.lastEmission < emissionIntervalTimestamp;
-            if (emit) this.lastEmission = DateTime.Now;
-
-            foreach (var ph in this.components.OfType<IPhysical>())
+            switch (this.mode)
             {
-                if (ph is IPerishable perishable)
-                {
-                    perishable.Life--;
-                    if (perishable.Life < 0)
-                        this.Remove(perishable);
-                }
+                case ModeValue.RotationTest:
+                    foreach (var worm in this.Components.OfType<Worm>())
+                    {
+                        worm.Collide(
+                            new CollisionInfo(
+                                new Odor(),
+                                worm.Components.OfType<Nose>().Single().Components.OfType<Sector>().First(),
+                                1
+                            )
+                        );
+                    }
+                    break;
+                case ModeValue.Forage:
+                    var emissionIntervalTimestamp = DateTime.Now.Subtract(new TimeSpan(0, 0, 0, 0, this.EmissionInterval));
+                    bool emit = this.lastEmission < emissionIntervalTimestamp;
+                    if (emit) this.lastEmission = DateTime.Now;
 
-                if (ph is IMovable m)
-                    m.Move();
+                    foreach (var ph in this.components.OfType<IPhysical>())
+                    {
+                        if (ph is IPerishable perishable)
+                        {
+                            perishable.Life--;
+                            if (perishable.Life < 0)
+                                this.Remove(perishable);
+                        }
 
-                if (ph is IEmitter e && emit)
-                {
-                    this.lastEmission = DateTime.Now;
-                    e.Emit();
-                }
+                        if (ph is IMovable m)
+                            m.Move();
+
+                        if (ph is IEmitter e && emit)
+                        {
+                            this.lastEmission = DateTime.Now;
+                            e.Emit();
+                        }
+                    }
+                    break;
             }
         }
 
@@ -274,6 +299,15 @@ namespace ei8.Prototypes.HelloWorm
         public void Pause()
         {
             this.IsPlaying = false;
+        }
+
+        public ModeValue Mode
+        {
+            get => this.mode;
+            set
+            {
+                this.mode = value;
+            }
         }
 
         public Point Location { get; set; }
