@@ -3,6 +3,7 @@ using ei8.Cortex.Coding.Mirrors;
 using ei8.Cortex.Coding.Model.Reflection;
 using ei8.Prototypes.HelloWorm.Spiker;
 using neurUL.Common.Domain.Model;
+using NLog;
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing.Drawing2D;
@@ -14,6 +15,8 @@ namespace ei8.Prototypes.HelloWorm
 {
     internal static class ExtensionMethods
     {
+        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
+
         #region Forms
         public static List<TreeNode> GetAllNodes(this TreeView treeView)
         {
@@ -344,10 +347,12 @@ namespace ei8.Prototypes.HelloWorm
                 {
                     var maxSectors = collidedSectors.Where(ct => ct.Count == max);
 
-#if DEBUG
                     if (maxSectors.Count() > 1)
-                        Debug.WriteLine("Multiple sectors collided equally: " + string.Join(";", maxSectors.Select(mt => ((Sector)mt.Source).StartAngle)));
-#endif
+                        ExtensionMethods.logger.Debug(
+                            new LogMessageGenerator(
+                                () => "Multiple sectors collided equally: " + string.Join(";", maxSectors.Select(mt => ((Sector)mt.Source).StartAngle))
+                            )
+                        );
 
                     result = maxSectors.FirstOrDefault();
                 }

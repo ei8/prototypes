@@ -40,6 +40,7 @@ namespace ei8.Prototypes.HelloWorm
             Sector8
         }
 
+        private int invokeFailureCount;
         private int rotationCount;
         private int collisionCount;
         private Size size;
@@ -54,9 +55,12 @@ namespace ei8.Prototypes.HelloWorm
         private TimeSpan refractoryPeriod;
         private TimeSpan relativeSpikesPeriod;
         private readonly IList<IObject> components;
+        private readonly ISpikeService spikeService;
 
-        public Worm()
+        public Worm(ISpikeService spikeService)
         {
+            this.invokeFailureCount = 0;
+            this.rotationCount = 0;
             this.collisionCount = 0;
             this.Direction = 0;
             this.Location = new Point(0, 0);
@@ -85,6 +89,46 @@ namespace ei8.Prototypes.HelloWorm
             this.degreesValueDictionary = null;
             this.sectorsValueDictionary = null;
             this.targetsValueDictionary = null;
+            this.spikeService = spikeService;
+            this.spikeService.Triggered += this.SpikeService_Triggered;
+            this.spikeService.Fired += this.SpikeService_Fired;
+        }
+
+        private void SpikeService_Triggered(object? sender, TriggeredEventArgs e)
+        {
+            Worm.logger.Debug(new LogMessageGenerator(() => $"Triggered: {e.Source.Id}:'{e.Source.Tag}'"));
+        }
+
+        private void SpikeService_Fired(object? sender, FiredEventArgs e)
+        {
+            if (e.Sender is ISpikable spikable)
+            {
+                // TODO: Transfer to extension method
+                this.fireHistory.Clean(
+                    (nfi) => nfi.Timestamp,
+                    e.FireInfo.Timestamp.Subtract(this.relativeSpikesPeriod)
+                );
+
+                this.fireHistory.TryAdd(e.FireInfo.Timestamp, e.FireInfo);
+
+                if (
+                    this.rotationNeuron != null &&
+                    this.fireHistory.Values.TryFauxDeneurULizeInvoke(
+                        this.rotationNeuron.Id,
+                        this.directionValueDictionary!,
+                        this.degreesValueDictionary!,
+                        out RotationDirection? parameter1,
+                        out RotationDegrees? parameter2
+                    )
+                )
+                {
+                    this.Rotate(parameter1.Value, parameter2.Value);
+                }
+                else
+                    Worm.logger.Debug(new LogMessageGenerator(() => $"Invoke failed: {this.invokeFailureCount++}"));
+            }
+
+            Worm.logger.Debug(new LogMessageGenerator(() => $"Fired: {e.FireInfo.Target.Id}:'{e.FireInfo.Target.Tag}'"));
         }
 
         private static IEnumerable<Sector> InitializeSectors()
@@ -201,8 +245,29 @@ namespace ei8.Prototypes.HelloWorm
 
         public void Collide(CollisionInfo info)
         {
-            if (info.Source is not Food)
-                Worm.logger.Info(new LogMessageGenerator(() => $"Rotation-requiring collision. [Total: {this.collisionCount++}]"));
+            if (info.Target is not Food)
+                Worm.logger.Info(new LogMessageGenerator(() => $"Collided with {info.Target.GetType()}, rotation-required. [Total: {this.collisionCount++}]"));
+
+            if (this.TryGetSpikeTargets(
+                    info.Source,
+                    info.Target,
+                    out IEnumerable<Guid>? spikeTargets
+                )
+            )
+            {
+                Worm.logger.Debug(
+                    new LogMessageGenerator(
+                        () => 
+                            $"{info.Target.GetType()} stimulating Sector " +
+                            $"{this.Components.OfType<Nose>().Single().GetSectorId((ISectoral) info.Source)}"
+                    )
+                );
+
+                this.spikeService.Spike(
+                    spikeTargets,
+                    this
+                );
+            }
 
             this.Collided?.Invoke(this, new CollidedEventArgs(info));
         }
@@ -268,35 +333,6 @@ namespace ei8.Prototypes.HelloWorm
             }
 
             return bResult;
-        }
-
-        public bool ProcessFire(FireInfo fireInfo)
-        {
-            bool result = false;
-
-            this.fireHistory.Clean(
-                (nfi) => nfi.Timestamp,
-                fireInfo.Timestamp.Subtract(this.relativeSpikesPeriod)
-            );
-
-            this.fireHistory.TryAdd(fireInfo.Timestamp, fireInfo);
-
-            if (
-                this.rotationNeuron != null &&
-                this.fireHistory.Values.TryFauxDeneurULizeInvoke(
-                    this.rotationNeuron.Id,
-                    this.directionValueDictionary!,
-                    this.degreesValueDictionary!,
-                    out RotationDirection? parameter1,
-                    out RotationDegrees? parameter2
-                )
-            )
-            {
-                this.Rotate(parameter1.Value, parameter2.Value);
-                result = true;
-            }
-
-            return result;
         }
 
         public void Initialize(Network? network, IEnumerable<MirrorConfig>? mirrorConfigs)

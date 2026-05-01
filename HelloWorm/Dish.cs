@@ -29,11 +29,10 @@ namespace ei8.Prototypes.HelloWorm
 
         private int timerResolution;
         private readonly IServiceProvider serviceProvider;
-        private readonly ISpikeService spikeService;
 
         private object IndexLock { get; } = new();
 
-        public Dish(IServiceProvider serviceProvider, ISpikeService spikeService)
+        public Dish(IServiceProvider serviceProvider)
         {
             this.Location = new Point(0, 0);
             this.Size = Size.Empty;
@@ -59,22 +58,6 @@ namespace ei8.Prototypes.HelloWorm
             this.EmissionInterval = 500;
 
             this.serviceProvider = serviceProvider;
-            this.spikeService = spikeService;
-            this.spikeService.Triggered += this.SpikeService_Triggered;
-            this.spikeService.Fired += this.SpikeService_Fired;
-        }
-
-        private void SpikeService_Triggered(object? sender, TriggeredEventArgs e)
-        {
-            Dish.logger.Debug(new LogMessageGenerator(() => $"{this.Name} - Triggered: {e.Source.Id}:'{e.Source.Tag}'"));
-        }
-
-        private void SpikeService_Fired(object? sender, FiredEventArgs e)
-        {
-            if (e.Sender is ISpikable spikable)
-                spikable.ProcessFire(e.FireInfo);
-
-            Dish.logger.Debug(new LogMessageGenerator(() => $"{this.Name} - Fired: {e.FireInfo.Target.Id}:'{e.FireInfo.Target.Tag}'"));
         }
 
         public void ProcessTick()
@@ -211,24 +194,6 @@ namespace ei8.Prototypes.HelloWorm
             {
                 this.Remove(food);
                 worm2.Grow();
-            }
-
-            if (
-                sender is ISpikable spikable &&
-                spikable.TryGetSpikeTargets(
-                    e.Info.Source,
-                    e.Info.Target,
-                    out IEnumerable<Guid>? spikeTargets
-                )
-            )
-            {
-#if DEBUG
-                // Debug.WriteLine($"{info.Target.GetType()} spiking Sector {sectorId}" + @"\\\\\\\\\\\\\\\\\\\\\\\\\\\\");
-#endif
-                this.spikeService.Spike(
-                    spikeTargets,
-                    spikable
-                );
             }
         }
 

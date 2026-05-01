@@ -7,13 +7,12 @@ namespace ei8.Prototypes.HelloWorm.Spiker
 {
     public interface ISpikable : INeurULized
     {
+        // TODO: transfer to extension methods
         bool TryGetSpikeTargets<TS, TT>(TS source, TT target, [NotNullWhen(true)] out IEnumerable<Guid>? result)
             where TS : notnull
             where TT : notnull;
 
         ConcurrentDictionary<Guid, SpikeInfo> SpikeHistory { get; }
-
-        bool ProcessFire(FireInfo fireInfo);
 
         void Initialize(Network? network, IEnumerable<MirrorConfig>? mirrorConfigs);
 
