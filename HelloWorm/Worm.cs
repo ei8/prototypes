@@ -96,39 +96,47 @@ namespace ei8.Prototypes.HelloWorm
 
         private void SpikeService_Triggered(object? sender, TriggeredEventArgs e)
         {
-            Worm.logger.Debug(new LogMessageGenerator(() => $"Triggered: {e.Source.Id}:'{e.Source.Tag}'"));
+            Worm.logger.Debug(new LogMessageGenerator(() => $"Triggered: {e.Source.ToReadableString()}"));
         }
 
         private void SpikeService_Fired(object? sender, FiredEventArgs e)
         {
-            if (e.Sender is ISpikable spikable)
-            {
-                // TODO: Transfer to extension method
-                this.fireHistory.Clean(
-                    (nfi) => nfi.Timestamp,
-                    e.FireInfo.Timestamp.Subtract(this.relativeSpikesPeriod)
-                );
-
-                this.fireHistory.TryAdd(e.FireInfo.Timestamp, e.FireInfo);
-
-                if (
-                    this.rotationNeuron != null &&
-                    this.fireHistory.Values.TryFauxDeneurULizeInvoke(
-                        this.rotationNeuron.Id,
-                        this.directionValueDictionary!,
-                        this.degreesValueDictionary!,
-                        out RotationDirection? parameter1,
-                        out RotationDegrees? parameter2
-                    )
+            if (
+                this.rotationNeuron != null &&
+                this.directionValueDictionary != null &&
+                this.degreesValueDictionary != null &&
+                this.TryParseMotorNeurons(
+                    e.FireInfo,
+                    [
+                        new ResponseParser(
+                            new Predicate<FireInfo>(
+                                fi =>
+                                    this.directionValueDictionary.ContainsKey(fi.Target.Id) ||
+                                    this.degreesValueDictionary.ContainsKey(fi.Target.Id)
+                            ),
+                            this.rotationNeuron.Id,
+                            [
+                                // and any parameter1 was fired
+                                new ParameterConverter(
+                                    (fi, [NotNullWhen(true)] out or) =>
+                                        fi.TryGetFiredParameter(this.directionValueDictionary, out or)
+                                ),
+                                // and any parameter2 was fired
+                                new ParameterConverter(
+                                    (fi, [NotNullWhen(true)] out or2) =>
+                                        fi.TryGetFiredParameter(this.degreesValueDictionary, out or2)
+                                )
+                            ]
+                        )
+                    ],
+                    out IEnumerable<object>? parseResult
                 )
-                {
-                    this.Rotate(parameter1.Value, parameter2.Value);
-                }
-                else
-                    Worm.logger.Debug(new LogMessageGenerator(() => $"Invoke failed: {this.invokeFailureCount++}"));
-            }
+            )
+                this.Rotate((RotationDirection)parseResult.ElementAt(0), (RotationDegrees)parseResult.ElementAt(1));
+            else
+                Worm.logger.Trace(new LogMessageGenerator(() => $"Invoke failed: {this.invokeFailureCount++}"));
 
-            Worm.logger.Debug(new LogMessageGenerator(() => $"Fired: {e.FireInfo.Target.Id}:'{e.FireInfo.Target.Tag}'"));
+            Worm.logger.Debug(new LogMessageGenerator(() => $"Fired: {e.FireInfo.Target.ToReadableString()}"));
         }
 
         private static IEnumerable<Sector> InitializeSectors()
@@ -166,7 +174,9 @@ namespace ei8.Prototypes.HelloWorm
 
         public Network? Network => this.network;
 
-        public ConcurrentDictionary<Guid, SpikeInfo> SpikeHistory => this.spikeHistory;
+        public IDictionary<DateTime, FireInfo> FireHistory => this.fireHistory;
+
+        public IDictionary<Guid, SpikeInfo> NeuronSpikeHistory => this.spikeHistory;
 
         public float ProcessingRatio => ((float)this.rotationCount / (float)this.collisionCount) * 100f;
 
@@ -179,10 +189,10 @@ namespace ei8.Prototypes.HelloWorm
             Worm.logger.Info(
                 new LogMessageGenerator(
                     () => 
-                    $"Rotating {direction} {degrees}. [Total: {this.rotationCount++}; " +
+                    $"Rotating {direction} {degrees}. [Total: {++this.rotationCount}; " +
                     $"Processing ratio: { Math.Round(this.ProcessingRatio)}%]"
                 )
-           );
+            );
 
             this.Direction += ((int)degrees) * (direction == RotationDirection.Clockwise ? 1 : -1);
         }
@@ -245,28 +255,44 @@ namespace ei8.Prototypes.HelloWorm
 
         public void Collide(CollisionInfo info)
         {
-            if (info.Target is not Food)
-                Worm.logger.Info(new LogMessageGenerator(() => $"Collided with {info.Target.GetType()}, rotation-required. [Total: {this.collisionCount++}]"));
+            if (info.Receiver is not Food)
+                Worm.logger.Info(new LogMessageGenerator(() => $"Collided with {info.Receiver.GetType()}, rotation-required. [Total: {++this.collisionCount}]"));
 
-            if (this.TryGetSpikeTargets(
-                    info.Source,
-                    info.Target,
-                    out IEnumerable<Guid>? spikeTargets
+            if (
+                this.sectorsValueDictionary != null &&
+                this.targetsValueDictionary != null &&
+                this.TryParseSensoryNeurons(
+                    [
+                        new StimulusParser(
+                            StimulusType.Internal,
+                            (o) => o is ISectoral,
+                            (o) => {
+                                var sectorId = this.Components.OfType<Nose>().Single().GetSectorId((ISectoral) o);
+                                return this.sectorsValueDictionary[Enum.Parse<SectorValues>("Sector" + sectorId)];
+                            }
+                        ),
+                        new StimulusParser(
+                            StimulusType.External,
+                            (o) => o is not Food,
+                            (o) => this.targetsValueDictionary[o.GetType().ToKeyString()]
+                        )
+                    ],
+                    out IEnumerable<Guid>? result,
+                    // Collision cause is internal eg. Nose Sector
+                    new StimulusInfo(StimulusType.Internal, info.Cause),
+                    // Collision receiver is external eg. Dish, Food
+                    new StimulusInfo(StimulusType.External, info.Receiver)
                 )
             )
             {
                 Worm.logger.Debug(
                     new LogMessageGenerator(
-                        () => 
-                            $"{info.Target.GetType()} stimulating Sector " +
-                            $"{this.Components.OfType<Nose>().Single().GetSectorId((ISectoral) info.Source)}"
+                        () =>
+                            $"{info.Receiver.GetType()} stimulating Sector " +
+                            $"{this.Components.OfType<Nose>().Single().GetSectorId((ISectoral)info.Cause)}"
                     )
                 );
-
-                this.spikeService.Spike(
-                    spikeTargets,
-                    this
-                );
+                this.spikeService.Spike(result, this);
             }
 
             this.Collided?.Invoke(this, new CollidedEventArgs(info));
@@ -298,41 +324,6 @@ namespace ei8.Prototypes.HelloWorm
             this.Location = new Point(center.Width, center.Height);
             this.Size = Worm.GetSizeByWidth(wormWidth);
             this.Speed = Worm.GetSpeedByWidth(wormWidth);
-        }
-
-        public bool TryGetSpikeTargets<TS, TT>(TS source, TT target, [NotNullWhen(true)] out IEnumerable<Guid>? result)
-            where TS : notnull
-            where TT : notnull
-        {
-            var bResult = false;
-            result = null;
-
-            if (source is ISectoral sector)
-            {
-                var sectorId = this.Components.OfType<Nose>().Single().GetSectorId(sector);
-
-                AssertionConcern.AssertArgumentValid(
-                    si => si > 0 && si <= Constants.Worm.SectorCount,
-                    sectorId,
-                    "Sector ID must in the range 1 to 8.",
-                    nameof(sectorId)
-                );
-
-                if (
-                    this.sectorsValueDictionary != null &&
-                    this.targetsValueDictionary != null &&
-                    target is not Food
-                )
-                {
-                    result = [
-                        this.sectorsValueDictionary[Enum.Parse<SectorValues>("Sector" + sectorId)],
-                        this.targetsValueDictionary[target.GetType().ToKeyString()]
-                    ];
-                    bResult = true;
-                }
-            }
-
-            return bResult;
         }
 
         public void Initialize(Network? network, IEnumerable<MirrorConfig>? mirrorConfigs)

@@ -1,5 +1,4 @@
-﻿using ei8.Prototypes.HelloWorm.Spiker;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using NLog;
 using System.Collections.Immutable;
 using System.Collections.Specialized;
@@ -176,24 +175,26 @@ namespace ei8.Prototypes.HelloWorm
 
         private void Movable_Collided(object? sender, CollidedEventArgs e)
         {
-            if (sender is Odor odor && e.Info.Target is Dish)
+            if (e.Info.Cause is Odor odor && e.Info.Receiver is Dish)
             {
                 this.Remove(odor);
             }
             else if (
-                sender is Worm worm &&
-                e.Info.Target is Odor odor2
+                e.Info.Cause is ISectoral &&
+                e.Info.Receiver is Odor odor2
             )
             {
                 this.Remove(odor2);
             }
             else if (
-                sender is Worm worm2 &&
-                e.Info.Target is Food food
+                // TODO: create responseParser for Grow
+                // e.Info.Cause is ISectoral &&
+                sender is Worm worm &&
+                e.Info.Receiver is Food food
             )
             {
                 this.Remove(food);
-                worm2.Grow();
+                worm.Grow();
             }
         }
 

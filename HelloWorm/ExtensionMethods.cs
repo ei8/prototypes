@@ -40,102 +40,139 @@ namespace ei8.Prototypes.HelloWorm
         #endregion
 
         #region Spiker
+        public static bool TryParseSensoryNeurons(
+            this ISpikable spikable, 
+            IEnumerable<StimulusParser> parsers, 
+            [NotNullWhen(true)] out IEnumerable<Guid>? result,
+            params StimulusInfo[] stimuli
+        )
+        {
+            var bResult = false;
+            result = null;
+            var tempList = new List<Guid>();
+
+            foreach (var stimulus in stimuli)
+            {
+                StimulusParser? parser = null;
+                if (
+                    (
+                        parser = parsers
+                            .Where(p => p.Type == stimulus.Type)
+                            .SingleOrDefault(p => p.Evaluator(stimulus.Value))
+                    ) != null
+                )
+                    tempList.Add(parser.IdConverter(stimulus.Value));
+            }
+
+            if (tempList.Count() == stimuli.Length)
+            {
+                bResult = true;
+                result = tempList;
+            }
+
+            return bResult;
+        }
+
+        private static readonly object parseLock = new object();
+
         /// <summary>
-        /// As indicated, this is a temporary approach. 
+        /// This might be a temporary approach. 
         /// Ideally, the fired neurons for a method and its parameters
         /// should be retrieved via mirrors if necessary, deneurULized, cached and invoked accordingly. 
         /// eg. Rotate Method (granny), Clockwise Direction Parameter (granny), 22.5 Float Degrees Parameter (granny)
         /// Using Method (class), MethodParameter (class)
         /// </summary>
-        /// <typeparam name="T1"></typeparam>
-        /// <typeparam name="T2"></typeparam>
-        /// <param name="fireInfos"></param>
-        /// <param name="methodNeuronId"></param>
-        /// <param name="param1ValueMap"></param>
-        /// <param name="param2ValueMap"></param>
-        /// <param name="parameter1"></param>
-        /// <param name="parameter2"></param>
+        /// <param name="spikable"></param>
+        /// <param name="currentFire"></param>
+        /// <param name="responseParsers"></param>
+        /// <param name="result"></param>
         /// <returns></returns>
-        internal static bool TryFauxDeneurULizeInvoke<T1, T2>(
-            this IEnumerable<FireInfo> fireInfos,
-            Guid methodNeuronId,
-            IDictionary<Guid, T1> param1ValueMap,
-            IDictionary<Guid, T2> param2ValueMap,
-            [NotNullWhen(true)] out T1? parameter1,
-            [NotNullWhen(true)] out T2? parameter2
+        public static bool TryParseMotorNeurons(
+            this ISpikable spikable,
+            FireInfo currentFire,
+            IEnumerable<ResponseParser> responseParsers,
+            [NotNullWhen(true)] out IEnumerable<object>? result
         )
-            where T1 : struct
-            where T2 : struct
         {
-            bool result = false;
-            parameter1 = default;
-            parameter2 = default;
+            bool bResult = false;
+            result = null;
+            var tempResults = new List<object>();
 
-            FireInfo? latestFire = fireInfos.LastOrDefault();
-            // if last fired is one of the anticipated neurons
-            // TODO: anticipated neurons can include instantiates grannies (eg. instantiates^methodParameter) to optimize recognition,
-            // ie. no need to recognize all possible values
-            if (
-                latestFire.HasValue &&
-                (
-                    latestFire.Value.Target.Id == methodNeuronId ||
-                    param1ValueMap.ContainsKey(latestFire.Value.Target.Id) ||
-                    param2ValueMap.ContainsKey(latestFire.Value.Target.Id)
-                )
-            )
+            lock (ExtensionMethods.parseLock)
             {
-                // if number of related fires equals method + 2 parameters
-                if (fireInfos.Count() >= 3)
-                {
-#if DEBUG
-                    //Debug.WriteLine($"Related Fires (Micros): {string.Join(
-                    //        ", ",
-                    //        neuronFireInfos.Select(rf =>
-                    //            rf.Neuron.Tag +
-                    //            " (" +
-                    //            latestFire.FireInfo.Timestamp.Subtract(rf.FireInfo.Timestamp).TotalMicroseconds +
-                    //            ")"
-                    //         )
-                    //    )}");
-#endif
-                    if (
-                        // and specified method was fired
-                        fireInfos.Any(n => n.Target.Id == methodNeuronId) &&
-                        // and any param1 was fired
-                        fireInfos.TryGetFiredParameter(param1ValueMap, out parameter1) &&
-                        // and any param2 was fired
-                        fireInfos.TryGetFiredParameter(param2ValueMap, out parameter2)
-                    )
+                ConcurrentDictionary<DateTime, FireInfo> fireHistory = (ConcurrentDictionary<DateTime, FireInfo>)spikable.FireHistory;
+                fireHistory.Clean(currentFire.Timestamp.Subtract(spikable.RelativeSpikesPeriod));
+                fireHistory.TryAdd(currentFire.Timestamp, currentFire);
+
+                // if last fired is one of the anticipated neurons
+                // TODO: anticipated neurons can include instantiates grannies (eg. instantiates^methodParameter) to optimize recognition,
+                // ie. no need to recognize all possible values
+                foreach (var rp in responseParsers)
+                    if (currentFire.Target.Id == rp.ActionNeuronId || rp.Evaluator(currentFire))
                     {
-                        result = true;
+                        // if number of related fires equals eg. 2 parameters + 1 method
+                        if (fireHistory.Count() >= rp.ParameterConverters.Count() + 1)
+                        {
+                            ExtensionMethods.logger.Debug(
+                                new LogMessageGenerator(() =>
+                                    $"Related Fires (Micros): {string.Join(
+                                        ", ",
+                                        fireHistory.Select(rf =>
+                                            rf.Value.Target.ToReadableString() +
+                                            " (" +
+                                                currentFire.Timestamp.Subtract(rf.Value.Timestamp).TotalMicroseconds +
+                                            ")"
+                                         )
+                                    )}"
+                                )
+                            );
+                            // and specified method was fired within relative spikes period
+                            if (fireHistory.Any(n => n.Value.Target.Id == rp.ActionNeuronId))
+                            {
+                                foreach (var pc in rp.ParameterConverters)
+                                {
+                                    foreach (var fi in fireHistory.Values)
+                                    {
+                                        if (pc.Invoke(fi, out object? objectResult))
+                                        {
+                                            tempResults.Add(objectResult);
+
+                                            if (tempResults.Count() == rp.ParameterConverters.Count())
+                                            {
+                                                fireHistory.Clear();
+                                                bResult = true;
+                                                result = tempResults;
+                                            }
+                                            break;
+                                        }
+                                    }
+
+                                    if (bResult)
+                                        break;
+                                }
+                            }
+                        }
                     }
-                }
             }
-            return result;
+
+            return bResult;
         }
 
-        private static bool TryGetFiredParameter<T1>(this IEnumerable<FireInfo> fireInfos, IDictionary<Guid, T1> paramValueMap, out T1? parameter) where T1 : struct
+        public static bool TryGetFiredParameter<T>(this FireInfo fireInfo, IDictionary<Guid, T> paramValueMap, out object? parameter)
         {
             parameter = null;
 
-            foreach (var nfi in fireInfos)
-                if (paramValueMap.ContainsKey(nfi.Target.Id))
-                {
-                    parameter = paramValueMap[nfi.Target.Id];
-                    break;
-                }
+            if (paramValueMap.ContainsKey(fireInfo.Target.Id))
+                parameter = paramValueMap[fireInfo.Target.Id];
 
             return parameter != null;
         }
 
-        public static void Clean<T>(this ConcurrentDictionary<DateTime, T> concurrentDictionary, Func<T, DateTime> timestampRetriever, DateTime maxTimestamp)
+        public static void Clean<T>(this ConcurrentDictionary<DateTime, T> concurrentDictionary, DateTime maxTimestamp)
         {
-            foreach (var nfi in concurrentDictionary.Values)
-            {
-                var ts = timestampRetriever(nfi);
-                if (ts < maxTimestamp)
-                    concurrentDictionary.Remove(ts, out _);
-            }
+            foreach (var nfi in concurrentDictionary)
+                if (nfi.Key < maxTimestamp)
+                    concurrentDictionary.Remove(nfi.Key, out _);
         }
 
         public static Neuron ValidateGet(this Network network, Guid id)
@@ -146,12 +183,17 @@ namespace ei8.Prototypes.HelloWorm
                 throw new ArgumentException($"Neuron with specified Id '{id}' was not found.");
         }
 
-        public static string ToString(this Neuron neuron)
+        public static string ToReadableString(this Neuron neuron)
         {
             return $"{neuron.Id}:Neuron '{neuron.Tag}'";
         }
 
-        public static bool TryGetAdd<TKey, TValue>(this ConcurrentDictionary<TKey, TValue> dictionary, TKey key, Func<TKey, TValue> valueCreator, out TValue? result)
+        public static bool TryGetAdd<TKey, TValue>(
+            this ConcurrentDictionary<TKey, TValue> dictionary, 
+            TKey key, 
+            Func<TKey, TValue> valueCreator, 
+            [NotNullWhen(true)] out TValue? result
+        )
             where TKey : notnull
         {
             var bResult = false;
@@ -350,7 +392,7 @@ namespace ei8.Prototypes.HelloWorm
                     if (maxSectors.Count() > 1)
                         ExtensionMethods.logger.Debug(
                             new LogMessageGenerator(
-                                () => "Multiple sectors collided equally: " + string.Join(";", maxSectors.Select(mt => ((Sector)mt.Source).StartAngle))
+                                () => "Multiple sectors collided equally: " + string.Join(";", maxSectors.Select(mt => ((Sector)mt.Cause).StartAngle))
                             )
                         );
 
@@ -361,17 +403,17 @@ namespace ei8.Prototypes.HelloWorm
             return result;
         }
 
-        internal static CollisionInfo? GetCollisionInfo(this SectorPointInfo sp, IEnumerable<IRectangular> components)
+        internal static CollisionInfo? GetCollisionInfo(this SectorPointInfo sectorPointInfo, IEnumerable<IRectangular> components)
         {
             CollisionInfo? result = null;
 
-            foreach (var c in components)
+            foreach (var component in components)
             {
-                if (sp.Path.IsVisible(c.GetRectangle().Location))
+                if (sectorPointInfo.Path.IsVisible(component.GetRectangle().Location))
                 {
                     result = new(
-                        c,
-                        sp.Sector,
+                        component,
+                        sectorPointInfo.Sector,
                         1
                     );
                     break;

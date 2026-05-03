@@ -1,10 +1,16 @@
 ﻿using ei8.Cortex.Coding;
 using ei8.Prototypes.HelloWorm;
+using NLog;
+using System.Collections.Concurrent;
+using System.Diagnostics;
+using System.Windows;
 
 namespace ei8.Prototypes.HelloWorm.Spiker
 {
     public class SpikeService : ISpikeService
     {
+        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
+
         public event EventHandler<TriggeredEventArgs>? Triggered;
 
         public event EventHandler<FiredEventArgs>? Fired;
@@ -13,7 +19,7 @@ namespace ei8.Prototypes.HelloWorm.Spiker
             Neuron target,
             SpikeOrigin origin,
             TriggerInfo trigger,
-            IEnumerable<FireInfo> path,
+            IEnumerable<FireInfo> reflexArc,
             ISpikable spikable,
             Action<TriggeredEventArgs> triggeredCallback,
             Action<FiredEventArgs> firedCallback
@@ -25,7 +31,7 @@ namespace ei8.Prototypes.HelloWorm.Spiker
 
             public TriggerInfo Trigger { get; } = trigger;
 
-            public IEnumerable<FireInfo> Path { get; } = path;
+            public IEnumerable<FireInfo> ReflexArc { get; } = reflexArc;
 
             public ISpikable Spikable { get; } = spikable;
 
@@ -73,30 +79,26 @@ namespace ei8.Prototypes.HelloWorm.Spiker
         
         private static void SpikeCore(SpikeCallbackParameters state)
         {
-            if (state.Spikable.SpikeHistory.TryGetAdd(state.Target.Id, id => new(), out SpikeInfo? spikeInfo))
+            if (((ConcurrentDictionary<Guid, SpikeInfo>)state.Spikable.NeuronSpikeHistory).TryGetAdd(state.Target.Id, id => new(), out SpikeInfo? spikeInfo))
             {
-                spikeInfo!.Triggers.Clean((ti) => ti.Timestamp, state.Trigger.Timestamp.Subtract(state.Spikable.RefractoryPeriod));
-                spikeInfo.Triggers.TryAdd(state.Trigger.Timestamp, state.Trigger);
+                var dateTimeTriggers = (ConcurrentDictionary<DateTime, TriggerInfo>)spikeInfo.Triggers;
+                dateTimeTriggers.Clean(state.Trigger.Timestamp.Subtract(state.Spikable.RefractoryPeriod));
+                dateTimeTriggers.TryAdd(state.Trigger.Timestamp, state.Trigger);
 
                 ICollection<TriggerInfo> triggers = spikeInfo.Triggers.Values;
 
-                int sumCharge = SpikeService.GetSumCharge(triggers);
+                int sumCharge = SpikeService.GetSumCharge(triggers, state.Target);
 
                 state.TriggeredCallback(
                     new TriggeredEventArgs(
-                        state.Spikable,
                         state.Target,
                         state.Origin,
                         state.Trigger,
                         sumCharge,
-                        state.Path
+                        state.ReflexArc
                     )
                 );
-
-                #region DEBUG
-                // Debug.WriteLine($"EffectiveTriggers: {this.triggerInfos.Count()}; Sum charge: {positiveCharge} + {negativeCharge} = {sumCharge} ({this.Data})");
-                #endregion
-
+                
                 // if spiked enough and spiked after repolarization
                 if (
                     sumCharge >= Constants.Spiker.DefaultThreshold &&
@@ -110,7 +112,6 @@ namespace ei8.Prototypes.HelloWorm.Spiker
                     spikeInfo.LastFire = spikeResultingFireInfo;
                     state.FiredCallback(
                         new FiredEventArgs(
-                            state.Spikable,
                             spikeResultingFireInfo,
                             sumCharge
                         )
@@ -126,7 +127,7 @@ namespace ei8.Prototypes.HelloWorm.Spiker
                                         state.Spikable.Network.ValidateGet(t.PostsynapticNeuronId),
                                         state.Origin,
                                         new TriggerInfo(DateTime.Now, t.Effect, t.Strength, state.Target.Id),
-                                        state.Path.Concat([spikeResultingFireInfo]),
+                                        state.ReflexArc.Concat([spikeResultingFireInfo]),
                                         state.Spikable,
                                         state.TriggeredCallback,
                                         state.FiredCallback
@@ -141,11 +142,18 @@ namespace ei8.Prototypes.HelloWorm.Spiker
                 throw new InvalidOperationException($"SpikeInfo for neuron '{state.Target.Id}' was not found.");
         }
 
-        private static int GetSumCharge(ICollection<TriggerInfo> tis)
+        private static int GetSumCharge(ICollection<TriggerInfo> triggers, Neuron target)
         {
-            var positiveCharge = SpikeService.GetChargeByEffect(tis, NeurotransmitterEffect.Excite);
-            var negativeCharge = SpikeService.GetChargeByEffect(tis, NeurotransmitterEffect.Inhibit);
+            var positiveCharge = SpikeService.GetChargeByEffect(triggers, NeurotransmitterEffect.Excite);
+            var negativeCharge = SpikeService.GetChargeByEffect(triggers, NeurotransmitterEffect.Inhibit);
             var sumCharge = (int)(Constants.Spiker.RestingPotential + positiveCharge + negativeCharge);
+
+            SpikeService.logger.Debug(
+                new LogMessageGenerator(() =>
+                    $"EffectiveTriggers: {triggers.Count()}; " +
+                    $"Sum charge: {positiveCharge} + {negativeCharge} = {sumCharge} ({target.ToReadableString()})")
+            );
+
             return sumCharge;
         }
 
