@@ -46,6 +46,7 @@
             toolStrip1.Name = "toolStrip1";
             toolStrip1.Size = new Size(800, 450);
             toolStrip1.TabIndex = 1;
+            toolStrip1.TabStop = true;
             // 
             // tsbFood
             // 
@@ -56,6 +57,7 @@
             tsbFood.Name = "tsbFood";
             tsbFood.Size = new Size(798, 20);
             tsbFood.Text = "Food";
+            tsbFood.Click += tsbFood_DoubleClick;
             tsbFood.DoubleClick += tsbFood_DoubleClick;
             // 
             // tsbWorm
@@ -67,6 +69,7 @@
             tsbWorm.Name = "tsbWorm";
             tsbWorm.Size = new Size(798, 20);
             tsbWorm.Text = "Worm";
+            tsbWorm.Click += tsbWorm_DoubleClick;
             tsbWorm.DoubleClick += tsbWorm_DoubleClick;
             // 
             // tslblNoUsableControls
@@ -90,10 +93,9 @@
         }
 
         #endregion
-
-        private ToolStrip toolStrip1;
         private ToolStripButton tsbFood;
         private ToolStripButton tsbWorm;
         private ToolStripLabel tslblNoUsableControls;
+        private ToolStrip toolStrip1;
     }
 }

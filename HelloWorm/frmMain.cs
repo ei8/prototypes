@@ -338,23 +338,55 @@ namespace ei8.Prototypes.HelloWorm
 
         private void mnuViewResetPeripherals_Click(object sender, EventArgs e)
         {
-            var fp = this.serviceProvider.GetRequiredService<frmProperties>();
-            fp.Show(this.dockPanel1, DockState.DockRight);
+            this.mnuViewProperties_Click(sender, EventArgs.Empty);
 
-            var tb = this.serviceProvider.GetRequiredService<frmToolbox>();
-            tb.Show(this.dockPanel1, DockState.DockLeftAutoHide);
+            this.mnuViewToolbox_Click(this, EventArgs.Empty);
 
-            var o = this.serviceProvider.GetRequiredService<frmOutput>();
-            o.Show(this.dockPanel1, DockState.DockBottom);
+            this.mnuViewOutput_Click(this, EventArgs.Empty);
 
-            var pe = this.serviceProvider.GetRequiredService<frmProjectExplorer>();
-            pe.Show(this.dockPanel1.Panes[0], DockAlignment.Top, 0.50);
+            this.mnuViewProjectExplorer_Click(this, EventArgs.Empty);
         }
 
         private void mnuViewCode_Click(object sender, EventArgs e)
         {
             var fc = this.serviceProvider.GetRequiredService<frmCode>();
             fc.Show(this.dockPanel1, DockState.Document);
+        }
+
+        private void mnuTimePlay_Click(object sender, EventArgs e)
+        {
+            this.tsbTemporalPlay_Click(sender, EventArgs.Empty);
+        }
+
+        private void mnuTimePause_Click(object sender, EventArgs e)
+        {
+            this.tsbTemporalPause_Click(sender, EventArgs.Empty);
+        }
+
+        private void mnuViewToolbox_Click(object sender, EventArgs e)
+        {
+            var tb = this.serviceProvider.GetRequiredService<frmToolbox>();
+            tb.Show(this.dockPanel1, DockState.DockLeftAutoHide);
+            tb.Pane.Show();
+            tb.Activate();
+        }
+
+        private void mnuViewProjectExplorer_Click(object sender, EventArgs e)
+        {
+            var pe = this.serviceProvider.GetRequiredService<frmProjectExplorer>();
+            pe.Show(this.dockPanel1.Panes[0], DockAlignment.Top, 0.50);
+        }
+
+        private void mnuViewProperties_Click(object sender, EventArgs e)
+        {
+            var fp = this.serviceProvider.GetRequiredService<frmProperties>();
+            fp.Show(this.dockPanel1, DockState.DockRight);
+        }
+
+        private void mnuViewOutput_Click(object sender, EventArgs e)
+        {
+            var o = this.serviceProvider.GetRequiredService<frmOutput>();
+            o.Show(this.dockPanel1, DockState.DockBottom);
         }
     }
 }

@@ -16,8 +16,8 @@ namespace ei8.Prototypes.HelloWorm
         private readonly INeuronQueryClient neuronQueryClient;
 
         public frmToolbox(
-            IServiceProvider serviceProvider, 
-            ISelectionService selectionService, 
+            IServiceProvider serviceProvider,
+            ISelectionService selectionService,
             ISettingsService settingsService,
             INeuronQueryClient neuronQueryClient
         )
@@ -32,6 +32,14 @@ namespace ei8.Prototypes.HelloWorm
 
             this.HideOnClose = true;
         }
+
+        // TODO: necessary?
+        //internal void FocusFirstItem()
+        //{
+        //    this.toolStrip1.Focus();
+        //    if (this.toolStrip1.Items.Count > 0)
+        //        this.toolStrip1.Items[0].Select();
+        //}
 
         private void SelectionService_SelectionChanged(object? sender, EventArgs e)
         {
@@ -59,9 +67,9 @@ namespace ei8.Prototypes.HelloWorm
                 this.selectionService.PrimarySelection is Dish d &&
                 this.settingsService.Mirrors != null
             )
-            { 
+            {
                 string neuronQuery = InputBox.ShowDialog(this, "neurUL Query", "http://fibona.cc/worm1/av8r/cortex/neurons?sortorder=1&sortby=1&pagesize=29&depth=5&direction=1");
-                if (!string.IsNullOrEmpty(neuronQuery) && 
+                if (!string.IsNullOrEmpty(neuronQuery) &&
                     neuronQuery.Contains('?') &&
                     QueryUrl.TryParse(neuronQuery, out QueryUrl queryUrl) &&
                     NeuronQuery.TryParse(queryUrl.QueryString, out NeuronQuery query)

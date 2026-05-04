@@ -42,11 +42,19 @@
             mnuView = new ToolStripMenuItem();
             mnuViewCode = new ToolStripMenuItem();
             toolStripSeparator3 = new ToolStripSeparator();
+            mnuViewToolbox = new ToolStripMenuItem();
+            mnuViewProjectExplorer = new ToolStripMenuItem();
+            mnuViewProperties = new ToolStripMenuItem();
+            mnuViewOutput = new ToolStripMenuItem();
+            toolStripSeparator4 = new ToolStripSeparator();
             mnuViewResetPeripherals = new ToolStripMenuItem();
             mnuProject = new ToolStripMenuItem();
             mnuProjectAddDish = new ToolStripMenuItem();
             toolStripSeparator1 = new ToolStripSeparator();
             mnuProjectSettings = new ToolStripMenuItem();
+            toolStripMenuItem2 = new ToolStripMenuItem();
+            mnuTimePlay = new ToolStripMenuItem();
+            mnuTimePause = new ToolStripMenuItem();
             toolStripMenuItem1 = new ToolStripMenuItem();
             mnuToolsInitializeAvatar = new ToolStripMenuItem();
             helpToolStripMenuItem = new ToolStripMenuItem();
@@ -112,7 +120,7 @@
             // menuStrip1
             // 
             menuStrip1.Dock = DockStyle.None;
-            menuStrip1.Items.AddRange(new ToolStripItem[] { toolStripMenuItem3, mnuView, mnuProject, toolStripMenuItem1, helpToolStripMenuItem });
+            menuStrip1.Items.AddRange(new ToolStripItem[] { toolStripMenuItem3, mnuView, mnuProject, toolStripMenuItem2, toolStripMenuItem1, helpToolStripMenuItem });
             menuStrip1.Location = new Point(0, 0);
             menuStrip1.Name = "menuStrip1";
             menuStrip1.Size = new Size(800, 24);
@@ -130,25 +138,27 @@
             // 
             mnuFileNewProject.Image = (Image)resources.GetObject("mnuFileNewProject.Image");
             mnuFileNewProject.Name = "mnuFileNewProject";
-            mnuFileNewProject.Size = new Size(138, 22);
+            mnuFileNewProject.ShortcutKeys = Keys.Control | Keys.N;
+            mnuFileNewProject.Size = new Size(181, 22);
             mnuFileNewProject.Text = "New &Project";
             mnuFileNewProject.Click += mnuFileNewProject_Click;
             // 
             // toolStripSeparator2
             // 
             toolStripSeparator2.Name = "toolStripSeparator2";
-            toolStripSeparator2.Size = new Size(135, 6);
+            toolStripSeparator2.Size = new Size(178, 6);
             // 
             // exitToolStripMenuItem
             // 
             exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            exitToolStripMenuItem.Size = new Size(138, 22);
+            exitToolStripMenuItem.ShortcutKeys = Keys.Alt | Keys.F4;
+            exitToolStripMenuItem.Size = new Size(181, 22);
             exitToolStripMenuItem.Text = "E&xit";
             exitToolStripMenuItem.Click += exitToolStripMenuItem_Click;
             // 
             // mnuView
             // 
-            mnuView.DropDownItems.AddRange(new ToolStripItem[] { mnuViewCode, toolStripSeparator3, mnuViewResetPeripherals });
+            mnuView.DropDownItems.AddRange(new ToolStripItem[] { mnuViewCode, toolStripSeparator3, mnuViewToolbox, mnuViewProjectExplorer, mnuViewProperties, mnuViewOutput, toolStripSeparator4, mnuViewResetPeripherals });
             mnuView.Name = "mnuView";
             mnuView.Size = new Size(44, 20);
             mnuView.Text = "&View";
@@ -157,6 +167,7 @@
             // 
             mnuViewCode.Enabled = false;
             mnuViewCode.Name = "mnuViewCode";
+            mnuViewCode.ShortcutKeys = Keys.F7;
             mnuViewCode.Size = new Size(180, 22);
             mnuViewCode.Text = "&Code";
             mnuViewCode.Click += mnuViewCode_Click;
@@ -165,6 +176,39 @@
             // 
             toolStripSeparator3.Name = "toolStripSeparator3";
             toolStripSeparator3.Size = new Size(177, 6);
+            // 
+            // mnuViewToolbox
+            // 
+            mnuViewToolbox.Name = "mnuViewToolbox";
+            mnuViewToolbox.Size = new Size(180, 22);
+            mnuViewToolbox.Text = "&Toolbox";
+            mnuViewToolbox.Click += mnuViewToolbox_Click;
+            // 
+            // mnuViewProjectExplorer
+            // 
+            mnuViewProjectExplorer.Name = "mnuViewProjectExplorer";
+            mnuViewProjectExplorer.Size = new Size(180, 22);
+            mnuViewProjectExplorer.Text = "&Project Explorer";
+            mnuViewProjectExplorer.Click += mnuViewProjectExplorer_Click;
+            // 
+            // mnuViewProperties
+            // 
+            mnuViewProperties.Name = "mnuViewProperties";
+            mnuViewProperties.Size = new Size(180, 22);
+            mnuViewProperties.Text = "&Properties";
+            mnuViewProperties.Click += mnuViewProperties_Click;
+            // 
+            // mnuViewOutput
+            // 
+            mnuViewOutput.Name = "mnuViewOutput";
+            mnuViewOutput.Size = new Size(180, 22);
+            mnuViewOutput.Text = "&Output";
+            mnuViewOutput.Click += mnuViewOutput_Click;
+            // 
+            // toolStripSeparator4
+            // 
+            toolStripSeparator4.Name = "toolStripSeparator4";
+            toolStripSeparator4.Size = new Size(177, 6);
             // 
             // mnuViewResetPeripherals
             // 
@@ -200,6 +244,31 @@
             mnuProjectSettings.Text = "&Settings";
             mnuProjectSettings.Click += mnuProjectSettings_Click;
             // 
+            // toolStripMenuItem2
+            // 
+            toolStripMenuItem2.DropDownItems.AddRange(new ToolStripItem[] { mnuTimePlay, mnuTimePause });
+            toolStripMenuItem2.Name = "toolStripMenuItem2";
+            toolStripMenuItem2.Size = new Size(45, 20);
+            toolStripMenuItem2.Text = "&Time";
+            // 
+            // mnuTimePlay
+            // 
+            mnuTimePlay.Image = (Image)resources.GetObject("mnuTimePlay.Image");
+            mnuTimePlay.Name = "mnuTimePlay";
+            mnuTimePlay.ShortcutKeys = Keys.F5;
+            mnuTimePlay.Size = new Size(151, 22);
+            mnuTimePlay.Text = "Play";
+            mnuTimePlay.Click += mnuTimePlay_Click;
+            // 
+            // mnuTimePause
+            // 
+            mnuTimePause.Image = (Image)resources.GetObject("mnuTimePause.Image");
+            mnuTimePause.Name = "mnuTimePause";
+            mnuTimePause.ShortcutKeys = Keys.Control | Keys.F5;
+            mnuTimePause.Size = new Size(151, 22);
+            mnuTimePause.Text = "Pause";
+            mnuTimePause.Click += mnuTimePause_Click;
+            // 
             // toolStripMenuItem1
             // 
             toolStripMenuItem1.DropDownItems.AddRange(new ToolStripItem[] { mnuToolsInitializeAvatar });
@@ -224,7 +293,8 @@
             // aboutHelloWormToolStripMenuItem
             // 
             aboutHelloWormToolStripMenuItem.Name = "aboutHelloWormToolStripMenuItem";
-            aboutHelloWormToolStripMenuItem.Size = new Size(174, 22);
+            aboutHelloWormToolStripMenuItem.ShortcutKeys = Keys.F1;
+            aboutHelloWormToolStripMenuItem.Size = new Size(193, 22);
             aboutHelloWormToolStripMenuItem.Text = "&About Hello Worm";
             // 
             // tsTemporal
@@ -310,5 +380,13 @@
         private ToolStripMenuItem mnuViewResetPeripherals;
         private ToolStripMenuItem mnuViewCode;
         private ToolStripSeparator toolStripSeparator3;
+        private ToolStripMenuItem toolStripMenuItem2;
+        private ToolStripMenuItem mnuTimePlay;
+        private ToolStripMenuItem mnuTimePause;
+        private ToolStripMenuItem mnuViewToolbox;
+        private ToolStripMenuItem mnuViewProjectExplorer;
+        private ToolStripMenuItem mnuViewProperties;
+        private ToolStripMenuItem mnuViewOutput;
+        private ToolStripSeparator toolStripSeparator4;
     }
 }
