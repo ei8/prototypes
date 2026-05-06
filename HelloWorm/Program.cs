@@ -43,7 +43,8 @@ namespace ei8.Prototypes.HelloWorm
                     services.AddSingleton<frmProperties>();
                     services.AddSingleton<frmProjectExplorer>();
                     services.AddSingleton<frmOutput>();
-                    services.AddTransient<frmCode>();
+                    services.AddTransient<frmGraph>();
+                    services.AddTransient<frmTree>();
                     services.AddTransient<ISpikeService, SpikeService>();
                     services.AddTransient<Worm>();
                     services.AddTransient<Food>();

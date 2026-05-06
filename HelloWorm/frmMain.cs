@@ -347,9 +347,9 @@ namespace ei8.Prototypes.HelloWorm
             this.mnuViewProjectExplorer_Click(this, EventArgs.Empty);
         }
 
-        private void mnuViewCode_Click(object sender, EventArgs e)
+        private void mnuViewCodeGraph_Click(object sender, EventArgs e)
         {
-            var fc = this.serviceProvider.GetRequiredService<frmCode>();
+            var fc = this.serviceProvider.GetRequiredService<frmGraph>();
             fc.Show(this.dockPanel1, DockState.Document);
         }
 
@@ -387,6 +387,12 @@ namespace ei8.Prototypes.HelloWorm
         {
             var o = this.serviceProvider.GetRequiredService<frmOutput>();
             o.Show(this.dockPanel1, DockState.DockBottom);
+        }
+
+        private void mnuViewCodeTree_Click(object sender, EventArgs e)
+        {
+            var fc = this.serviceProvider.GetRequiredService<frmTree>();
+            fc.Show(this.dockPanel1, DockState.Document);
         }
     }
 }

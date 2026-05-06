@@ -41,6 +41,7 @@
             exitToolStripMenuItem = new ToolStripMenuItem();
             mnuView = new ToolStripMenuItem();
             mnuViewCode = new ToolStripMenuItem();
+            mnuViewCodeGraph = new ToolStripMenuItem();
             toolStripSeparator3 = new ToolStripSeparator();
             mnuViewToolbox = new ToolStripMenuItem();
             mnuViewProjectExplorer = new ToolStripMenuItem();
@@ -62,6 +63,7 @@
             tsTemporal = new ToolStrip();
             tsbTemporalPlay = new ToolStripButton();
             tsbTemporalPause = new ToolStripButton();
+            mnuViewCodeTree = new ToolStripMenuItem();
             statusStrip1.SuspendLayout();
             toolStripContainer1.ContentPanel.SuspendLayout();
             toolStripContainer1.TopToolStripPanel.SuspendLayout();
@@ -165,12 +167,19 @@
             // 
             // mnuViewCode
             // 
+            mnuViewCode.DropDownItems.AddRange(new ToolStripItem[] { mnuViewCodeGraph, mnuViewCodeTree });
             mnuViewCode.Enabled = false;
             mnuViewCode.Name = "mnuViewCode";
-            mnuViewCode.ShortcutKeys = Keys.F7;
             mnuViewCode.Size = new Size(180, 22);
             mnuViewCode.Text = "&Code";
-            mnuViewCode.Click += mnuViewCode_Click;
+            // 
+            // mnuViewCodeGraph
+            // 
+            mnuViewCodeGraph.Name = "mnuViewCodeGraph";
+            mnuViewCodeGraph.ShortcutKeys = Keys.Shift | Keys.F7;
+            mnuViewCodeGraph.Size = new Size(180, 22);
+            mnuViewCodeGraph.Text = "Graph";
+            mnuViewCodeGraph.Click += mnuViewCodeGraph_Click;
             // 
             // toolStripSeparator3
             // 
@@ -327,6 +336,14 @@
             tsbTemporalPause.ToolTipText = "Pause";
             tsbTemporalPause.Click += tsbTemporalPause_Click;
             // 
+            // mnuViewCodeTree
+            // 
+            mnuViewCodeTree.Name = "mnuViewCodeTree";
+            mnuViewCodeTree.ShortcutKeys = Keys.F7;
+            mnuViewCodeTree.Size = new Size(180, 22);
+            mnuViewCodeTree.Text = "&Tree";
+            mnuViewCodeTree.Click += mnuViewCodeTree_Click;
+            // 
             // frmMain
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -388,5 +405,7 @@
         private ToolStripMenuItem mnuViewProperties;
         private ToolStripMenuItem mnuViewOutput;
         private ToolStripSeparator toolStripSeparator4;
+        private ToolStripMenuItem mnuViewCodeGraph;
+        private ToolStripMenuItem mnuViewCodeTree;
     }
 }

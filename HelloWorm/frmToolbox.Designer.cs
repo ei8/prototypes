@@ -57,8 +57,7 @@
             tsbFood.Name = "tsbFood";
             tsbFood.Size = new Size(798, 20);
             tsbFood.Text = "Food";
-            tsbFood.Click += tsbFood_DoubleClick;
-            tsbFood.DoubleClick += tsbFood_DoubleClick;
+            tsbFood.Click += tsbFood_Click;
             // 
             // tsbWorm
             // 
@@ -69,8 +68,7 @@
             tsbWorm.Name = "tsbWorm";
             tsbWorm.Size = new Size(798, 20);
             tsbWorm.Text = "Worm";
-            tsbWorm.Click += tsbWorm_DoubleClick;
-            tsbWorm.DoubleClick += tsbWorm_DoubleClick;
+            tsbWorm.Click += tsbWorm_Click;
             // 
             // tslblNoUsableControls
             // 

@@ -1,6 +1,6 @@
 ﻿namespace ei8.Prototypes.HelloWorm
 {
-    partial class frmCode
+    partial class frmTree
     {
         /// <summary>
         /// Required designer variable.
@@ -28,9 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmCode));
-            gViewer1 = new Microsoft.Msagl.GraphViewerGdi.GViewer();
-            splitContainer1 = new SplitContainer();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmTree));
             listView1 = new ListView();
             columnHeader2 = new ColumnHeader();
             columnHeader1 = new ColumnHeader();
@@ -41,74 +39,8 @@
             tsbCheckSelected = new ToolStripButton();
             toolStripSeparator2 = new ToolStripSeparator();
             tsbFocusReflexArc = new ToolStripButton();
-            tsbChangeOrientation = new ToolStripButton();
-            ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
-            splitContainer1.Panel1.SuspendLayout();
-            splitContainer1.Panel2.SuspendLayout();
-            splitContainer1.SuspendLayout();
             toolStrip1.SuspendLayout();
             SuspendLayout();
-            // 
-            // gViewer1
-            // 
-            gViewer1.ArrowheadLength = 10D;
-            gViewer1.AsyncLayout = false;
-            gViewer1.AutoScroll = true;
-            gViewer1.BackwardEnabled = false;
-            gViewer1.BuildHitTree = true;
-            gViewer1.CurrentLayoutMethod = Microsoft.Msagl.GraphViewerGdi.LayoutMethod.UseSettingsOfTheGraph;
-            gViewer1.Dock = DockStyle.Fill;
-            gViewer1.EdgeInsertButtonVisible = true;
-            gViewer1.FileName = "";
-            gViewer1.ForwardEnabled = false;
-            gViewer1.Graph = null;
-            gViewer1.IncrementalDraggingModeAlways = false;
-            gViewer1.InsertingEdge = false;
-            gViewer1.LayoutAlgorithmSettingsButtonVisible = true;
-            gViewer1.LayoutEditingEnabled = true;
-            gViewer1.Location = new Point(0, 0);
-            gViewer1.LooseOffsetForRouting = 0.25D;
-            gViewer1.MouseHitDistance = 0.05D;
-            gViewer1.Name = "gViewer1";
-            gViewer1.NavigationVisible = true;
-            gViewer1.NeedToCalculateLayout = true;
-            gViewer1.OffsetForRelaxingInRouting = 0.6D;
-            gViewer1.PaddingForEdgeRouting = 8D;
-            gViewer1.PanButtonPressed = false;
-            gViewer1.SaveAsImageEnabled = true;
-            gViewer1.SaveAsMsaglEnabled = true;
-            gViewer1.SaveButtonVisible = true;
-            gViewer1.SaveGraphButtonVisible = true;
-            gViewer1.SaveInVectorFormatEnabled = true;
-            gViewer1.Size = new Size(800, 225);
-            gViewer1.TabIndex = 0;
-            gViewer1.TightOffsetForRouting = 0.125D;
-            gViewer1.ToolBarIsVisible = true;
-            gViewer1.Transform = (Microsoft.Msagl.Core.Geometry.Curves.PlaneTransformation)resources.GetObject("gViewer1.Transform");
-            gViewer1.UndoRedoButtonsVisible = true;
-            gViewer1.WindowZoomButtonPressed = false;
-            gViewer1.ZoomF = 1D;
-            gViewer1.ZoomWindowThreshold = 0.05D;
-            gViewer1.MouseClick += gViewer1_MouseClick;
-            // 
-            // splitContainer1
-            // 
-            splitContainer1.Dock = DockStyle.Fill;
-            splitContainer1.Location = new Point(0, 0);
-            splitContainer1.Name = "splitContainer1";
-            splitContainer1.Orientation = Orientation.Horizontal;
-            // 
-            // splitContainer1.Panel1
-            // 
-            splitContainer1.Panel1.Controls.Add(gViewer1);
-            // 
-            // splitContainer1.Panel2
-            // 
-            splitContainer1.Panel2.Controls.Add(listView1);
-            splitContainer1.Panel2.Controls.Add(toolStrip1);
-            splitContainer1.Size = new Size(800, 450);
-            splitContainer1.SplitterDistance = 225;
-            splitContainer1.TabIndex = 1;
             // 
             // listView1
             // 
@@ -118,8 +50,8 @@
             listView1.FullRowSelect = true;
             listView1.Location = new Point(0, 25);
             listView1.Name = "listView1";
-            listView1.Size = new Size(800, 196);
-            listView1.TabIndex = 0;
+            listView1.Size = new Size(800, 425);
+            listView1.TabIndex = 2;
             listView1.UseCompatibleStateImageBehavior = false;
             listView1.View = View.Details;
             // 
@@ -136,11 +68,11 @@
             // toolStrip1
             // 
             toolStrip1.GripStyle = ToolStripGripStyle.Hidden;
-            toolStrip1.Items.AddRange(new ToolStripItem[] { tsbReload, toolStripSeparator1, tsbCheckAll, tsbCheckSelected, toolStripSeparator2, tsbFocusReflexArc, tsbChangeOrientation });
+            toolStrip1.Items.AddRange(new ToolStripItem[] { tsbReload, toolStripSeparator1, tsbCheckAll, tsbCheckSelected, toolStripSeparator2, tsbFocusReflexArc });
             toolStrip1.Location = new Point(0, 0);
             toolStrip1.Name = "toolStrip1";
             toolStrip1.Size = new Size(800, 25);
-            toolStrip1.TabIndex = 1;
+            toolStrip1.TabIndex = 3;
             toolStrip1.Text = "toolStrip1";
             // 
             // tsbReload
@@ -197,42 +129,27 @@
             tsbFocusReflexArc.ToolTipText = "Focus Reflex Arc";
             tsbFocusReflexArc.Click += tsbFocusReflexArc_Click;
             // 
-            // tsbChangeOrientation
-            // 
-            tsbChangeOrientation.DisplayStyle = ToolStripItemDisplayStyle.Image;
-            tsbChangeOrientation.Image = (Image)resources.GetObject("tsbChangeOrientation.Image");
-            tsbChangeOrientation.ImageTransparentColor = Color.Magenta;
-            tsbChangeOrientation.Name = "tsbChangeOrientation";
-            tsbChangeOrientation.Size = new Size(23, 22);
-            tsbChangeOrientation.Text = "Change orientation";
-            tsbChangeOrientation.Click += tsbChangeOrientation_Click;
-            // 
-            // frmCode
+            // frmTree
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
-            Controls.Add(splitContainer1);
-            Name = "frmCode";
-            Text = "Code";
-            Load += frmCode_Load;
-            splitContainer1.Panel1.ResumeLayout(false);
-            splitContainer1.Panel2.ResumeLayout(false);
-            splitContainer1.Panel2.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)splitContainer1).EndInit();
-            splitContainer1.ResumeLayout(false);
+            Controls.Add(listView1);
+            Controls.Add(toolStrip1);
+            Name = "frmTree";
+            Text = "Tree";
+            Load += frmTree_Load;
             toolStrip1.ResumeLayout(false);
             toolStrip1.PerformLayout();
             ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion
 
-        private Microsoft.Msagl.GraphViewerGdi.GViewer gViewer1;
-        private SplitContainer splitContainer1;
         private ListView listView1;
-        private ColumnHeader columnHeader1;
         private ColumnHeader columnHeader2;
+        private ColumnHeader columnHeader1;
         private ToolStrip toolStrip1;
         private ToolStripButton tsbReload;
         private ToolStripSeparator toolStripSeparator1;
@@ -240,6 +157,5 @@
         private ToolStripButton tsbCheckSelected;
         private ToolStripSeparator toolStripSeparator2;
         private ToolStripButton tsbFocusReflexArc;
-        private ToolStripButton tsbChangeOrientation;
     }
 }

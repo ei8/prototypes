@@ -51,7 +51,7 @@ namespace ei8.Prototypes.HelloWorm
             this.tslblNoUsableControls.Visible = !isDish;
         }
 
-        private void tsbFood_DoubleClick(object sender, EventArgs e)
+        private void tsbFood_Click(object sender, EventArgs e)
         {
             if (this.selectionService.PrimarySelection is Dish d)
             {
@@ -61,7 +61,7 @@ namespace ei8.Prototypes.HelloWorm
             }
         }
 
-        private async void tsbWorm_DoubleClick(object sender, EventArgs e)
+        private async void tsbWorm_Click(object sender, EventArgs e)
         {
             if (
                 this.selectionService.PrimarySelection is Dish d &&
