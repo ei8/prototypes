@@ -1,7 +1,7 @@
 ﻿namespace ei8.Prototypes.HelloWorm
 {
-    public interface ICreatable : IPhysical
+    public interface ICreatable : IPhysical, IComponent, INamed
     {
-        void Initialize(Size dishSize);
+        void Initialize(string name, IRectangularComposite parent);
     }
 }

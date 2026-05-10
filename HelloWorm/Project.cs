@@ -1,42 +1,46 @@
-﻿using System.Collections.Specialized;
+﻿using NLog;
+using System.Collections.Specialized;
 
 namespace ei8.Prototypes.HelloWorm
 {
     public class Project : IAbstract, IComposite
     {
-        private readonly IList<IObject> components;
+        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
+        private readonly IList<IComponent> components;
 
         public Project()
         {
-            this.components = new List<IObject>();
+            this.components = new List<IComponent>();
         }
 
-        public IEnumerable<IObject> Components => components;
+        public IEnumerable<IComponent> Components => components;
 
         public event NotifyCollectionChangedEventHandler? NotifyCollectionChanged;
 
-        public void Add(IObject @object)
+        public void Add(IComponent component)
         {
-            this.components.Add(@object);
+            this.components.Add(component);
+
+            Project.logger.Info(new LogMessageGenerator(() => $"{typeof(Project).Name} - {component.GetFullName()} added."));
 
             this.NotifyCollectionChanged?.Invoke(
                 this,
                 new NotifyCollectionChangedEventArgs(
                     NotifyCollectionChangedAction.Add,
-                    @object
+                    component
                 )
             );
         }
 
-        public void Remove(IObject @object)
+        public void Remove(IComponent component)
         {
-            this.components.Remove(@object);
+            this.components.Remove(component);
 
             this.NotifyCollectionChanged?.Invoke(
                 this,
                 new NotifyCollectionChangedEventArgs(
                     NotifyCollectionChangedAction.Remove,
-                    @object
+                    component
                 )
             );
         }

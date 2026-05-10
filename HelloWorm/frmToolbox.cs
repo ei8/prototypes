@@ -33,14 +33,6 @@ namespace ei8.Prototypes.HelloWorm
             this.HideOnClose = true;
         }
 
-        // TODO: necessary?
-        //internal void FocusFirstItem()
-        //{
-        //    this.toolStrip1.Focus();
-        //    if (this.toolStrip1.Items.Count > 0)
-        //        this.toolStrip1.Items[0].Select();
-        //}
-
         private void SelectionService_SelectionChanged(object? sender, EventArgs e)
         {
             bool isDish = this.selectionService.PrimarySelection is Dish;
@@ -56,7 +48,13 @@ namespace ei8.Prototypes.HelloWorm
             if (this.selectionService.PrimarySelection is Dish d)
             {
                 var newFood = this.serviceProvider.GetRequiredService<Food>();
-                newFood.Initialize(d.Size);
+                newFood.Initialize(
+                    ExtensionMethods.CreateUnusedName(
+                        (i) => $"{nameof(Food)}{i.ToString()}",
+                        (s) => d.Components.OfType<INamed>().Any(dcn => dcn.Name == s)
+                    ),
+                    d
+                );
                 d.Add(newFood);
             }
         }
@@ -82,7 +80,13 @@ namespace ei8.Prototypes.HelloWorm
                     );
 
                     var newWorm = this.serviceProvider.GetRequiredService<Worm>();
-                    newWorm.Initialize(d.Size);
+                    newWorm.Initialize(
+                        ExtensionMethods.CreateUnusedName(
+                            (i) => $"{nameof(Worm)}{i.ToString()}",
+                            (s) => d.Components.OfType<INamed>().Any(dcn => dcn.Name == s)
+                        ), 
+                        d
+                    );
                     newWorm.Initialize(queryResult.ToNetwork(), this.settingsService.Mirrors);
                     d.Add(newWorm);
                 }

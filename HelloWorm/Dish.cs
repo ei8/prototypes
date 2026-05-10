@@ -18,7 +18,7 @@ namespace ei8.Prototypes.HelloWorm
         public event PropertyChangedEventHandler? PropertyChanged;
         public event NotifyCollectionChangedEventHandler? NotifyCollectionChanged;
 
-        private IImmutableList<IObject> components;
+        private IImmutableList<IComponent> components;
         private DateTime lastEmission;
 
         private bool isPlaying;
@@ -35,7 +35,7 @@ namespace ei8.Prototypes.HelloWorm
         {
             this.Location = new Point(0, 0);
             this.Size = Size.Empty;
-            this.components = ImmutableList<IObject>.Empty;
+            this.components = ImmutableList<IComponent>.Empty;
             this.Regenerate = true;
             this.lastEmission = DateTime.MinValue;
 
@@ -68,7 +68,7 @@ namespace ei8.Prototypes.HelloWorm
                     {
                         worm.Collide(
                             new CollisionInfo(
-                                new Odor(),
+                                new Odor() { Parent = this },
                                 worm.Components.OfType<Nose>().Single().Components.OfType<Sector>().First(),
                                 1
                             )
@@ -102,64 +102,64 @@ namespace ei8.Prototypes.HelloWorm
             }
         }
 
-        public void Add(IObject @object)
+        public void Add(IComponent component)
         {
             lock (this.IndexLock)
             {
-                this.components = this.components.Add(@object);
+                this.components = this.components.Add(component);
             }
 
-            if (@object is not Odor)
-                Dish.logger.Info(new LogMessageGenerator(() => $"{this.name} - {@object.GetType()} added."));
+            if (component is not Odor)
+                Dish.logger.Info(new LogMessageGenerator(() => $"{this.GetFullName()} - {component.GetFullName()} added."));
 
-            if (@object is IMovable movable)
+            if (component is IMovable movable)
             {
                 movable.Moving += this.Movable_Moving;
                 movable.Collided += this.Movable_Collided;
             }
 
-            if (@object is IEmitter emitter)
+            if (component is IEmitter emitter)
                 emitter.Emitted += this.Emitter_Emitted;
 
             this.NotifyCollectionChanged?.Invoke(
                 this,
                 new NotifyCollectionChangedEventArgs(
                     NotifyCollectionChangedAction.Add,
-                    @object
+                    component
                 )
             );
         }
 
-        public void Remove(IObject @object)
+        public void Remove(IComponent component)
         {
             lock (this.IndexLock)
             {
-                if (this.components.Contains(@object))
+                if (this.components.Contains(component))
                 {
-                    this.components = this.components.Remove(@object);
+                    this.components = this.components.Remove(component);
                 }
             }
 
-            if (@object is not Odor)
-                Dish.logger.Info(new LogMessageGenerator(() => $"{this.name} - {@object.GetType()} removed."));
+            if (component is not Odor)
+                Dish.logger.Info(new LogMessageGenerator(() => $"{this.GetFullName()} - {component.GetFullName()} removed."));
 
-            if (@object is IMovable movable)
+            if (component is IMovable movable)
             {
                 movable.Moving -= this.Movable_Moving;
                 movable.Collided -= this.Movable_Collided;
             }
 
-            if (@object is IEmitter emitter)
+            if (component is IEmitter emitter)
                 emitter.Emitted -= this.Emitter_Emitted;
 
             if (
-                @object is IRegenerative original &&
+                component is IRegenerative original &&
                 this.Regenerate
             )
             {
-                Dish.logger.Info(new LogMessageGenerator(() => $"{this.name} - {@object.GetType()} regenerating..."));
+                Dish.logger.Info(new LogMessageGenerator(() => $"{this.GetFullName()} - {component.GetFullName()} regenerating..."));
                 var regen = (IRegenerative)this.serviceProvider.GetRequiredService(original.GetType());
-                regen.Initialize(this.Size);
+                regen.Initialize(regen.Name, this);
                 regen.Inherit(original);
                 this.Add(regen);
             }
@@ -168,7 +168,7 @@ namespace ei8.Prototypes.HelloWorm
                 this, 
                 new NotifyCollectionChangedEventArgs(
                      NotifyCollectionChangedAction.Remove,
-                     @object
+                     component
                 )
             );
         }
@@ -269,7 +269,7 @@ namespace ei8.Prototypes.HelloWorm
 
         public Point Location { get; set; }
         public Size Size { get; set; }
-        public IEnumerable<IObject> Components => this.components; 
+        public IEnumerable<IComponent> Components => this.components; 
         public bool Regenerate { get; set; }
         public bool IsPlaying 
         {
@@ -281,7 +281,7 @@ namespace ei8.Prototypes.HelloWorm
                     this.isPlaying = value;
                     this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsPlaying)));
 
-                    Dish.logger.Info(new LogMessageGenerator(() => $"{this.name} - {(this.IsPlaying ? "played." : "paused.")}"));
+                    Dish.logger.Info(new LogMessageGenerator(() => $"{this.GetFullName()} - {(this.IsPlaying ? "played." : "paused.")}"));
                 }
             }
         }
@@ -339,5 +339,6 @@ namespace ei8.Prototypes.HelloWorm
 
         [Category(nameof(Constants.PropertyCategory.Time))]
         public int EmissionInterval { get; set; }
+        public required IComposite Parent { get; set; }
     }
 }

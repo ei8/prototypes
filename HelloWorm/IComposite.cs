@@ -4,11 +4,11 @@ namespace ei8.Prototypes.HelloWorm
 {
     public interface IComposite : IObject
     {
-        void Add(IObject @object);
+        void Add(IComponent component);
 
-        void Remove(IObject @object);
+        void Remove(IComponent component);
 
-        IEnumerable<IObject> Components { get; }
+        IEnumerable<IComponent> Components { get; }
 
         event NotifyCollectionChangedEventHandler? NotifyCollectionChanged;
     }

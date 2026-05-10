@@ -17,6 +17,25 @@ namespace ei8.Prototypes.HelloWorm
     {
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
+        #region Helpers
+        public static string CreateUnusedName(Func<int, string> nameGenerator, Func<string, bool> nameChecker)
+        {
+            var result = string.Empty;
+
+            for (int i = 1; i < int.MaxValue; i++)
+            {
+                string name = nameGenerator(i);
+                if (!nameChecker(name))
+                {
+                    result = name;
+                    break;
+                }
+            }
+
+            return result;
+        }
+        #endregion
+
         #region Forms
         public static List<TreeNode> GetAllNodes(this TreeView treeView)
         {
@@ -43,13 +62,13 @@ namespace ei8.Prototypes.HelloWorm
         public static bool TryParseSensoryNeurons(
             this ISpikable spikable, 
             IEnumerable<StimulusParser> parsers, 
-            [NotNullWhen(true)] out IEnumerable<Guid>? result,
+            [NotNullWhen(true)] out IEnumerable<ParseSensorResult>? result,
             params StimulusInfo[] stimuli
         )
         {
             var bResult = false;
             result = null;
-            var tempList = new List<Guid>();
+            var tempList = new List<ParseSensorResult>();
 
             foreach (var stimulus in stimuli)
             {
@@ -61,7 +80,7 @@ namespace ei8.Prototypes.HelloWorm
                             .SingleOrDefault(p => p.Evaluator(stimulus.Value))
                     ) != null
                 )
-                    tempList.Add(parser.IdConverter(stimulus.Value));
+                    tempList.Add(new (stimulus.Value, parser.NeuronConverter(stimulus.Value)));
             }
 
             if (tempList.Count() == stimuli.Length)
@@ -91,12 +110,12 @@ namespace ei8.Prototypes.HelloWorm
             this ISpikable spikable,
             FireInfo currentFire,
             IEnumerable<ResponseParser> responseParsers,
-            [NotNullWhen(true)] out IEnumerable<object>? result
+            [NotNullWhen(true)] out IEnumerable<ParseMotorResult>? result
         )
         {
             bool bResult = false;
             result = null;
-            var tempResults = new List<object>();
+            var tempResults = new List<ParseMotorResult>();
 
             lock (ExtensionMethods.parseLock)
             {
@@ -110,34 +129,22 @@ namespace ei8.Prototypes.HelloWorm
                 foreach (var rp in responseParsers)
                     if (currentFire.Target.Id == rp.ActionNeuronId || rp.Evaluator(currentFire))
                     {
-                        // if number of related fires equals eg. 2 parameters + 1 method
-                        if (fireHistory.Count() >= rp.ParameterConverters.Count() + 1)
+                        if (fireHistory.Count() >= ExtensionMethods.GetExpectedResultCount(rp))
                         {
-                            ExtensionMethods.logger.Debug(
-                                new LogMessageGenerator(() =>
-                                    $"Related Fires (Micros): {string.Join(
-                                        ", ",
-                                        fireHistory.Select(rf =>
-                                            rf.Value.Target.ToReadableString() +
-                                            " (" +
-                                                currentFire.Timestamp.Subtract(rf.Value.Timestamp).TotalMicroseconds +
-                                            ")"
-                                         )
-                                    )}"
-                                )
-                            );
+                            var actionFireInfo = fireHistory.Select(fh => fh.Value).SingleOrDefault(n => n.Target.Id == rp.ActionNeuronId);
                             // and specified method was fired within relative spikes period
-                            if (fireHistory.Any(n => n.Value.Target.Id == rp.ActionNeuronId))
+                            if (actionFireInfo != null)
                             {
+                                tempResults.Add(new(actionFireInfo.Target, actionFireInfo, actionFireInfo.Target.Tag));
                                 foreach (var pc in rp.ParameterConverters)
                                 {
                                     foreach (var fi in fireHistory.Values)
                                     {
                                         if (pc.Invoke(fi, out object? objectResult))
                                         {
-                                            tempResults.Add(objectResult);
+                                            tempResults.Add(new(fi.Target, fi, objectResult));
 
-                                            if (tempResults.Count() == rp.ParameterConverters.Count())
+                                            if (tempResults.Count() == ExtensionMethods.GetExpectedResultCount(rp))
                                             {
                                                 fireHistory.Clear();
                                                 bResult = true;
@@ -157,6 +164,10 @@ namespace ei8.Prototypes.HelloWorm
 
             return bResult;
         }
+
+        private static int GetExpectedResultCount(ResponseParser responseParser) =>
+            // if number of related fires equals eg. 2 parameters + 1 method
+            responseParser.ParameterConverters.Count() + 1;
 
         public static bool TryGetFiredParameter<T>(this FireInfo fireInfo, IDictionary<Guid, T> paramValueMap, out object? parameter)
         {
@@ -364,6 +375,23 @@ namespace ei8.Prototypes.HelloWorm
         #endregion
 
         #region Physical
+        internal static string GetFullName(
+            this IComponent component
+        )
+        {
+            string result = component is INamed n ? 
+                n.Name : 
+                component.GetType().Name;
+
+            while (component != null && component.Parent is INamed pn)
+            {
+                result = pn.Name + "." + result;
+
+                if (component.Parent is IComponent cp)
+                    component = cp;
+            }
+            return result;
+        }
         internal static CollisionInfo? GetCollisionSector(
             this IRectangularComposite rectangularComposite,
             Func<SectorPointInfo, CollisionInfo?> collisionEvaluator,
@@ -490,6 +518,7 @@ namespace ei8.Prototypes.HelloWorm
 
         #endregion
 
+        // TODO: remove and make Sectors implement INamed
         internal static int GetSectorId(this IRectangularComposite rectangularComposite, ISectoral sectoral) =>
             rectangularComposite.Components.TakeWhile(s => s != sectoral).Count() + 1;
 

@@ -10,7 +10,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace ei8.Prototypes.HelloWorm
 {
-    public class Worm : IMovable, IRectangularComposite, IElliptical, IPerishable, IRegenerative, ISpikableReporting
+    public class Worm : IMovable, IRectangularComposite, IElliptical, IPerishable, IRegenerative, ISpikableReporting, INamed
     {
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
@@ -46,7 +46,6 @@ namespace ei8.Prototypes.HelloWorm
         private Size size;
         private Network? network;
         private readonly ConcurrentDictionary<DateTime, FireInfo> fireHistory;
-        private readonly ConcurrentDictionary<Guid, SpikeInfo> spikeHistory;
         private Neuron? rotationNeuron;
         private IDictionary<Guid, RotationDirection>? directionValueDictionary;
         private IDictionary<Guid, RotationDegrees>? degreesValueDictionary;
@@ -54,7 +53,7 @@ namespace ei8.Prototypes.HelloWorm
         private IDictionary<string, Guid>? targetsValueDictionary;
         private TimeSpan refractoryPeriod;
         private TimeSpan relativeSpikesPeriod;
-        private readonly IList<IObject> components;
+        private readonly IList<IComponent> components;
         private readonly ISpikeService spikeService;
 
         public Worm(ISpikeService spikeService)
@@ -66,14 +65,15 @@ namespace ei8.Prototypes.HelloWorm
             this.Location = new Point(0, 0);
             this.refractoryPeriod = Constants.Spiker.InitialRefractoryPeriod;
             this.relativeSpikesPeriod = Constants.Spiker.InitialRelativeSpikesPeriod;
-            this.components = new List<IObject>();
+            this.components = new List<IComponent>();
 
             var nose = new Nose()
             {
                 Location = new Point(0, 0),
-                Size = new Size(1, 1)
+                Size = new Size(1, 1),
+                Parent = this
             };
-            var sectors = Worm.InitializeSectors();
+            var sectors = Worm.InitializeSectors(nose);
             foreach (var s in sectors)
                 nose.Add(s);
 
@@ -82,7 +82,6 @@ namespace ei8.Prototypes.HelloWorm
             this.network = null;
 
             this.fireHistory = new ConcurrentDictionary<DateTime, FireInfo>();
-            this.spikeHistory = new ConcurrentDictionary<Guid, SpikeInfo>();
 
             this.rotationNeuron = null;
             this.directionValueDictionary = null;
@@ -96,7 +95,7 @@ namespace ei8.Prototypes.HelloWorm
 
         private void SpikeService_Triggered(object? sender, TriggeredEventArgs e)
         {
-            Worm.logger.Debug(new LogMessageGenerator(() => $"Triggered: {e.Source.ToReadableString()}"));
+            Worm.logger.Debug(new LogMessageGenerator(() => $"{this.GetFullName()} - Triggered: {e.Source.ToReadableString()}"));
         }
 
         private void SpikeService_Fired(object? sender, FiredEventArgs e)
@@ -129,17 +128,33 @@ namespace ei8.Prototypes.HelloWorm
                             ]
                         )
                     ],
-                    out IEnumerable<object>? parseResult
+                    out IEnumerable<ParseMotorResult>? parseResult
                 )
             )
-                this.Rotate((RotationDirection)parseResult.ElementAt(0), (RotationDegrees)parseResult.ElementAt(1));
+            {
+                Worm.logger.Debug(
+                    new LogMessageGenerator(() =>
+                        $"{this.GetFullName()} - Related Fires (Micros): {string.Join(
+                            ", ",
+                            parseResult.Select(rf =>
+                                rf.Neuron.ToReadableString() +
+                                " (" +
+                                    e.FireInfo.Timestamp.Subtract(rf.FireInfo.Timestamp).TotalMicroseconds +
+                                ")"
+                                )
+                        )}"
+                    )
+                );
+                var parseValues = parseResult.Select(pr => pr.Value);
+                this.Rotate(parseValues.OfType<RotationDirection>().Single(), parseValues.OfType<RotationDegrees>().Single());
+            }
             else
                 Worm.logger.Trace(new LogMessageGenerator(() => $"Invoke failed: {this.invokeFailureCount++}"));
 
-            Worm.logger.Debug(new LogMessageGenerator(() => $"Fired: {e.FireInfo.Target.ToReadableString()}"));
+            Worm.logger.Debug(new LogMessageGenerator(() => $"{this.GetFullName()} - Fired: {e.FireInfo.Target.ToReadableString()}"));
         }
 
-        private static IEnumerable<Sector> InitializeSectors()
+        private static IEnumerable<Sector> InitializeSectors(Nose nose)
         {
             var sects = new List<Sector>();
 
@@ -147,7 +162,8 @@ namespace ei8.Prototypes.HelloWorm
                 sects.Add(new Sector()
                 {
                     StartAngle = (i * Constants.Worm.SectorSweepAngle) + 1,
-                    SweepAngle = Constants.Worm.SectorSweepAngle
+                    SweepAngle = Constants.Worm.SectorSweepAngle,
+                    Parent = nose
                 });
 
             return sects;
@@ -170,13 +186,11 @@ namespace ei8.Prototypes.HelloWorm
         public int Speed { get; set; }
         public int Score { get; set; }
         public int Life { get; set; }
-        public IEnumerable<IObject> Components => this.components;
+        public IEnumerable<IComponent> Components => this.components;
 
         public Network? Network => this.network;
 
         public IDictionary<DateTime, FireInfo> FireHistory => this.fireHistory;
-
-        public IDictionary<Guid, SpikeInfo> NeuronSpikeHistory => this.spikeHistory;
 
         public float ProcessingRatio => ((float)this.rotationCount / (float)this.collisionCount) * 100f;
 
@@ -184,12 +198,16 @@ namespace ei8.Prototypes.HelloWorm
 
         public TimeSpan RelativeSpikesPeriod { get => this.relativeSpikesPeriod; set => this.relativeSpikesPeriod = value; }
 
+        public required IComposite Parent { get; set; }
+        
+        public required string Name { get; set; }
+
         public void Rotate(RotationDirection direction, RotationDegrees degrees)
         {
             Worm.logger.Info(
                 new LogMessageGenerator(
                     () => 
-                    $"Rotating {direction} {degrees}. [Total: {++this.rotationCount}; " +
+                    $"{this.GetFullName()} - Rotating {direction} {degrees}. [Total: {++this.rotationCount}; " +
                     $"Processing ratio: { Math.Round(this.ProcessingRatio)}%]"
                 )
             );
@@ -256,9 +274,10 @@ namespace ei8.Prototypes.HelloWorm
         public void Collide(CollisionInfo info)
         {
             if (info.Receiver is not Food)
-                Worm.logger.Info(new LogMessageGenerator(() => $"Collided with {info.Receiver.GetType()}, rotation-required. [Total: {++this.collisionCount}]"));
+                Worm.logger.Info(new LogMessageGenerator(() => $"{info.Cause.GetFullName()} collided with {info.Receiver.GetFullName()}, rotation-required. [Total: {++this.collisionCount}]"));
 
             if (
+                this.network != null &&
                 this.sectorsValueDictionary != null &&
                 this.targetsValueDictionary != null &&
                 this.TryParseSensoryNeurons(
@@ -268,16 +287,16 @@ namespace ei8.Prototypes.HelloWorm
                             (o) => o is ISectoral,
                             (o) => {
                                 var sectorId = this.Components.OfType<Nose>().Single().GetSectorId((ISectoral) o);
-                                return this.sectorsValueDictionary[Enum.Parse<SectorValues>("Sector" + sectorId)];
+                                return this.network.ValidateGet(this.sectorsValueDictionary[Enum.Parse<SectorValues>(typeof(Sector).Name + sectorId)]);
                             }
                         ),
                         new StimulusParser(
                             StimulusType.External,
                             (o) => o is not Food,
-                            (o) => this.targetsValueDictionary[o.GetType().ToKeyString()]
+                            (o) => this.network.ValidateGet(this.targetsValueDictionary[o.GetType().ToKeyString()])
                         )
                     ],
-                    out IEnumerable<Guid>? result,
+                    out IEnumerable<ParseSensorResult>? result,
                     // Collision cause is internal eg. Nose Sector
                     new StimulusInfo(StimulusType.Internal, info.Cause),
                     // Collision receiver is external eg. Dish, Food
@@ -288,11 +307,11 @@ namespace ei8.Prototypes.HelloWorm
                 Worm.logger.Debug(
                     new LogMessageGenerator(
                         () =>
-                            $"{info.Receiver.GetType()} stimulating Sector " +
+                            $"{this.GetFullName()} - {info.Receiver.GetType()} stimulating {typeof(Sector).Name} " +
                             $"{this.Components.OfType<Nose>().Single().GetSectorId((ISectoral)info.Cause)}"
                     )
                 );
-                this.spikeService.Spike(result, this);
+                this.spikeService.Spike(result.Select(r => r.Value), this.network, this.refractoryPeriod);
             }
 
             this.Collided?.Invoke(this, new CollidedEventArgs(info));
@@ -304,6 +323,8 @@ namespace ei8.Prototypes.HelloWorm
         {
             var originalWorm = (Worm) original;
             this.Initialize(originalWorm.Network);
+            this.Parent = originalWorm.Parent;
+            this.Name = originalWorm.Name;
             Worm.UpdateCaches(
                 this,
                 originalWorm.rotationNeuron,
@@ -314,16 +335,18 @@ namespace ei8.Prototypes.HelloWorm
             );
         }
 
-        public void Initialize(Size dishSize)
+        public void Initialize(string name, IRectangularComposite parent)
         {
             var r = new Random();
             var wormWidth = Constants.Worm.MinWidth;
-            var center = dishSize / 2;
+            var center = parent.Size / 2;
             this.Life = Constants.Worm.InitialLife;
             this.Direction = r.Next(Constants.CircleDegreesCount);
             this.Location = new Point(center.Width, center.Height);
             this.Size = Worm.GetSizeByWidth(wormWidth);
             this.Speed = Worm.GetSpeedByWidth(wormWidth);
+            this.Name = name;
+            this.Parent = parent;
         }
 
         public void Initialize(Network? network, IEnumerable<MirrorConfig>? mirrorConfigs)
@@ -402,18 +425,18 @@ namespace ei8.Prototypes.HelloWorm
             }
         }
 
-        public void Add(IObject @object)
+        public void Add(IComponent component)
         {
-            this.components.Add(@object);
+            this.components.Add(component);
 
-            this.NotifyCollectionChanged?.Invoke(this, new(NotifyCollectionChangedAction.Add, @object));
+            this.NotifyCollectionChanged?.Invoke(this, new(NotifyCollectionChangedAction.Add, component));
         }
 
-        public void Remove(IObject @object)
+        public void Remove(IComponent component)
         {
-            this.components.Remove(@object);
+            this.components.Remove(component);
 
-            this.NotifyCollectionChanged?.Invoke(this, new(NotifyCollectionChangedAction.Remove, @object));
+            this.NotifyCollectionChanged?.Invoke(this, new(NotifyCollectionChangedAction.Remove, component));
         }
     }
 }

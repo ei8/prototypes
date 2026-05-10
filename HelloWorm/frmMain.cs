@@ -8,6 +8,7 @@ using neurUL.Common.Http;
 using NLog;
 using System.ComponentModel;
 using System.ComponentModel.Design;
+using System.Xml.Linq;
 using WeifenLuo.WinFormsUI.Docking;
 
 namespace ei8.Prototypes.HelloWorm
@@ -310,21 +311,12 @@ namespace ei8.Prototypes.HelloWorm
         private void mnuProjectAddDish_Click(object sender, EventArgs e)
         {
             var fp = this.serviceProvider.GetRequiredService<frmDish>();
-            for (int i = 1; i < int.MaxValue; i++)
-            {
-                string name = $"Dish{i.ToString()}";
-                if (!this.dockPanel1.Contents.OfType<frmDish>().Any(fd => fd.Dish.Name == name))
-                {
-                    fp.Dish.Name = name;
-                    break;
-                }
-            }
-
-            var proj = this.projectService.GetProject();
-            AssertionConcern.AssertArgumentNotNull(proj, nameof(proj));
-            proj!.Add(fp.Dish);
 
             fp.Show(this.dockPanel1, DockState.Document);
+
+            var project = this.projectService.GetProject();
+            AssertionConcern.AssertArgumentNotNull(project, nameof(project));
+            project!.Add(fp.Dish);
         }
 
         private void mnuFileNewProject_Click(object sender, EventArgs e)

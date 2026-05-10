@@ -18,11 +18,8 @@ namespace ei8.Prototypes.HelloWorm
             this.dishPanel.Name = "dishPanel";
             this.dishPanel.Size = new Size(800, 450);
             this.dishPanel.TabIndex = 1;
-            this.dishPanel.Dish = serviceProvider.GetRequiredService<Dish>();
-            this.dishPanel.Dish.PropertyChanged += this.Dish_PropertyChanged;
             this.Controls.Add(dishPanel);
 
-            this.timer1.Interval = this.dishPanel.Dish.TimerResolution;
             this.serviceProvider = serviceProvider;
         }
 
@@ -46,11 +43,36 @@ namespace ei8.Prototypes.HelloWorm
             }
         }
 
-        public Dish Dish => this.dishPanel.Dish!;
+        public Dish Dish
+        {
+            get => this.dishPanel.Dish!;
+            private set
+            {
+                if (this.dishPanel.Dish != value)
+                {
+                    if (this.dishPanel.Dish != null)
+                        this.dishPanel.Dish.PropertyChanged -= this.Dish_PropertyChanged;
+
+                    this.dishPanel.Dish = value;
+
+                    if (this.dishPanel.Dish != null)
+                    {
+                        this.dishPanel.Dish.PropertyChanged += this.Dish_PropertyChanged;
+                        this.dishPanel.Dish.Name = ExtensionMethods.CreateUnusedName(
+                            (i) => $"{typeof(Dish).Name}{i.ToString()}",
+                            (s) => this.DockPanel.Contents.OfType<frmDish>().Any(fd => fd.Dish.Name == s)
+                        );
+                        this.timer1.Interval = this.dishPanel.Dish.TimerResolution;
+                    }
+
+                    this.dishPanel.Invalidate();
+                }
+            }
+        }
 
         private void frmDish_Load(object sender, EventArgs e)
         {
-            this.dishPanel.Invalidate();
+            this.Dish = serviceProvider.GetRequiredService<Dish>();
         }
 
         private void Timer1_Tick(object sender, EventArgs e)

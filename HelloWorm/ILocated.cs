@@ -1,6 +1,6 @@
 ﻿namespace ei8.Prototypes.HelloWorm
 {
-    internal interface ILocated : IPhysical
+    public interface ILocated : IPhysical, IComponent
     {
         public Point Location { get; set; }
     }

@@ -1,6 +1,6 @@
 ﻿namespace ei8.Prototypes.HelloWorm
 {
-    public interface IRectangleBound : IPhysical
+    public interface IRectangleBound : IPhysical, IComponent
     { 
     }
 }

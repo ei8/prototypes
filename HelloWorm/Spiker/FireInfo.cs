@@ -2,7 +2,7 @@
 
 namespace ei8.Prototypes.HelloWorm.Spiker
 {
-    public struct FireInfo(Neuron target, DateTime timestamp, IEnumerable<TriggerInfo> triggers)
+    public class FireInfo(Neuron target, DateTime timestamp, IEnumerable<TriggerInfo> triggers)
     {
         public Neuron Target { get; } = target;
 
@@ -18,11 +18,11 @@ namespace ei8.Prototypes.HelloWorm.Spiker
         {
             return Timestamp.GetHashCode();
         }
-        public static bool operator ==(FireInfo x, FireInfo y)
+        public static bool operator ==(FireInfo? x, FireInfo? y)
         {
-            return x.Timestamp == y.Timestamp;
+            return x?.Timestamp == y?.Timestamp;
         }
-        public static bool operator !=(FireInfo x, FireInfo y)
+        public static bool operator !=(FireInfo? x, FireInfo? y)
         {
             return !(x == y);
         }

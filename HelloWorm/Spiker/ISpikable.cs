@@ -7,8 +7,6 @@ namespace ei8.Prototypes.HelloWorm.Spiker
     {
         IDictionary<DateTime, FireInfo> FireHistory { get; }
 
-        IDictionary<Guid, SpikeInfo> NeuronSpikeHistory { get; }
-
         void Initialize(Network? network, IEnumerable<MirrorConfig>? mirrorConfigs);
 
         TimeSpan RefractoryPeriod { get; set; }

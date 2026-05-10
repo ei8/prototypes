@@ -10,6 +10,7 @@
         public int Speed { get; set; }
         public Point Location { get; set; }
         public Size Size { get; set; }
+        public required IComposite Parent { get; set; }
 
         public event EventHandler<MovingEventArgs>? Moving;
         public event EventHandler<CollidedEventArgs>? Collided;

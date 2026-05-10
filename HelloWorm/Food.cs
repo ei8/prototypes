@@ -16,6 +16,9 @@
 
         public int Life { get; set; }
 
+        public required IComposite Parent { get; set; }
+        public string Name { get; set; }
+
         public void Emit()
         {
             var r = new Random();
@@ -29,23 +32,30 @@
                     Location = this.Location,
                     Direction = this.StartAngle + sweep,
                     Size = new Size(Constants.Odor.Size, Constants.Odor.Size),
-                    Speed = Constants.Odor.MinSpeed + r.Next(Constants.Odor.MaxSpeed - Constants.Odor.MinSpeed)
+                    Speed = Constants.Odor.MinSpeed + r.Next(Constants.Odor.MaxSpeed - Constants.Odor.MinSpeed),
+                    Parent = this.Parent
                 });
             }
 
             this.Emitted?.Invoke(this, new EmittedEventArgs(newOdors));
         }
 
-        public void Inherit(IRegenerative target) { }
+        public void Inherit(IRegenerative target) 
+        {
+            this.Parent = target.Parent;
+            this.Name = target.Name;
+        }
 
-        public void Initialize(Size dishSize)
+        public void Initialize(string name, IRectangularComposite parent)
         {
             var r = new Random();
-            this.Location = new Point(r.Next(dishSize.Width), r.Next(dishSize.Height));
+            this.Location = new Point(r.Next(parent.Size.Width), r.Next(parent.Size.Height));
             this.Size = new Size(5, 5);
             this.StartAngle = r.Next(Constants.CircleDegreesCount);
             this.SweepAngle = 90 + r.Next(135);
             this.Life = Constants.Food.InitialLife;
+            this.Name = name;
+            this.Parent = parent;
         }
     }
 }

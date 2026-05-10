@@ -25,22 +25,15 @@ namespace ei8.Prototypes.HelloWorm
             {
                 var result = string.Empty;
 
-                // TODO: use INamed
-                if (o is Project)
-                    result = "Project";
-                else if (o is Dish d)
-                    result = d.Name;
-                else if (o is Worm w)
-                    result = "Worm";
-                else if (o is Food f)
-                    result = "Food";
-                else if (o is Nose)
-                    result = "Nose";
+                if (o is INamed n)
+                    result = n.Name;
+                else if (o is Project || o is Nose)
+                    result = o.GetType().Name;
                 else if (
                     o is ISectoral s &&
                     pn != null
                 )
-                    result = "Sector" + ((IRectangularComposite)pn.Tag).GetSectorId(s).ToString();
+                    result = typeof(Sector).Name + ((IRectangularComposite)pn.Tag).GetSectorId(s).ToString();
 
                 return result;
             };
