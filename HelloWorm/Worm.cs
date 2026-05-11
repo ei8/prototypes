@@ -52,7 +52,7 @@ namespace ei8.Prototypes.HelloWorm
         private IDictionary<SectorValues, Guid>? sectorsValueDictionary;
         private IDictionary<string, Guid>? targetsValueDictionary;
         private TimeSpan refractoryPeriod;
-        private TimeSpan relativeSpikesPeriod;
+        private TimeSpan relatedSpikesPeriod;
         private readonly IList<IComponent> components;
         private readonly ISpikeService spikeService;
 
@@ -63,8 +63,8 @@ namespace ei8.Prototypes.HelloWorm
             this.collisionCount = 0;
             this.Direction = 0;
             this.Location = new Point(0, 0);
-            this.refractoryPeriod = Constants.Spiker.InitialRefractoryPeriod;
-            this.relativeSpikesPeriod = Constants.Spiker.InitialRelativeSpikesPeriod;
+            this.refractoryPeriod = Constants.Worm.InitialRefractoryPeriod;
+            this.relatedSpikesPeriod = Constants.Worm.InitialRelatedSpikesPeriod;
             this.components = new List<IComponent>();
 
             var nose = new Nose()
@@ -95,11 +95,26 @@ namespace ei8.Prototypes.HelloWorm
 
         private void SpikeService_Triggered(object? sender, TriggeredEventArgs e)
         {
-            Worm.logger.Debug(new LogMessageGenerator(() => $"{this.GetFullName()} - Triggered: {e.Source.ToReadableString()}"));
+            Worm.logger.Debug(
+                new LogMessageGenerator(
+                    () => {
+                        var origin = e.ReflexArc.LastOrDefault();
+                        var result = $"{this.GetFullName()} - " +
+                        $"Triggered: {e.Target.ToReadableString()}; " +
+                        $"By: {(origin != null ? origin.Target.ToReadableString() : "[Stimulus]")}; " +
+                        $"Count: {e.Charge.Excitations.Count() + e.Charge.Inhibitions.Count()}; " +
+                        $"Charge: ({ChargeInfo.RestingPotential}) + {e.Charge.Excitations.Sum(ChargeInfo.GetCharge)} + ({e.Charge.Inhibitions.Sum(ChargeInfo.GetCharge)}) = {e.Charge.Result} mV";
+
+                        return result;
+                    }
+                )
+            );
         }
 
         private void SpikeService_Fired(object? sender, FiredEventArgs e)
         {
+            Worm.logger.Debug(new LogMessageGenerator(() => $"{this.GetFullName()} - Fired: {e.FireInfo.Target.ToReadableString()}"));
+
             if (
                 this.rotationNeuron != null &&
                 this.directionValueDictionary != null &&
@@ -134,7 +149,7 @@ namespace ei8.Prototypes.HelloWorm
             {
                 Worm.logger.Debug(
                     new LogMessageGenerator(() =>
-                        $"{this.GetFullName()} - Related Fires (Micros): {string.Join(
+                        $"{this.GetFullName()} - Related Fires (microseconds): {string.Join(
                             ", ",
                             parseResult.Select(rf =>
                                 rf.Neuron.ToReadableString() +
@@ -150,8 +165,6 @@ namespace ei8.Prototypes.HelloWorm
             }
             else
                 Worm.logger.Trace(new LogMessageGenerator(() => $"Invoke failed: {this.invokeFailureCount++}"));
-
-            Worm.logger.Debug(new LogMessageGenerator(() => $"{this.GetFullName()} - Fired: {e.FireInfo.Target.ToReadableString()}"));
         }
 
         private static IEnumerable<Sector> InitializeSectors(Nose nose)
@@ -159,12 +172,18 @@ namespace ei8.Prototypes.HelloWorm
             var sects = new List<Sector>();
 
             for (int i = 0; i < Constants.Worm.SectorRenderCount; i++)
-                sects.Add(new Sector()
-                {
-                    StartAngle = (i * Constants.Worm.SectorSweepAngle) + 1,
-                    SweepAngle = Constants.Worm.SectorSweepAngle,
-                    Parent = nose
-                });
+                sects.Add(
+                    new Sector()
+                    {
+                        StartAngle = (i * Constants.Worm.SectorSweepAngle) + 1,
+                        SweepAngle = Constants.Worm.SectorSweepAngle,
+                        Parent = nose,
+                        Name = ExtensionMethods.CreateUnusedName(
+                            (i) => $"{typeof(Sector).Name}{i.ToString()}",
+                            (s) => sects.Any(fd => fd.Name == s)
+                        )
+                    }
+                );
 
             return sects;
         }
@@ -196,7 +215,7 @@ namespace ei8.Prototypes.HelloWorm
 
         public TimeSpan RefractoryPeriod { get => this.refractoryPeriod; set => this.refractoryPeriod = value; }
 
-        public TimeSpan RelativeSpikesPeriod { get => this.relativeSpikesPeriod; set => this.relativeSpikesPeriod = value; }
+        public TimeSpan RelatedSpikesPeriod { get => this.relatedSpikesPeriod; set => this.relatedSpikesPeriod = value; }
 
         public required IComposite Parent { get; set; }
         
@@ -284,10 +303,10 @@ namespace ei8.Prototypes.HelloWorm
                     [
                         new StimulusParser(
                             StimulusType.Internal,
-                            (o) => o is ISectoral,
+                            (o) => o is ISector,
                             (o) => {
-                                var sectorId = this.Components.OfType<Nose>().Single().GetSectorId((ISectoral) o);
-                                return this.network.ValidateGet(this.sectorsValueDictionary[Enum.Parse<SectorValues>(typeof(Sector).Name + sectorId)]);
+                                var sector = (ISector) o;
+                                return this.network.ValidateGet(this.sectorsValueDictionary[Enum.Parse<SectorValues>(sector.Name)]);
                             }
                         ),
                         new StimulusParser(
@@ -306,9 +325,7 @@ namespace ei8.Prototypes.HelloWorm
             {
                 Worm.logger.Debug(
                     new LogMessageGenerator(
-                        () =>
-                            $"{this.GetFullName()} - {info.Receiver.GetType()} stimulating {typeof(Sector).Name} " +
-                            $"{this.Components.OfType<Nose>().Single().GetSectorId((ISectoral)info.Cause)}"
+                        () => $"{this.GetFullName()} - {info.Receiver.GetFullName()} stimulating {info.Cause.GetFullName()}."
                     )
                 );
                 this.spikeService.Spike(result.Select(r => r.Value), this.network, this.refractoryPeriod);

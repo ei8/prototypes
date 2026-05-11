@@ -29,11 +29,6 @@ namespace ei8.Prototypes.HelloWorm
                     result = n.Name;
                 else if (o is Project || o is Nose)
                     result = o.GetType().Name;
-                else if (
-                    o is ISectoral s &&
-                    pn != null
-                )
-                    result = typeof(Sector).Name + ((IRectangularComposite)pn.Tag).GetSectorId(s).ToString();
 
                 return result;
             };

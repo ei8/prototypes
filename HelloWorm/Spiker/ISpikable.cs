@@ -11,6 +11,6 @@ namespace ei8.Prototypes.HelloWorm.Spiker
 
         TimeSpan RefractoryPeriod { get; set; }
 
-        TimeSpan RelativeSpikesPeriod { get; set; }
+        TimeSpan RelatedSpikesPeriod { get; set; }
     }
 }

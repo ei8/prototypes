@@ -120,7 +120,7 @@ namespace ei8.Prototypes.HelloWorm
             lock (ExtensionMethods.parseLock)
             {
                 ConcurrentDictionary<DateTime, FireInfo> fireHistory = (ConcurrentDictionary<DateTime, FireInfo>)spikable.FireHistory;
-                fireHistory.Clean(currentFire.Timestamp.Subtract(spikable.RelativeSpikesPeriod));
+                fireHistory.Clean(currentFire.Timestamp.Subtract(spikable.RelatedSpikesPeriod));
                 fireHistory.TryAdd(currentFire.Timestamp, currentFire);
 
                 // if last fired is one of the anticipated neurons
@@ -131,7 +131,18 @@ namespace ei8.Prototypes.HelloWorm
                     {
                         if (fireHistory.Count() >= ExtensionMethods.GetExpectedResultCount(rp))
                         {
-                            var actionFireInfo = fireHistory.Select(fh => fh.Value).SingleOrDefault(n => n.Target.Id == rp.ActionNeuronId);
+                            var matchedActionNeurons = fireHistory.Select(fh => fh.Value).Where(n => n.Target.Id == rp.ActionNeuronId);
+
+                            if (matchedActionNeurons.Count() > 1)
+                                ExtensionMethods.logger.Warn(
+                                    new LogMessageGenerator(
+                                        () => 
+                                            $"{matchedActionNeurons.First().Target.ToReadableString()} fired more than once within related spikes period ({spikable.RelatedSpikesPeriod.TotalMicroseconds} microseconds): " +
+                                            $"{string.Join(", ", matchedActionNeurons.Select(man => man.Timestamp.TimeOfDay.TotalMilliseconds))}"
+                                    )
+                                );
+
+                            var actionFireInfo = matchedActionNeurons.FirstOrDefault();
                             // and specified method was fired within relative spikes period
                             if (actionFireInfo != null)
                             {
@@ -196,7 +207,7 @@ namespace ei8.Prototypes.HelloWorm
 
         public static string ToReadableString(this Neuron neuron)
         {
-            return $"{neuron.Id}:Neuron '{neuron.Tag}'";
+            return $"{neuron.Id}:'{neuron.Tag}'";
         }
 
         public static bool TryGetAdd<TKey, TValue>(
@@ -518,10 +529,6 @@ namespace ei8.Prototypes.HelloWorm
 
         #endregion
 
-        // TODO: remove and make Sectors implement INamed
-        internal static int GetSectorId(this IRectangularComposite rectangularComposite, ISectoral sectoral) =>
-            rectangularComposite.Components.TakeWhile(s => s != sectoral).Count() + 1;
-
         internal static void Move(this IMovable movable)
         {
             ArgumentNullException.ThrowIfNull(movable);
@@ -546,7 +553,7 @@ namespace ei8.Prototypes.HelloWorm
         )
         {
             var results = new List<SectorPointInfo>();
-            var sectors = parent.Components.OfType<IRectangleBoundSectoral>();
+            var sectors = parent.Components.OfType<ISector>();
             foreach (var s in sectors)
             {
                 Rectangle parentRectangle = parent.GetRectangle();
@@ -696,23 +703,23 @@ namespace ei8.Prototypes.HelloWorm
             params Func<Point, Point>[] locationTranslators
         )
         {
-            if (rectangleBound is ISectoral sectoral)
+            if (rectangleBound is ISector sector)
             {
                 using var boundedPath = new GraphicsPath();
                 var parentRectangle = parent.GetRectangle();
                 parentRectangle.Location = parentRectangle.Location.Translate(locationTranslators);
 
                 Brush rb = ExtensionMethods.GetRandomBrushColor(2);
-                g.FillPie(rb, parentRectangle, angleTranslator(sectoral.StartAngle), sectoral.SweepAngle);
+                g.FillPie(rb, parentRectangle, angleTranslator(sector.StartAngle), sector.SweepAngle);
 
                 if (showSectorIds)
                 {
                     Point hypoPoint = parentRectangle.GetHypotenusePoint(
-                        angleTranslator(sectoral.StartAngle - 1 + (sectoral.SweepAngle / 2)),
+                        angleTranslator(sector.StartAngle - 1 + (sector.SweepAngle / 2)),
                         10
                     );
                     g.DrawCenteredStringAtPoint(
-                        parent.GetSectorId(sectoral).ToString(),
+                        sector.Name.Substring(typeof(Sector).Name.Length),
                         new Font("Arial", 8, FontStyle.Regular),
                         Brushes.Blue,
                         hypoPoint

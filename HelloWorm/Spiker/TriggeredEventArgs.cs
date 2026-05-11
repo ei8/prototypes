@@ -4,17 +4,13 @@ namespace ei8.Prototypes.HelloWorm.Spiker
 {
     public class TriggeredEventArgs
     (
-        Neuron source,
-        SpikeOrigin spikeOrigin, 
-        TriggerInfo triggerInfo, 
-        int charge, 
+        Neuron target,
+        ChargeInfo charge, 
         IEnumerable<FireInfo> reflexArc
     ) : EventArgs
     {
-        public Neuron Source { get; } = source;
-        public SpikeOrigin SpikeOrigin { get; } = spikeOrigin;
-        public TriggerInfo TriggerInfo { get; } = triggerInfo;
-        public int Charge { get; } = charge;
+        public Neuron Target { get; } = target;
+        public ChargeInfo Charge { get; } = charge;
         public IEnumerable<FireInfo> ReflexArc { get; } = reflexArc;
     }
 }

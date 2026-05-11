@@ -3,7 +3,7 @@ using System.Collections.Specialized;
 
 namespace ei8.Prototypes.HelloWorm
 {
-    internal class Nose : IRectangularComposite, IElliptical
+    internal class Nose : IRectangularComposite, IElliptical, INamed
     {
         private readonly IList<IComponent> components;
 
@@ -19,6 +19,7 @@ namespace ei8.Prototypes.HelloWorm
         public IEnumerable<IComponent> Components => components;
 
         public required IComposite Parent { get; set; }
+        public string Name { get => typeof(Nose).Name; set { throw new NotSupportedException(); } }
 
         public event NotifyCollectionChangedEventHandler? NotifyCollectionChanged;
 

@@ -218,7 +218,7 @@ namespace ei8.Prototypes.HelloWorm
                     {
                         CollisionInfo? result = null;
 
-                        var sectorId = nose.GetSectorId(sp.Sector);
+                        var sectorId = int.Parse(sp.Sector.Name.Substring(typeof(Sector).Name.Length));
                         var spCount = 0;
                         //  ...dish
                         if ((sectorId < 3 || sectorId > 6) && (spCount = sp.CircumferencePoints.Count(spp => !this.GetRectangle().Contains(spp))) > 0)
