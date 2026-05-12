@@ -1,5 +1,5 @@
+using ei8.Cortex.Coding.Spiker;
 using ei8.Cortex.Library.Client.Out;
-using ei8.Prototypes.HelloWorm.Spiker;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using neurUL.Common.Http;

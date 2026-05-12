@@ -1,7 +1,7 @@
 ﻿using ei8.Cortex.Coding;
 using ei8.Cortex.Coding.Mirrors;
 using ei8.Cortex.Coding.Model.Reflection;
-using ei8.Prototypes.HelloWorm.Spiker;
+using ei8.Cortex.Coding.Spiker;
 using neurUL.Common.Domain.Model;
 using NLog;
 using System.Collections.Concurrent;
@@ -226,7 +226,7 @@ namespace ei8.Prototypes.HelloWorm
             Worm.logger.Info(
                 new LogMessageGenerator(
                     () => 
-                    $"{this.GetFullName()} - Rotating {direction} {degrees}. [Total: {++this.rotationCount}; " +
+                    $"{this.GetFullName()} - Invoking {nameof(Worm.Rotate)}({direction}, {degrees}). [Total: {++this.rotationCount}; " +
                     $"Processing ratio: { Math.Round(this.ProcessingRatio)}%]"
                 )
             );

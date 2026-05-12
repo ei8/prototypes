@@ -62,7 +62,7 @@ namespace ei8.Prototypes.HelloWorm
         private async void tsbWorm_Click(object sender, EventArgs e)
         {
             if (
-                this.selectionService.PrimarySelection is Dish d &&
+                this.selectionService.PrimarySelection is Dish dish &&
                 this.settingsService.Mirrors != null
             )
             {
@@ -83,12 +83,12 @@ namespace ei8.Prototypes.HelloWorm
                     newWorm.Initialize(
                         ExtensionMethods.CreateUnusedName(
                             (i) => $"{nameof(Worm)}{i.ToString()}",
-                            (s) => d.Components.OfType<INamed>().Any(dcn => dcn.Name == s)
+                            (s) => dish.Components.OfType<INamed>().Any(dcn => dcn.Name == s)
                         ), 
-                        d
+                        dish
                     );
                     newWorm.Initialize(queryResult.ToNetwork(), this.settingsService.Mirrors);
-                    d.Add(newWorm);
+                    dish.Add(newWorm);
                 }
             }
         }

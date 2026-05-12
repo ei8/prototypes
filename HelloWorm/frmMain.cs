@@ -1,6 +1,7 @@
 ﻿using ei8.Cortex.Coding;
 using ei8.Cortex.Coding.Mirrors;
 using ei8.Cortex.Coding.Model.Reflection;
+using ei8.Cortex.Coding.Spiker;
 using ei8.Cortex.Diary.Nucleus.Client.In;
 using Microsoft.Extensions.DependencyInjection;
 using neurUL.Common.Domain.Model;
@@ -8,7 +9,6 @@ using neurUL.Common.Http;
 using NLog;
 using System.ComponentModel;
 using System.ComponentModel.Design;
-using System.Xml.Linq;
 using WeifenLuo.WinFormsUI.Docking;
 
 namespace ei8.Prototypes.HelloWorm
@@ -154,22 +154,22 @@ namespace ei8.Prototypes.HelloWorm
             if (
                 this.settingsService.Mirrors != null &&
                 this.settingsService.Mirrors.TryGetByKey(typeof(Worm).ToMethodKeyString(nameof(Worm.Rotate), typeof(Worm.RotationDirection), typeof(Worm.RotationDegrees)), out MirrorConfig? rotateConfig) &&
-                this.settingsService.Mirrors.TryGetByKey(Worm.RotationDirection.Clockwise.ToEnumKeyString(), out MirrorConfig? clockwiseConfig) &&
-                this.settingsService.Mirrors.TryGetByKey(Worm.RotationDirection.CounterClockwise.ToEnumKeyString(), out MirrorConfig? counterClockwiseConfig) &&
-                this.settingsService.Mirrors.TryGetByKey(Worm.RotationDegrees.Small.ToEnumKeyString(), out MirrorConfig? smallConfig) &&
-                this.settingsService.Mirrors.TryGetByKey(Worm.RotationDegrees.Medium.ToEnumKeyString(), out MirrorConfig? mediumConfig) &&
-                this.settingsService.Mirrors.TryGetByKey(Worm.RotationDegrees.Large.ToEnumKeyString(), out MirrorConfig? largeConfig) &&
-                this.settingsService.Mirrors.TryGetByKey(Worm.RotationDegrees.ExtraLarge.ToEnumKeyString(), out MirrorConfig? extraLargeConfig) &&
+                this.settingsService.Mirrors.TryGetByKey(Worm.RotationDirection.Clockwise.ToKeyString(), out MirrorConfig? clockwiseConfig) &&
+                this.settingsService.Mirrors.TryGetByKey(Worm.RotationDirection.CounterClockwise.ToKeyString(), out MirrorConfig? counterClockwiseConfig) &&
+                this.settingsService.Mirrors.TryGetByKey(Worm.RotationDegrees.Small.ToKeyString(), out MirrorConfig? smallConfig) &&
+                this.settingsService.Mirrors.TryGetByKey(Worm.RotationDegrees.Medium.ToKeyString(), out MirrorConfig? mediumConfig) &&
+                this.settingsService.Mirrors.TryGetByKey(Worm.RotationDegrees.Large.ToKeyString(), out MirrorConfig? largeConfig) &&
+                this.settingsService.Mirrors.TryGetByKey(Worm.RotationDegrees.ExtraLarge.ToKeyString(), out MirrorConfig? extraLargeConfig) &&
                 this.settingsService.Mirrors.TryGetByKey(typeof(Odor).ToKeyString(), out MirrorConfig? odorConfig) &&
                 this.settingsService.Mirrors.TryGetByKey(typeof(Dish).ToKeyString(), out MirrorConfig? dishConfig) &&
-                this.settingsService.Mirrors.TryGetByKey(Worm.SectorValues.Sector1.ToEnumKeyString(), out MirrorConfig? sector1Config) &&
-                this.settingsService.Mirrors.TryGetByKey(Worm.SectorValues.Sector2.ToEnumKeyString(), out MirrorConfig? sector2Config) &&
-                this.settingsService.Mirrors.TryGetByKey(Worm.SectorValues.Sector3.ToEnumKeyString(), out MirrorConfig? sector3Config) &&
-                this.settingsService.Mirrors.TryGetByKey(Worm.SectorValues.Sector4.ToEnumKeyString(), out MirrorConfig? sector4Config) &&
-                this.settingsService.Mirrors.TryGetByKey(Worm.SectorValues.Sector5.ToEnumKeyString(), out MirrorConfig? sector5Config) &&
-                this.settingsService.Mirrors.TryGetByKey(Worm.SectorValues.Sector6.ToEnumKeyString(), out MirrorConfig? sector6Config) &&
-                this.settingsService.Mirrors.TryGetByKey(Worm.SectorValues.Sector7.ToEnumKeyString(), out MirrorConfig? sector7Config) &&
-                this.settingsService.Mirrors.TryGetByKey(Worm.SectorValues.Sector8.ToEnumKeyString(), out MirrorConfig? sector8Config)
+                this.settingsService.Mirrors.TryGetByKey(Worm.SectorValues.Sector1.ToKeyString(), out MirrorConfig? sector1Config) &&
+                this.settingsService.Mirrors.TryGetByKey(Worm.SectorValues.Sector2.ToKeyString(), out MirrorConfig? sector2Config) &&
+                this.settingsService.Mirrors.TryGetByKey(Worm.SectorValues.Sector3.ToKeyString(), out MirrorConfig? sector3Config) &&
+                this.settingsService.Mirrors.TryGetByKey(Worm.SectorValues.Sector4.ToKeyString(), out MirrorConfig? sector4Config) &&
+                this.settingsService.Mirrors.TryGetByKey(Worm.SectorValues.Sector5.ToKeyString(), out MirrorConfig? sector5Config) &&
+                this.settingsService.Mirrors.TryGetByKey(Worm.SectorValues.Sector6.ToKeyString(), out MirrorConfig? sector6Config) &&
+                this.settingsService.Mirrors.TryGetByKey(Worm.SectorValues.Sector7.ToKeyString(), out MirrorConfig? sector7Config) &&
+                this.settingsService.Mirrors.TryGetByKey(Worm.SectorValues.Sector8.ToKeyString(), out MirrorConfig? sector8Config)
             )
             {
                 var ns = new Network();
