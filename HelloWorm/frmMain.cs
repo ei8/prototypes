@@ -72,7 +72,7 @@ namespace ei8.Prototypes.HelloWorm
             if (this.selectionService.PrimarySelection is Dish d)
                 d.NotifyCollectionChanged += this.Dish_NotifyCollectionChanged;
 
-            this.mnuViewCode.Enabled = this.selectionService.PrimarySelection is Worm;
+            this.mnuViewCode.Enabled = this.selectionService.PrimarySelection is ISpikableReporting2;
 
             if (this.selectionService.PrimarySelection is INotifyPropertyChanged t)
             {

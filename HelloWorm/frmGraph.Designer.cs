@@ -33,6 +33,7 @@
             gViewer1 = new Microsoft.Msagl.GraphViewerGdi.GViewer();
             contextMenuStrip1 = new ContextMenuStrip(components);
             selectGraphToolStripMenuItem = new ToolStripMenuItem();
+            timer1 = new System.Windows.Forms.Timer(components);
             contextMenuStrip1.SuspendLayout();
             SuspendLayout();
             // 
@@ -83,14 +84,20 @@
             // 
             contextMenuStrip1.Items.AddRange(new ToolStripItem[] { selectGraphToolStripMenuItem });
             contextMenuStrip1.Name = "contextMenuStrip1";
-            contextMenuStrip1.Size = new Size(181, 48);
+            contextMenuStrip1.Size = new Size(150, 26);
             // 
             // selectGraphToolStripMenuItem
             // 
             selectGraphToolStripMenuItem.Name = "selectGraphToolStripMenuItem";
-            selectGraphToolStripMenuItem.Size = new Size(180, 22);
+            selectGraphToolStripMenuItem.Size = new Size(149, 22);
             selectGraphToolStripMenuItem.Text = "Select Graph...";
             selectGraphToolStripMenuItem.Click += selectGraphToolStripMenuItem_Click;
+            // 
+            // timer1
+            // 
+            timer1.Enabled = true;
+            timer1.Interval = 1000;
+            timer1.Tick += timer1_Tick;
             // 
             // frmGraph
             // 
@@ -110,5 +117,6 @@
         private Microsoft.Msagl.GraphViewerGdi.GViewer gViewer1;
         private ContextMenuStrip contextMenuStrip1;
         private ToolStripMenuItem selectGraphToolStripMenuItem;
+        private System.Windows.Forms.Timer timer1;
     }
 }

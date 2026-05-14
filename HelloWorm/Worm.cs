@@ -10,7 +10,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace ei8.Prototypes.HelloWorm
 {
-    public class Worm : IMovable, IRectangularComposite, IElliptical, IPerishable, IRegenerative, ISpikableReporting, INamed
+    public class Worm : IMovable, IRectangularComposite, IElliptical, IPerishable, IRegenerative, ISpikableReporting2, INamed
     {
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
@@ -109,6 +109,8 @@ namespace ei8.Prototypes.HelloWorm
                     }
                 )
             );
+
+            this.Triggered?.Invoke(this, e);
         }
 
         private void SpikeService_Fired(object? sender, FiredEventArgs e)
@@ -165,6 +167,8 @@ namespace ei8.Prototypes.HelloWorm
             }
             else
                 Worm.logger.Trace(new LogMessageGenerator(() => $"Invoke failed: {this.invokeFailureCount++}"));
+
+            this.Fired?.Invoke(this, e);
         }
 
         private static IEnumerable<Sector> InitializeSectors(Nose nose)
@@ -237,6 +241,8 @@ namespace ei8.Prototypes.HelloWorm
         public event EventHandler<MovingEventArgs>? Moving;
         public event EventHandler<CollidedEventArgs>? Collided;
         public event NotifyCollectionChangedEventHandler? NotifyCollectionChanged;
+        public event EventHandler<TriggeredEventArgs>? Triggered;
+        public event EventHandler<FiredEventArgs>? Fired;
 
         public void Grow()
         {
