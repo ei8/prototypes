@@ -34,6 +34,8 @@
             contextMenuStrip1 = new ContextMenuStrip(components);
             selectGraphToolStripMenuItem = new ToolStripMenuItem();
             timer1 = new System.Windows.Forms.Timer(components);
+            toolStripMenuItem1 = new ToolStripSeparator();
+            settingsToolStripMenuItem = new ToolStripMenuItem();
             contextMenuStrip1.SuspendLayout();
             SuspendLayout();
             // 
@@ -82,14 +84,14 @@
             // 
             // contextMenuStrip1
             // 
-            contextMenuStrip1.Items.AddRange(new ToolStripItem[] { selectGraphToolStripMenuItem });
+            contextMenuStrip1.Items.AddRange(new ToolStripItem[] { selectGraphToolStripMenuItem, toolStripMenuItem1, settingsToolStripMenuItem });
             contextMenuStrip1.Name = "contextMenuStrip1";
-            contextMenuStrip1.Size = new Size(150, 26);
+            contextMenuStrip1.Size = new Size(181, 76);
             // 
             // selectGraphToolStripMenuItem
             // 
             selectGraphToolStripMenuItem.Name = "selectGraphToolStripMenuItem";
-            selectGraphToolStripMenuItem.Size = new Size(149, 22);
+            selectGraphToolStripMenuItem.Size = new Size(180, 22);
             selectGraphToolStripMenuItem.Text = "Select Graph...";
             selectGraphToolStripMenuItem.Click += selectGraphToolStripMenuItem_Click;
             // 
@@ -98,6 +100,18 @@
             timer1.Enabled = true;
             timer1.Interval = 1000;
             timer1.Tick += timer1_Tick;
+            // 
+            // toolStripMenuItem1
+            // 
+            toolStripMenuItem1.Name = "toolStripMenuItem1";
+            toolStripMenuItem1.Size = new Size(177, 6);
+            // 
+            // settingsToolStripMenuItem
+            // 
+            settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
+            settingsToolStripMenuItem.Size = new Size(180, 22);
+            settingsToolStripMenuItem.Text = "Settings...";
+            settingsToolStripMenuItem.Click += settingsToolStripMenuItem_Click;
             // 
             // frmGraph
             // 
@@ -118,5 +132,7 @@
         private ContextMenuStrip contextMenuStrip1;
         private ToolStripMenuItem selectGraphToolStripMenuItem;
         private System.Windows.Forms.Timer timer1;
+        private ToolStripSeparator toolStripMenuItem1;
+        private ToolStripMenuItem settingsToolStripMenuItem;
     }
 }

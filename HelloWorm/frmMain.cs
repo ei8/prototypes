@@ -341,8 +341,11 @@ namespace ei8.Prototypes.HelloWorm
 
         private void mnuViewCodeGraph_Click(object sender, EventArgs e)
         {
-            var fc = this.serviceProvider.GetRequiredService<frmGraph>();
-            fc.Show(this.dockPanel1, DockState.Document);
+            if (this.selectionService.PrimarySelection is ISpikableReporting2)
+            {
+                var fc = this.serviceProvider.GetRequiredService<frmGraph>();
+                fc.Show(this.dockPanel1, DockState.Document);
+            }
         }
 
         private void mnuTimePlay_Click(object sender, EventArgs e)

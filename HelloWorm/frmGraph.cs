@@ -16,6 +16,7 @@ namespace ei8.Prototypes.HelloWorm
         {
             NotSet,
             Triggered,
+            TriggeredPreviously,
             Fired,
             FiredPreviously
         }
@@ -31,9 +32,11 @@ namespace ei8.Prototypes.HelloWorm
         private const int FiredPreviouslyWidth = 3;
         private const int FiredWidth = 3;
         private const int InitialWidth = 1;
+        private static readonly Color InactiveColor = Color.Silver;
         private readonly ISpikableReporting2 spikable;
         private readonly ISelectionService selectionService;
         private readonly ConcurrentDictionary<Guid, SpikeUIInfo> spikes;
+        private readonly GraphSettings settings;
 
         public frmGraph(ISelectionService selectionService)
         {
@@ -51,28 +54,60 @@ namespace ei8.Prototypes.HelloWorm
                 throw new ArgumentException("Cannot construct Graph without a selected ISpikable.");
 
             this.spikes = new();
+            this.settings = new GraphSettings();
+            this.settings.PropertyChanged += this.Settings_PropertyChanged;
+            this.settings.SpikeVisualization.PropertyChanged += this.SpikeVisualization_PropertyChanged;
+
+            this.settings.ShortenMirrorTags = true;
+            this.settings.SpikeVisualization.Enabled = true;
+            this.settings.SpikeVisualization.SustainTriggered = false;
+            this.settings.SpikeVisualization.SustainFired = true;
+        }
+
+        private void SpikeVisualization_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            switch (e.PropertyName)
+            {
+                case nameof(SpikeVisualizationSettings.Enabled):
+                    this.timer1.Enabled = this.settings.SpikeVisualization.Enabled;
+                    this.spikes.Clear();
+                    this.frmGraph_Load(this, EventArgs.Empty);
+                    break;
+            }
+        }
+
+        private void Settings_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            switch (e.PropertyName)
+            {
+                case nameof(GraphSettings.ShortenMirrorTags):
+                    this.frmGraph_Load(this, EventArgs.Empty);
+                    break;
+            }
         }
 
         private void Spikable_Fired(object? sender, FiredEventArgs e)
         {
-            frmGraph.UpdateNode(
-                this.gViewer1, 
-                spikes, 
-                e.FireInfo.Triggers.Select(t => t.PresynapticId), 
-                e.FireInfo.Target.Id, 
-                Status.Fired
-            );
+            if (this.settings.SpikeVisualization.Enabled)
+                frmGraph.UpdateNode(
+                    this.gViewer1,
+                    spikes,
+                    e.FireInfo.Triggers.Select(t => t.PresynapticId),
+                    e.FireInfo.Target.Id,
+                    Status.Fired
+                );
         }
 
         private void Spikable_Triggered(object? sender, TriggeredEventArgs e)
         {
-            frmGraph.UpdateNode(
-                this.gViewer1, 
-                spikes, 
-                e.ReflexArc.Any() ? [e.ReflexArc.Last().Target.Id] : Enumerable.Empty<Guid>(), 
-                e.Target.Id, 
-                Status.Triggered
-            );
+            if (this.settings.SpikeVisualization.Enabled)
+                frmGraph.UpdateNode(
+                    this.gViewer1,
+                    spikes,
+                    e.ReflexArc.Any() ? [e.ReflexArc.Last().Target.Id] : Enumerable.Empty<Guid>(),
+                    e.Target.Id,
+                    Status.Triggered
+                );
         }
 
         private static void UpdateNode(GViewer gViewer, ConcurrentDictionary<Guid, SpikeUIInfo> spikes, IEnumerable<Guid> sourceIds, Guid targetId, Status newStatus)
@@ -86,23 +121,40 @@ namespace ei8.Prototypes.HelloWorm
                 {
                     case Status.Triggered:
                         invalidateRectangles = frmGraph.UpdateNodeCore(
-                            sourceIds.Select(s => gViewer.Graph.FindNode(s.ToString())), 
-                            targetNode, 
-                            spikes, 
-                            Color.Red, 
-                            Color.Red, 
+                            sourceIds.Select(s => gViewer.Graph.FindNode(s.ToString())),
+                            targetNode,
+                            spikes,
+                            Color.Red,
+                            Color.Black,
+                            Color.Red,
+                            Color.Black,
                             frmGraph.TriggeredWidth
+                        );
+                        break;
+                    case Status.TriggeredPreviously:
+                        invalidateRectangles = frmGraph.UpdateNodeCore(
+                            sourceIds.Select(s => gViewer.Graph.FindNode(s.ToString())),
+                            targetNode,
+                            spikes,
+                            Color.DarkRed,
+                            Color.Black,
+                            Color.DarkRed,
+                            Color.Black,
+                            frmGraph.TriggeredWidth,
+                            true
                         );
                         break;
                     case Status.Fired:
                         invalidateRectangles = frmGraph.UpdateNodeCore(
                             sourceIds.Select(s => gViewer.Graph.FindNode(s.ToString())),
-                            targetNode, 
+                            targetNode,
                             spikes,
                             !targetNode.OutEdges.Any() ?
                                 Color.Lime :
-                                Color.DodgerBlue, 
+                                Color.DodgerBlue,
+                            Color.Black,
                             Color.DodgerBlue,
+                            Color.Black,
                             frmGraph.FiredWidth
                         );
                         break;
@@ -114,7 +166,9 @@ namespace ei8.Prototypes.HelloWorm
                             !targetNode.OutEdges.Any() ?
                                 Color.ForestGreen :
                                 Color.DarkSlateBlue,
+                            Color.Black,
                             Color.DarkSlateBlue,
+                            Color.Black,
                             frmGraph.FiredPreviouslyWidth,
                             true
                         );
@@ -122,16 +176,18 @@ namespace ei8.Prototypes.HelloWorm
                     case Status.NotSet:
                         invalidateRectangles = frmGraph.UpdateNodeCore(
                             sourceIds.Select(s => gViewer.Graph.FindNode(s.ToString())),
-                            targetNode, 
-                            spikes, 
-                            Color.Black, 
-                            Color.Black,
-                            InitialWidth
+                            targetNode,
+                            spikes,
+                            frmGraph.InactiveColor,
+                            frmGraph.InactiveColor,
+                            frmGraph.InactiveColor,
+                            frmGraph.InactiveColor,
+                            frmGraph.InitialWidth
                         );
                         break;
                 }
 
-                foreach(var rectangle in invalidateRectangles)
+                foreach (var rectangle in invalidateRectangles)
                     gViewer.Invalidate(
                         new System.Drawing.Rectangle(
                             (int)rectangle.Left,
@@ -147,20 +203,19 @@ namespace ei8.Prototypes.HelloWorm
         }
 
         private static IEnumerable<Rectangle> UpdateNodeCore(
-            IEnumerable<Node> sourceNodes, 
-            Node targetNode, 
-            ConcurrentDictionary<Guid, SpikeUIInfo> spikes, 
-            Color nodeColor, 
-            Color edgeColor, 
+            IEnumerable<Node> sourceNodes,
+            Node targetNode,
+            ConcurrentDictionary<Guid, SpikeUIInfo> spikes,
+            Color nodeColor,
+            Color nodeLabelFontColor,
+            Color edgeColor,
+            Color edgeLabelFontColor,
             double width,
             bool forceUpdateInEdges = false
         )
         {
             var result = new List<Rectangle>();
-
-            targetNode.Attr.Color = nodeColor;
-            targetNode.Attr.LineWidth = width;
-
+            frmGraph.UpdateNodeStyle(targetNode, nodeColor, nodeLabelFontColor, width);
             result.Add(targetNode.BoundingBox);
 
             foreach (var ie in targetNode.Edges)
@@ -170,17 +225,16 @@ namespace ei8.Prototypes.HelloWorm
                 {
                     // if resetting or presynaptic is in triggers list
                     if (
-                        width == frmGraph.InitialWidth || 
-                        sourceNodes.Contains(ie.SourceNode) || 
+                        width == frmGraph.InitialWidth ||
+                        sourceNodes.Contains(ie.SourceNode) ||
                         (
-                            forceUpdateInEdges && 
+                            forceUpdateInEdges &&
                             ie.Attr.LineWidth != frmGraph.InitialWidth
                         )
                     )
                     {
                         // apply style to edge
-                        ie.Attr.Color = edgeColor;
-                        ie.Attr.LineWidth = width;
+                        frmGraph.UpdateEdgeStyle(ie, edgeColor, edgeLabelFontColor, width);
                         result.Add(ie.BoundingBox);
                     }
                 }
@@ -191,14 +245,27 @@ namespace ei8.Prototypes.HelloWorm
                     if (width == frmGraph.InitialWidth)
                     {
                         // apply style to edge
-                        ie.Attr.Color = edgeColor;
-                        ie.Attr.LineWidth = width;
+                        frmGraph.UpdateEdgeStyle(ie, edgeColor, edgeLabelFontColor, width);
                         result.Add(ie.BoundingBox);
                     }
                 }
             }
 
             return result;
+        }
+
+        private static void UpdateEdgeStyle(Edge edge, Color edgeColor, Color labelFontColor, double width)
+        {
+            edge.Label.FontColor = labelFontColor;
+            edge.Attr.Color = edgeColor;
+            edge.Attr.LineWidth = width;
+        }
+
+        private static void UpdateNodeStyle(Node node, Color nodeColor, Color labelFontColor, double width)
+        {
+            node.Label.FontColor = labelFontColor;
+            node.Attr.Color = nodeColor;
+            node.Attr.LineWidth = width;
         }
 
         private void frmGraph_Load(object sender, EventArgs e)
@@ -221,6 +288,9 @@ namespace ei8.Prototypes.HelloWorm
                             (t.Effect == NeurotransmitterEffect.Excite ? "+" : "-") + t.Strength.ToString(),
                             t.PostsynapticNeuronId.ToString()
                         );
+
+                        if (this.settings.SpikeVisualization.Enabled)
+                            frmGraph.UpdateEdgeStyle(edge, frmGraph.InactiveColor, frmGraph.InactiveColor, frmGraph.InitialWidth);
                     }
 
                 foreach (var n in this.spikable.Network.GetItems<Neuron>().Where(n => cns.Any(cn => cn.Id == n.Id)))
@@ -229,7 +299,7 @@ namespace ei8.Prototypes.HelloWorm
                     if (node != null)
                     {
                         var tag = n.Tag;
-                        if (!string.IsNullOrWhiteSpace(tag))
+                        if (!string.IsNullOrWhiteSpace(tag) && this.settings.ShortenMirrorTags)
                         {
                             var lastIndex = tag.LastIndexOfAny(['.', '+']);
                             if (lastIndex > -1)
@@ -240,9 +310,12 @@ namespace ei8.Prototypes.HelloWorm
 
                         if (string.IsNullOrEmpty(tag))
                             node.Attr.Shape = Shape.Circle;
+
+                        if (this.settings.SpikeVisualization.Enabled)
+                            frmGraph.UpdateNodeStyle(node, frmGraph.InactiveColor, frmGraph.InactiveColor, frmGraph.InitialWidth);
                     }
                 }
-                this.gViewer1.CurrentLayoutMethod = LayoutMethod.Ranking;
+                this.gViewer1.CurrentLayoutMethod = LayoutMethod.MDS;
                 this.gViewer1.Graph = graph;
             }
         }
@@ -260,22 +333,36 @@ namespace ei8.Prototypes.HelloWorm
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            var activeSpikes = this.spikes.Where(s => s.Value.Status != Status.NotSet);
-
-            foreach (var spike in activeSpikes)
+            if (this.settings.SpikeVisualization.Enabled)
             {
-                if (DateTime.Now.Subtract(spike.Value.Timestamp).TotalSeconds > 4 && spike.Value.Status == Status.FiredPreviously)
+                var activeSpikes = this.spikes.Where(s => s.Value.Status != Status.NotSet);
+
+                foreach (var spike in activeSpikes)
                 {
-                    frmGraph.UpdateNode(this.gViewer1, this.spikes, Enumerable.Empty<Guid>(), spike.Key, Status.NotSet);
-                }
-                else if (DateTime.Now.Subtract(spike.Value.Timestamp).TotalSeconds > 2)
-                {
-                    if (spike.Value.Status == Status.Triggered)
-                        frmGraph.UpdateNode(this.gViewer1, this.spikes, Enumerable.Empty<Guid>(), spike.Key, Status.NotSet);
-                    else if (spike.Value.Status == Status.Fired)
-                        frmGraph.UpdateNode(this.gViewer1, this.spikes, Enumerable.Empty<Guid>(), spike.Key, Status.FiredPreviously);
+                    if (spike.Value.Status == Status.FiredPreviously || spike.Value.Status == Status.TriggeredPreviously)
+                    {
+                        if (DateTime.Now.Subtract(spike.Value.Timestamp).TotalSeconds > (
+                                (this.settings.SpikeVisualization.ResetPeriod + this.settings.SpikeVisualization.SustainPeriod) / 1000
+                            )
+                        )
+                            frmGraph.UpdateNode(this.gViewer1, this.spikes, Enumerable.Empty<Guid>(), spike.Key, Status.NotSet);
+                    }
+                    else if (DateTime.Now.Subtract(spike.Value.Timestamp).TotalSeconds > (this.settings.SpikeVisualization.ResetPeriod / 1000))
+                    {
+                        if (spike.Value.Status == Status.Triggered && this.settings.SpikeVisualization.SustainTriggered)
+                            frmGraph.UpdateNode(this.gViewer1, this.spikes, Enumerable.Empty<Guid>(), spike.Key, Status.TriggeredPreviously);
+                        else if (spike.Value.Status == Status.Fired && this.settings.SpikeVisualization.SustainFired)
+                            frmGraph.UpdateNode(this.gViewer1, this.spikes, Enumerable.Empty<Guid>(), spike.Key, Status.FiredPreviously);
+                        else
+                            frmGraph.UpdateNode(this.gViewer1, this.spikes, Enumerable.Empty<Guid>(), spike.Key, Status.NotSet);
+                    }
                 }
             }
+        }
+
+        private void settingsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            this.selectionService.SetSelectedComponents(new[] { this.settings });
         }
     }
 }
