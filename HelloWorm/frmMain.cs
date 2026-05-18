@@ -389,5 +389,17 @@ namespace ei8.Prototypes.HelloWorm
             var fc = this.serviceProvider.GetRequiredService<frmTree>();
             fc.Show(this.dockPanel1, DockState.Document);
         }
+
+        private void mnuWindowNewHorizontal_Click(object sender, EventArgs e)
+        {
+            if (this.dockPanel1.ActiveContent.DockHandler.Pane.Contents.Count() > 1)
+                this.dockPanel1.ActiveContent.DockHandler.Show(this.dockPanel1.ActiveContent.DockHandler.Pane, DockAlignment.Bottom, 0.5);
+        }
+
+        private void mnuWindowNewVertical_Click(object sender, EventArgs e)
+        {
+            if (this.dockPanel1.ActiveContent.DockHandler.Pane.Contents.Count() > 1)
+                this.dockPanel1.ActiveContent.DockHandler.Show(this.dockPanel1.ActiveContent.DockHandler.Pane, DockAlignment.Right, 0.5);
+        }
     }
 }
