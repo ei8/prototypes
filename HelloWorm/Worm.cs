@@ -6,6 +6,7 @@ using neurUL.Common.Domain.Model;
 using NLog;
 using System.Collections.Concurrent;
 using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 
 namespace ei8.Prototypes.HelloWorm
@@ -53,6 +54,8 @@ namespace ei8.Prototypes.HelloWorm
         private IDictionary<string, Guid>? targetsValueDictionary;
         private TimeSpan refractoryPeriod;
         private TimeSpan relatedSpikesPeriod;
+        private int life;
+        private string name;
         private readonly IList<IComponent> components;
         private readonly ISpikeService spikeService;
 
@@ -208,7 +211,19 @@ namespace ei8.Prototypes.HelloWorm
         public float Direction { get; set; }
         public int Speed { get; set; }
         public int Score { get; set; }
-        public int Life { get; set; }
+        public int Life 
+        { 
+            get => this.life;
+            set
+            {
+                if (this.life != value)
+                {
+                    this.life = value;
+                    this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Worm.Life)));
+                }
+            }
+        }
+
         public IEnumerable<IComponent> Components => this.components;
 
         public Network? Network => this.network;
@@ -222,8 +237,19 @@ namespace ei8.Prototypes.HelloWorm
         public TimeSpan RelatedSpikesPeriod { get => this.relatedSpikesPeriod; set => this.relatedSpikesPeriod = value; }
 
         public required IComposite Parent { get; set; }
-        
-        public required string Name { get; set; }
+
+        public required string Name 
+        { 
+            get => this.name;
+            set
+            {
+                if (this.name != value)
+                {
+                    this.name = value;
+                    this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Worm.Name)));
+                }
+            }
+        }
 
         public void Rotate(RotationDirection direction, RotationDegrees degrees)
         {
@@ -243,6 +269,7 @@ namespace ei8.Prototypes.HelloWorm
         public event NotifyCollectionChangedEventHandler? NotifyCollectionChanged;
         public event EventHandler<TriggeredEventArgs>? Triggered;
         public event EventHandler<FiredEventArgs>? Fired;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         public void Grow()
         {

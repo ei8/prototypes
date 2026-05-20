@@ -1,5 +1,6 @@
 ﻿
 using System.Collections.Specialized;
+using System.ComponentModel;
 
 namespace ei8.Prototypes.HelloWorm
 {
@@ -22,6 +23,7 @@ namespace ei8.Prototypes.HelloWorm
         public string Name { get => typeof(Nose).Name; set { throw new NotSupportedException(); } }
 
         public event NotifyCollectionChangedEventHandler? NotifyCollectionChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         public void Add(IComponent component)
         {

@@ -1,4 +1,6 @@
 ﻿
+using System.ComponentModel;
+
 namespace ei8.Prototypes.HelloWorm
 {
     public class Sector : ISector
@@ -10,6 +12,8 @@ namespace ei8.Prototypes.HelloWorm
         public required IComposite Parent { get; set; }
 
         public required string Name { get; set; }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         public void Initialize(string name, IRectangularComposite parent)
         {

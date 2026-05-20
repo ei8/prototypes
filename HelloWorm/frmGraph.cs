@@ -49,6 +49,10 @@ namespace ei8.Prototypes.HelloWorm
                 this.spikable = s;
                 this.spikable.Triggered += this.Spikable_Triggered;
                 this.spikable.Fired += this.Spikable_Fired;
+
+                if (this.spikable is INamed n)
+                    n.PropertyChanged += this.N_PropertyChanged;
+                
             }
             else
                 throw new ArgumentException("Cannot construct Graph without a selected ISpikable.");
@@ -62,6 +66,27 @@ namespace ei8.Prototypes.HelloWorm
             this.settings.SpikeVisualization.Enabled = true;
             this.settings.SpikeVisualization.SustainTriggered = false;
             this.settings.SpikeVisualization.SustainFired = true;
+        }
+
+        private void N_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            switch (e.PropertyName)
+            {
+                case nameof(INamed.Name):
+                case nameof(IPerishable.Life):
+                    bool process = true;
+                    if (
+                        e.PropertyName == nameof(IPerishable.Life) && 
+                        sender is IPerishable perishable &&
+                        perishable.Life > 0
+                    )
+                        process = false;
+
+                    if (process)
+                        frmGraph.UpdateName(this.spikable, this);
+
+                    break;
+            }
         }
 
         private void SpikeVisualization_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -317,7 +342,27 @@ namespace ei8.Prototypes.HelloWorm
                 }
                 this.gViewer1.CurrentLayoutMethod = LayoutMethod.MDS;
                 this.gViewer1.Graph = graph;
+
+                frmGraph.UpdateName(this.spikable, this);
             }
+        }
+
+        private static void UpdateName(ISpikableReporting2 spikable, frmGraph form)
+        {
+            var fullName = string.Empty;
+            var lifeText = string.Empty;
+            if (spikable is IComponent component)
+                fullName = component.GetFullName();
+            if (spikable is IPerishable perishable && perishable.Life <= 0)
+                lifeText = $"{(!string.IsNullOrEmpty(fullName) ? " " : string.Empty)}[Dead]";
+
+            form.Text =
+                $"{fullName}{lifeText}" +
+                $"{(!(string.IsNullOrWhiteSpace(fullName) && string.IsNullOrWhiteSpace(lifeText)) ?
+                        " - " :
+                        string.Empty
+                    )}" +
+                $"Graph";
         }
 
         private void gViewer1_MouseClick(object sender, MouseEventArgs e)

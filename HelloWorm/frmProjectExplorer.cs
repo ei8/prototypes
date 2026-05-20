@@ -112,7 +112,6 @@ namespace ei8.Prototypes.HelloWorm
 
         private void Composite_NotifyCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
-
             if (
                 // sender is composite and 
                 sender is IComposite composite &&
@@ -121,7 +120,7 @@ namespace ei8.Prototypes.HelloWorm
                     ( 
                         sender is not Dish
                     ) ||
-                    // or if it is, dish is not being added to but not an odor particle
+                    // or if it is, dish is being added to but not an odor particle
                     (
                         e.Action == NotifyCollectionChangedAction.Add &&
                         e.NewItems != null &&

@@ -1,6 +1,8 @@
-﻿namespace ei8.Prototypes.HelloWorm
+﻿using System.ComponentModel;
+
+namespace ei8.Prototypes.HelloWorm
 {
-    public interface INamed
+    public interface INamed : INotifyPropertyChanged
     {
         public string Name { get; set; }
     }

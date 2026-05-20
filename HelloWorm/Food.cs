@@ -1,4 +1,6 @@
-﻿namespace ei8.Prototypes.HelloWorm
+﻿using System.ComponentModel;
+
+namespace ei8.Prototypes.HelloWorm
 {
     internal class Food : IRectangular, IEmitter, IPerishable, IRegenerative
     {
@@ -13,6 +15,7 @@
         public float SweepAngle { get; set; }
 
         public event EventHandler<EmittedEventArgs>? Emitted;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         public int Life { get; set; }
 
