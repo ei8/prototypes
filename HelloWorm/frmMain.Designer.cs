@@ -61,12 +61,14 @@
             mnuToolsInitializeAvatar = new ToolStripMenuItem();
             toolStripMenuItem4 = new ToolStripMenuItem();
             mnuWindowNewHorizontal = new ToolStripMenuItem();
+            mnuWindowNewVertical = new ToolStripMenuItem();
+            mnuWindowMoveToNextDocumentGroup = new ToolStripMenuItem();
+            mnuWindowMoveToPreviousDocumentGroup = new ToolStripMenuItem();
             helpToolStripMenuItem = new ToolStripMenuItem();
             aboutHelloWormToolStripMenuItem = new ToolStripMenuItem();
             tsTemporal = new ToolStrip();
             tsbTemporalPlay = new ToolStripButton();
             tsbTemporalPause = new ToolStripButton();
-            mnuWindowNewVertical = new ToolStripMenuItem();
             statusStrip1.SuspendLayout();
             toolStripContainer1.ContentPanel.SuspendLayout();
             toolStripContainer1.TopToolStripPanel.SuspendLayout();
@@ -305,7 +307,7 @@
             // 
             // toolStripMenuItem4
             // 
-            toolStripMenuItem4.DropDownItems.AddRange(new ToolStripItem[] { mnuWindowNewHorizontal, mnuWindowNewVertical });
+            toolStripMenuItem4.DropDownItems.AddRange(new ToolStripItem[] { mnuWindowNewHorizontal, mnuWindowNewVertical, mnuWindowMoveToNextDocumentGroup, mnuWindowMoveToPreviousDocumentGroup });
             toolStripMenuItem4.Name = "toolStripMenuItem4";
             toolStripMenuItem4.Size = new Size(63, 20);
             toolStripMenuItem4.Text = "&Window";
@@ -313,9 +315,30 @@
             // mnuWindowNewHorizontal
             // 
             mnuWindowNewHorizontal.Name = "mnuWindowNewHorizontal";
-            mnuWindowNewHorizontal.Size = new Size(251, 22);
+            mnuWindowNewHorizontal.Size = new Size(261, 22);
             mnuWindowNewHorizontal.Text = "New &Horizontal Document Group";
             mnuWindowNewHorizontal.Click += mnuWindowNewHorizontal_Click;
+            // 
+            // mnuWindowNewVertical
+            // 
+            mnuWindowNewVertical.Name = "mnuWindowNewVertical";
+            mnuWindowNewVertical.Size = new Size(261, 22);
+            mnuWindowNewVertical.Text = "New &Vertical Document Group";
+            mnuWindowNewVertical.Click += mnuWindowNewVertical_Click;
+            // 
+            // mnuWindowMoveToNextDocumentGroup
+            // 
+            mnuWindowMoveToNextDocumentGroup.Name = "mnuWindowMoveToNextDocumentGroup";
+            mnuWindowMoveToNextDocumentGroup.Size = new Size(261, 22);
+            mnuWindowMoveToNextDocumentGroup.Text = "Move to Ne&xt Document Group";
+            mnuWindowMoveToNextDocumentGroup.Click += mnuWindowMoveToNextDocumentGroup_Click;
+            // 
+            // mnuWindowMoveToPreviousDocumentGroup
+            // 
+            mnuWindowMoveToPreviousDocumentGroup.Name = "mnuWindowMoveToPreviousDocumentGroup";
+            mnuWindowMoveToPreviousDocumentGroup.Size = new Size(261, 22);
+            mnuWindowMoveToPreviousDocumentGroup.Text = "Move to P&revious Document Group";
+            mnuWindowMoveToPreviousDocumentGroup.Click += mnuWindowMoveToPreviousDocumentGroup_Click;
             // 
             // helpToolStripMenuItem
             // 
@@ -360,13 +383,6 @@
             tsbTemporalPause.Text = "toolStripButton1";
             tsbTemporalPause.ToolTipText = "Pause";
             tsbTemporalPause.Click += tsbTemporalPause_Click;
-            // 
-            // mnuWindowNewVertical
-            // 
-            mnuWindowNewVertical.Name = "mnuWindowNewVertical";
-            mnuWindowNewVertical.Size = new Size(251, 22);
-            mnuWindowNewVertical.Text = "New &Vertical Document Group";
-            mnuWindowNewVertical.Click += mnuWindowNewVertical_Click;
             // 
             // frmMain
             // 
@@ -434,5 +450,7 @@
         private ToolStripMenuItem toolStripMenuItem4;
         private ToolStripMenuItem mnuWindowNewHorizontal;
         private ToolStripMenuItem mnuWindowNewVertical;
+        private ToolStripMenuItem mnuWindowMoveToNextDocumentGroup;
+        private ToolStripMenuItem mnuWindowMoveToPreviousDocumentGroup;
     }
 }

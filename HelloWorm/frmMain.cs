@@ -9,6 +9,7 @@ using neurUL.Common.Http;
 using NLog;
 using System.ComponentModel;
 using System.ComponentModel.Design;
+using System.Windows.Documents;
 using WeifenLuo.WinFormsUI.Docking;
 
 namespace ei8.Prototypes.HelloWorm
@@ -400,6 +401,58 @@ namespace ei8.Prototypes.HelloWorm
         {
             if (this.dockPanel1.ActiveContent.DockHandler.Pane.Contents.Count() > 1)
                 this.dockPanel1.ActiveContent.DockHandler.Show(this.dockPanel1.ActiveContent.DockHandler.Pane, DockAlignment.Right, 0.5);
+        }
+
+        private void mnuWindowMoveToNextDocumentGroup_Click(object sender, EventArgs e)
+        {
+            frmMain.MoveToDocumentGroup(
+                this.dockPanel1.ActiveContent.DockHandler,
+                (currentIndex, documentPanes) =>
+                    currentIndex < documentPanes.Count() - 1 ?
+                        currentIndex + 1 :
+                        0
+            );
+        }
+
+        private void mnuWindowMoveToPreviousDocumentGroup_Click(object sender, EventArgs e)
+        {
+            frmMain.MoveToDocumentGroup(
+                this.dockPanel1.ActiveContent.DockHandler,
+                (currentIndex, documentPanes) =>
+                    currentIndex > 0 ?
+                        currentIndex - 1 :
+                        documentPanes.Count() - 1
+            );
+        }
+
+        private static void MoveToDocumentGroup(
+            DockContentHandler handler,
+            Func<int, IEnumerable<DockPane>, int> newIndexRetriever
+        )
+        {
+            if (handler.DockState == DockState.Document)
+            {
+                var documentPanes = handler.DockPanel.Panes
+                    .Where(p => p.DockState == DockState.Document)
+                    .GroupBy(p => p.Top)
+                    .OrderBy(tg => tg.Key)
+                    .SelectMany(g => g.OrderBy(p => p.Left));
+
+                if (documentPanes.Any() && documentPanes.Count() > 1)
+                {
+                    var currentIndex = Array.IndexOf(
+                        documentPanes.ToArray(),
+                        handler.Pane
+                    );
+
+                    var newIndex = newIndexRetriever(currentIndex, documentPanes);
+                    var newPane = documentPanes.ElementAt(newIndex);
+                    handler.Show(
+                        newPane,
+                        newPane.Contents.First()
+                    );
+                }
+            }
         }
     }
 }
