@@ -6,7 +6,7 @@ using System.ComponentModel;
 
 namespace ei8.Prototypes.HelloWorm
 {
-    public class Dish : IRectangularComposite, ITemporal<Dish.ModeValue>, INamed
+    public class Dish : IRectangularComposite, ITemporal, INamed
     {
         public enum ModeValue
         {

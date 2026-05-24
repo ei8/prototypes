@@ -1,6 +1,6 @@
 ﻿namespace ei8.Prototypes.HelloWorm
 {
-    internal interface ITemporal
+    public interface ITemporal
     {
         void ProcessTick();
 
@@ -9,10 +9,5 @@
         void Play();
 
         void Pause();
-    }
-
-    internal interface ITemporal<T> : ITemporal where T : Enum
-    {
-        T Mode { get; set; }
     }
 }

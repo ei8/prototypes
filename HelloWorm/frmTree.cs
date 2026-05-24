@@ -22,7 +22,7 @@ namespace ei8.Prototypes.HelloWorm
 
         private void SelectionService_SelectionChanged(object? sender, EventArgs e)
         {
-            this.tsbFocusReflexArc.Enabled = this.selectionService.PrimarySelection is frmGraph;
+            this.tsbFocusReflexArc.Enabled = this.selectionService.PrimarySelection is IGraph;
         }
 
         private void frmTree_Load(object sender, EventArgs e)
@@ -34,6 +34,8 @@ namespace ei8.Prototypes.HelloWorm
         {
             if (this.worm.Network != null)
             {
+                this.listView1.Items.Clear();
+
                 foreach (var n in this.worm.Network.GetItems<Neuron>())
                 {
                     var lvi = this.listView1.Items.Add(n.Id.ToString(), n.Tag, null);
@@ -109,8 +111,11 @@ namespace ei8.Prototypes.HelloWorm
                     }
                 }
 
-                if (this.selectionService.PrimarySelection is frmGraph fg)
-                    fg.Reload(this.GetCheckedNeurons());
+                if (this.selectionService.PrimarySelection is IGraph fg)
+                {
+                    fg.FilterNeurons = this.GetCheckedNeurons();
+                    fg.Reload();
+                }
             }
         }
 

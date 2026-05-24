@@ -5,7 +5,8 @@
         public enum PropertyCategory
         {
             Appearance,
-            Time
+            Time, 
+            Visualization
         }
 
         public const int CircleDegreesCount = 360;
