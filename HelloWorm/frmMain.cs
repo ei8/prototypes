@@ -9,6 +9,7 @@ using neurUL.Common.Http;
 using NLog;
 using System.ComponentModel;
 using System.ComponentModel.Design;
+using System.Linq;
 using WeifenLuo.WinFormsUI.Docking;
 
 namespace ei8.Prototypes.HelloWorm
@@ -37,8 +38,24 @@ namespace ei8.Prototypes.HelloWorm
             this.selectionService.SelectionChanged += this.SelectionService_SelectionChanged;
             this.settingsService = settingsService;
 
+            var pe = this.serviceProvider.GetRequiredService<frmProjectExplorer>();
+            pe.DocumentActivationRequested += this.Pe_DocumentActivationRequested;
+
             this.mnuViewResetPeripherals_Click(this, EventArgs.Empty);
             this.ProjectService_ProjectChanged(this, EventArgs.Empty);
+        }
+
+        private void Pe_DocumentActivationRequested(object? sender, DocumentActivationRequestedEventArgs e)
+        {
+            if (e.Object is Dish dish)
+            {
+                var matchingDishForm = this.dockPanel1.Documents.SingleOrDefault(d => d is frmDish fd && fd.Dish == dish);
+
+                if (matchingDishForm != null)
+                    matchingDishForm.DockHandler.Show();
+                else
+                    this.ShowDish(dish);
+            }
         }
 
         private void ProjectService_ProjectChanging(object? sender, EventArgs e)
@@ -310,13 +327,19 @@ namespace ei8.Prototypes.HelloWorm
 
         private void mnuProjectAddDish_Click(object sender, EventArgs e)
         {
-            var fp = this.serviceProvider.GetRequiredService<frmDish>();
-
-            fp.Show(this.dockPanel1, DockState.Document);
+            var newDish = serviceProvider.GetRequiredService<Dish>();
+            this.ShowDish(newDish);
 
             var project = this.projectService.GetProject();
             AssertionConcern.AssertArgumentNotNull(project, nameof(project));
-            project!.Add(fp.Dish);
+            project!.Add(newDish);
+        }
+
+        private void ShowDish(Dish dish)
+        {
+            var fp = this.serviceProvider.GetRequiredService<frmDish>();
+            fp.Dish = dish;
+            fp.Show(this.dockPanel1, DockState.Document);
         }
 
         private void mnuFileNewProject_Click(object sender, EventArgs e)
@@ -452,6 +475,12 @@ namespace ei8.Prototypes.HelloWorm
                     );
                 }
             }
+        }
+
+        private void mnuWindowCloseDocumentTab_Click(object sender, EventArgs e)
+        {
+            if (this.dockPanel1.ActiveContent.DockHandler.DockState == DockState.Document)
+                this.dockPanel1.ActiveContent.DockHandler.Close();
         }
     }
 }

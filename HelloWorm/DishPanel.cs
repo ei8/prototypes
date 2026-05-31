@@ -2,7 +2,7 @@
 
 namespace ei8.Prototypes.HelloWorm
 {
-    internal class DishPanel : Panel
+    public class DishPanel : Panel
     {
         private const float AngleOffset = 90;
         private const int FocusOffset = 10;

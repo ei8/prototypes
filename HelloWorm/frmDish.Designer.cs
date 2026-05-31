@@ -48,6 +48,7 @@ namespace ei8.Prototypes.HelloWorm
             ClientSize = new Size(800, 450);
             Name = "frmDish";
             Text = "Dish";
+            FormClosed += frmDish_FormClosed;
             Load += frmDish_Load;
             ResumeLayout(false);
         }

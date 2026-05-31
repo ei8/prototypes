@@ -49,7 +49,9 @@
             treeView.ShowRootLines = false;
             treeView.Size = new Size(800, 425);
             treeView.TabIndex = 0;
-            treeView.NodeMouseClick += treeView_NodeMouseClick;
+            treeView.AfterSelect += treeView_AfterSelect;
+            treeView.NodeMouseDoubleClick += treeView_NodeMouseDoubleClick;
+            treeView.KeyDown += treeView_KeyDown;
             // 
             // imageList1
             // 

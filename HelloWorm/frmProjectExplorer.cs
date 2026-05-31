@@ -6,6 +6,8 @@ namespace ei8.Prototypes.HelloWorm
 {
     public partial class frmProjectExplorer : DockContent
     {
+        public event EventHandler<DocumentActivationRequestedEventArgs> DocumentActivationRequested;
+
         private readonly IProjectService projectService;
         private readonly ISelectionService selectionService;
         private readonly Func<IObject, TreeNode?, string> textRetriever;
@@ -52,7 +54,6 @@ namespace ei8.Prototypes.HelloWorm
 
                 return result;
             };
-
         }
 
         private void ProjectService_ProjectChanged(object? sender, EventArgs e)
@@ -80,20 +81,21 @@ namespace ei8.Prototypes.HelloWorm
         }
 
         private static void Fill(
-            TreeView treeView, 
-            IObject @object, 
-            Func<IObject, TreeNode?, string> textRetriever, 
+            TreeView treeView,
+            IObject @object,
+            Func<IObject, TreeNode?, string> textRetriever,
             Predicate<IObject> includeChecker,
             Func<IObject, int> imageIndexRetriever,
-            NotifyCollectionChangedEventHandler collectionHandler, 
+            NotifyCollectionChangedEventHandler collectionHandler,
             TreeNode? parent = null
         )
         {
             if (includeChecker(@object))
             {
-                var newNode = new TreeNode() { 
-                    Text = textRetriever(@object, parent), 
-                    Tag = @object, 
+                var newNode = new TreeNode()
+                {
+                    Text = textRetriever(@object, parent),
+                    Tag = @object,
                     ImageIndex = imageIndexRetriever(@object),
                     SelectedImageIndex = imageIndexRetriever(@object)
                 };
@@ -117,7 +119,7 @@ namespace ei8.Prototypes.HelloWorm
                 sender is IComposite composite &&
                 (
                     // is not a dish
-                    ( 
+                    (
                         sender is not Dish
                     ) ||
                     // or if it is, dish is being added to but not an odor particle
@@ -161,9 +163,22 @@ namespace ei8.Prototypes.HelloWorm
             this.ReloadProjectTreeView();
         }
 
-        private void treeView_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e)
+        private void treeView_AfterSelect(object sender, TreeViewEventArgs e)
         {
-            this.selectionService.SetSelectedComponents(new[] { e.Node.Tag });
+            if (e.Node != null)
+                this.selectionService.SetSelectedComponents(new[] { e.Node.Tag });
+        }
+
+        private void treeView_NodeMouseDoubleClick(object sender, TreeNodeMouseClickEventArgs e)
+        {
+            if (e.Node != null)
+                this.DocumentActivationRequested?.Invoke(this, new DocumentActivationRequestedEventArgs((IObject)e.Node.Tag));
+        }
+
+        private void treeView_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode  == Keys.Enter && this.treeView.SelectedNode != null)
+                this.DocumentActivationRequested?.Invoke(this, new DocumentActivationRequestedEventArgs((IObject)this.treeView.SelectedNode.Tag));
         }
     }
 }

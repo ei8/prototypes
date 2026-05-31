@@ -64,6 +64,7 @@
             mnuWindowNewVertical = new ToolStripMenuItem();
             mnuWindowMoveToNextDocumentGroup = new ToolStripMenuItem();
             mnuWindowMoveToPreviousDocumentGroup = new ToolStripMenuItem();
+            mnuWindowCloseDocumentTab = new ToolStripMenuItem();
             helpToolStripMenuItem = new ToolStripMenuItem();
             aboutHelloWormToolStripMenuItem = new ToolStripMenuItem();
             tsTemporal = new ToolStrip();
@@ -139,7 +140,7 @@
             toolStripMenuItem3.DropDownItems.AddRange(new ToolStripItem[] { mnuFileNewProject, toolStripSeparator2, exitToolStripMenuItem });
             toolStripMenuItem3.Name = "toolStripMenuItem3";
             toolStripMenuItem3.Size = new Size(37, 20);
-            toolStripMenuItem3.Text = "&FIle";
+            toolStripMenuItem3.Text = "&File";
             // 
             // mnuFileNewProject
             // 
@@ -175,7 +176,7 @@
             mnuViewCode.DropDownItems.AddRange(new ToolStripItem[] { mnuViewCodeGraph, mnuViewCodeTree });
             mnuViewCode.Enabled = false;
             mnuViewCode.Name = "mnuViewCode";
-            mnuViewCode.Size = new Size(163, 22);
+            mnuViewCode.Size = new Size(180, 22);
             mnuViewCode.Text = "&Code";
             // 
             // mnuViewCodeGraph
@@ -197,45 +198,45 @@
             // toolStripSeparator3
             // 
             toolStripSeparator3.Name = "toolStripSeparator3";
-            toolStripSeparator3.Size = new Size(160, 6);
+            toolStripSeparator3.Size = new Size(177, 6);
             // 
             // mnuViewToolbox
             // 
             mnuViewToolbox.Name = "mnuViewToolbox";
-            mnuViewToolbox.Size = new Size(163, 22);
+            mnuViewToolbox.Size = new Size(180, 22);
             mnuViewToolbox.Text = "&Toolbox";
             mnuViewToolbox.Click += mnuViewToolbox_Click;
             // 
             // mnuViewProjectExplorer
             // 
             mnuViewProjectExplorer.Name = "mnuViewProjectExplorer";
-            mnuViewProjectExplorer.Size = new Size(163, 22);
+            mnuViewProjectExplorer.Size = new Size(180, 22);
             mnuViewProjectExplorer.Text = "&Project Explorer";
             mnuViewProjectExplorer.Click += mnuViewProjectExplorer_Click;
             // 
             // mnuViewProperties
             // 
             mnuViewProperties.Name = "mnuViewProperties";
-            mnuViewProperties.Size = new Size(163, 22);
-            mnuViewProperties.Text = "&Properties";
+            mnuViewProperties.Size = new Size(180, 22);
+            mnuViewProperties.Text = "Properties &Window";
             mnuViewProperties.Click += mnuViewProperties_Click;
             // 
             // mnuViewOutput
             // 
             mnuViewOutput.Name = "mnuViewOutput";
-            mnuViewOutput.Size = new Size(163, 22);
+            mnuViewOutput.Size = new Size(180, 22);
             mnuViewOutput.Text = "&Output";
             mnuViewOutput.Click += mnuViewOutput_Click;
             // 
             // toolStripSeparator4
             // 
             toolStripSeparator4.Name = "toolStripSeparator4";
-            toolStripSeparator4.Size = new Size(160, 6);
+            toolStripSeparator4.Size = new Size(177, 6);
             // 
             // mnuViewResetPeripherals
             // 
             mnuViewResetPeripherals.Name = "mnuViewResetPeripherals";
-            mnuViewResetPeripherals.Size = new Size(163, 22);
+            mnuViewResetPeripherals.Size = new Size(180, 22);
             mnuViewResetPeripherals.Text = "&Reset Peripherals";
             mnuViewResetPeripherals.Click += mnuViewResetPeripherals_Click;
             // 
@@ -307,7 +308,7 @@
             // 
             // toolStripMenuItem4
             // 
-            toolStripMenuItem4.DropDownItems.AddRange(new ToolStripItem[] { mnuWindowNewHorizontal, mnuWindowNewVertical, mnuWindowMoveToNextDocumentGroup, mnuWindowMoveToPreviousDocumentGroup });
+            toolStripMenuItem4.DropDownItems.AddRange(new ToolStripItem[] { mnuWindowNewHorizontal, mnuWindowNewVertical, mnuWindowMoveToNextDocumentGroup, mnuWindowMoveToPreviousDocumentGroup, mnuWindowCloseDocumentTab });
             toolStripMenuItem4.Name = "toolStripMenuItem4";
             toolStripMenuItem4.Size = new Size(63, 20);
             toolStripMenuItem4.Text = "&Window";
@@ -339,6 +340,13 @@
             mnuWindowMoveToPreviousDocumentGroup.Size = new Size(261, 22);
             mnuWindowMoveToPreviousDocumentGroup.Text = "Move to P&revious Document Group";
             mnuWindowMoveToPreviousDocumentGroup.Click += mnuWindowMoveToPreviousDocumentGroup_Click;
+            // 
+            // mnuWindowCloseDocumentTab
+            // 
+            mnuWindowCloseDocumentTab.Name = "mnuWindowCloseDocumentTab";
+            mnuWindowCloseDocumentTab.Size = new Size(261, 22);
+            mnuWindowCloseDocumentTab.Text = "Close &Document Tab";
+            mnuWindowCloseDocumentTab.Click += mnuWindowCloseDocumentTab_Click;
             // 
             // helpToolStripMenuItem
             // 
@@ -452,5 +460,6 @@
         private ToolStripMenuItem mnuWindowNewVertical;
         private ToolStripMenuItem mnuWindowMoveToNextDocumentGroup;
         private ToolStripMenuItem mnuWindowMoveToPreviousDocumentGroup;
+        private ToolStripMenuItem mnuWindowCloseDocumentTab;
     }
 }

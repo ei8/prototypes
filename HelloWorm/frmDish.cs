@@ -1,17 +1,16 @@
-using Microsoft.Extensions.DependencyInjection;
+using System.ComponentModel.Design;
 using WeifenLuo.WinFormsUI.Docking;
 
 namespace ei8.Prototypes.HelloWorm
 {
     public partial class frmDish : DockContent
     {
-        private readonly IServiceProvider serviceProvider;
         private readonly DishPanel dishPanel;
-        public frmDish(IServiceProvider serviceProvider)
+        public frmDish(ISelectionService selectionService)
         {
             InitializeComponent();
 
-            this.dishPanel = serviceProvider.GetRequiredService<DishPanel>();
+            this.dishPanel = new DishPanel(selectionService);
             this.dishPanel.Dish = null;
             this.dishPanel.Dock = DockStyle.Fill;
             this.dishPanel.Location = new Point(0, 0);
@@ -19,8 +18,6 @@ namespace ei8.Prototypes.HelloWorm
             this.dishPanel.Size = new Size(800, 450);
             this.dishPanel.TabIndex = 1;
             this.Controls.Add(dishPanel);
-
-            this.serviceProvider = serviceProvider;
         }
 
         private void Dish_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -43,25 +40,24 @@ namespace ei8.Prototypes.HelloWorm
             }
         }
 
-        public Dish Dish
+        public Dish? Dish
         {
-            get => this.dishPanel.Dish!;
-            private set
+            get => this.dishPanel.Dish;
+            set
             {
                 if (this.dishPanel.Dish != value)
                 {
                     if (this.dishPanel.Dish != null)
+                    {
+                        this.dishPanel.Dish.Pause();
                         this.dishPanel.Dish.PropertyChanged -= this.Dish_PropertyChanged;
+                    }
 
                     this.dishPanel.Dish = value;
 
                     if (this.dishPanel.Dish != null)
                     {
                         this.dishPanel.Dish.PropertyChanged += this.Dish_PropertyChanged;
-                        this.dishPanel.Dish.Name = ExtensionMethods.CreateUnusedName(
-                            (i) => $"{typeof(Dish).Name}{i.ToString()}",
-                            (s) => this.DockPanel.Contents.OfType<frmDish>().Any(fd => fd.Dish.Name == s)
-                        );
                         this.timer1.Interval = this.dishPanel.Dish.TimerResolution;
                     }
 
@@ -70,15 +66,31 @@ namespace ei8.Prototypes.HelloWorm
             }
         }
 
-        private void frmDish_Load(object sender, EventArgs e)
-        {
-            this.Dish = serviceProvider.GetRequiredService<Dish>();
-        }
-
         private void Timer1_Tick(object sender, EventArgs e)
         {
-            this.dishPanel.Dish!.ProcessTick();
-            this.dishPanel.InvalidateDish();
+            if (this.Dish != null)
+            {
+                this.Dish.ProcessTick();
+                this.dishPanel.InvalidateDish();
+            }
+        }
+
+        private void frmDish_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            this.Dish = null;
+        }
+
+        private void frmDish_Load(object sender, EventArgs e)
+        {
+            if (this.dishPanel.Dish != null && string.IsNullOrEmpty(this.dishPanel.Dish.Name))
+            {
+                this.dishPanel.Dish.Name = ExtensionMethods.CreateUnusedName(
+                    (i) => $"{typeof(Dish).Name}{i}",
+                    (s) => this.DockPanel.Contents.OfType<frmDish>().Any(fd => fd.Dish?.Name == s)
+                );
+            }
+            else 
+                this.Text = this.Dish?.Name;
         }
     }
 }
