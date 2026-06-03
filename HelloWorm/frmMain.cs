@@ -415,13 +415,13 @@ namespace ei8.Prototypes.HelloWorm
 
         private void mnuWindowNewHorizontal_Click(object sender, EventArgs e)
         {
-            if (this.dockPanel1.ActiveContent.DockHandler.Pane.Contents.Count() > 1)
+            if (this.dockPanel1.ActiveContent?.DockHandler.Pane.Contents.Count() > 1)
                 this.dockPanel1.ActiveContent.DockHandler.Show(this.dockPanel1.ActiveContent.DockHandler.Pane, DockAlignment.Bottom, 0.5);
         }
 
         private void mnuWindowNewVertical_Click(object sender, EventArgs e)
         {
-            if (this.dockPanel1.ActiveContent.DockHandler.Pane.Contents.Count() > 1)
+            if (this.dockPanel1.ActiveContent?.DockHandler.Pane.Contents.Count() > 1)
                 this.dockPanel1.ActiveContent.DockHandler.Show(this.dockPanel1.ActiveContent.DockHandler.Pane, DockAlignment.Right, 0.5);
         }
 
@@ -479,7 +479,7 @@ namespace ei8.Prototypes.HelloWorm
 
         private void mnuWindowCloseDocumentTab_Click(object sender, EventArgs e)
         {
-            if (this.dockPanel1.ActiveContent.DockHandler.DockState == DockState.Document)
+            if (this.dockPanel1.ActiveContent?.DockHandler.DockState == DockState.Document)
                 this.dockPanel1.ActiveContent.DockHandler.Close();
         }
     }
