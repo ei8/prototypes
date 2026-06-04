@@ -176,7 +176,7 @@
             mnuViewCode.DropDownItems.AddRange(new ToolStripItem[] { mnuViewCodeGraph, mnuViewCodeTree });
             mnuViewCode.Enabled = false;
             mnuViewCode.Name = "mnuViewCode";
-            mnuViewCode.Size = new Size(180, 22);
+            mnuViewCode.Size = new Size(174, 22);
             mnuViewCode.Text = "&Code";
             // 
             // mnuViewCodeGraph
@@ -198,45 +198,45 @@
             // toolStripSeparator3
             // 
             toolStripSeparator3.Name = "toolStripSeparator3";
-            toolStripSeparator3.Size = new Size(177, 6);
+            toolStripSeparator3.Size = new Size(171, 6);
             // 
             // mnuViewToolbox
             // 
             mnuViewToolbox.Name = "mnuViewToolbox";
-            mnuViewToolbox.Size = new Size(180, 22);
+            mnuViewToolbox.Size = new Size(174, 22);
             mnuViewToolbox.Text = "&Toolbox";
             mnuViewToolbox.Click += mnuViewToolbox_Click;
             // 
             // mnuViewProjectExplorer
             // 
             mnuViewProjectExplorer.Name = "mnuViewProjectExplorer";
-            mnuViewProjectExplorer.Size = new Size(180, 22);
+            mnuViewProjectExplorer.Size = new Size(174, 22);
             mnuViewProjectExplorer.Text = "&Project Explorer";
             mnuViewProjectExplorer.Click += mnuViewProjectExplorer_Click;
             // 
             // mnuViewProperties
             // 
             mnuViewProperties.Name = "mnuViewProperties";
-            mnuViewProperties.Size = new Size(180, 22);
+            mnuViewProperties.Size = new Size(174, 22);
             mnuViewProperties.Text = "Properties &Window";
             mnuViewProperties.Click += mnuViewProperties_Click;
             // 
             // mnuViewOutput
             // 
             mnuViewOutput.Name = "mnuViewOutput";
-            mnuViewOutput.Size = new Size(180, 22);
+            mnuViewOutput.Size = new Size(174, 22);
             mnuViewOutput.Text = "&Output";
             mnuViewOutput.Click += mnuViewOutput_Click;
             // 
             // toolStripSeparator4
             // 
             toolStripSeparator4.Name = "toolStripSeparator4";
-            toolStripSeparator4.Size = new Size(177, 6);
+            toolStripSeparator4.Size = new Size(171, 6);
             // 
             // mnuViewResetPeripherals
             // 
             mnuViewResetPeripherals.Name = "mnuViewResetPeripherals";
-            mnuViewResetPeripherals.Size = new Size(180, 22);
+            mnuViewResetPeripherals.Size = new Size(174, 22);
             mnuViewResetPeripherals.Text = "&Reset Peripherals";
             mnuViewResetPeripherals.Click += mnuViewResetPeripherals_Click;
             // 
@@ -358,9 +358,9 @@
             // aboutHelloWormToolStripMenuItem
             // 
             aboutHelloWormToolStripMenuItem.Name = "aboutHelloWormToolStripMenuItem";
-            aboutHelloWormToolStripMenuItem.ShortcutKeys = Keys.F1;
-            aboutHelloWormToolStripMenuItem.Size = new Size(193, 22);
+            aboutHelloWormToolStripMenuItem.Size = new Size(180, 22);
             aboutHelloWormToolStripMenuItem.Text = "&About Hello Worm";
+            aboutHelloWormToolStripMenuItem.Click += aboutHelloWormToolStripMenuItem_Click;
             // 
             // tsTemporal
             // 

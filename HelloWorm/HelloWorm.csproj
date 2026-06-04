@@ -8,6 +8,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>ei8.Prototypes.HelloWorm</RootNamespace>
     <LangVersion>preview</LangVersion>
+    <AssemblyVersion>0.3.0</AssemblyVersion>
+    <FileVersion>$(AssemblyVersion)</FileVersion>
+    <Version>$(AssemblyVersion)</Version>
   </PropertyGroup>
 
   <ItemGroup>

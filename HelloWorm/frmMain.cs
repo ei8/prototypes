@@ -9,7 +9,6 @@ using neurUL.Common.Http;
 using NLog;
 using System.ComponentModel;
 using System.ComponentModel.Design;
-using System.Linq;
 using WeifenLuo.WinFormsUI.Docking;
 
 namespace ei8.Prototypes.HelloWorm
@@ -481,6 +480,11 @@ namespace ei8.Prototypes.HelloWorm
         {
             if (this.dockPanel1.ActiveContent?.DockHandler.DockState == DockState.Document)
                 this.dockPanel1.ActiveContent.DockHandler.Close();
+        }
+
+        private void aboutHelloWormToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show($"Hello Worm v{Application.ProductVersion.Split('+').First()}");
         }
     }
 }
