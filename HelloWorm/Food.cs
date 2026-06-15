@@ -29,7 +29,7 @@ namespace ei8.Prototypes.HelloWorm
             var newOdors = new List<Odor>();
             for (int i = 0; i < deployCount; i++)
             {
-                var sweep = r.Next((int)this.SweepAngle);
+                float sweep = r.Next((int)(this.SweepAngle * 100))/100f;
                 newOdors.Add(new Odor()
                 {
                     Location = this.Location,
