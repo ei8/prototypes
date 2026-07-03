@@ -51,6 +51,8 @@ namespace ei8.Prototypes.HelloWorm
                     result = 4;
                 else if (o is Sector)
                     result = 5;
+                else if (o is Worksheet)
+                    result = 6;
 
                 return result;
             };

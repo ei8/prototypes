@@ -6,7 +6,8 @@ namespace ei8.Prototypes.HelloWorm
 {
     public partial class frmTree : DockContent
     {
-        private readonly Worm worm;
+        private const string FormDescription = "Tree";
+        private readonly ISpikableReporting2 spikable;
         private readonly ISelectionService selectionService;
 
         public frmTree(ISelectionService selectionService)
@@ -16,8 +17,34 @@ namespace ei8.Prototypes.HelloWorm
 
             this.selectionService.SelectionChanged += this.SelectionService_SelectionChanged;
 
-            if (this.selectionService.PrimarySelection is Worm w)
-                this.worm = w;
+            if (this.selectionService.PrimarySelection is ISpikableReporting2 spikable)
+            {
+                this.spikable = spikable;
+
+                if (this.spikable is INamed n)
+                    n.PropertyChanged += this.N_PropertyChanged;
+            }
+        }
+
+        private void N_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            switch (e.PropertyName)
+            {
+                case nameof(INamed.Name):
+                case nameof(IPerishable.Life):
+                    bool process = true;
+                    if (
+                        e.PropertyName == nameof(IPerishable.Life) &&
+                        sender is IPerishable perishable &&
+                        perishable.Life > 0
+                    )
+                        process = false;
+
+                    if (process)
+                        this.Text = this.spikable.GetName(frmTree.FormDescription);
+
+                    break;
+            }
         }
 
         private void SelectionService_SelectionChanged(object? sender, EventArgs e)
@@ -32,17 +59,19 @@ namespace ei8.Prototypes.HelloWorm
 
         private void tsbReload_Click(object sender, EventArgs e)
         {
-            if (this.worm.Network != null)
+            if (this.spikable.Network != null)
             {
                 this.listView1.Items.Clear();
 
-                foreach (var n in this.worm.Network.GetItems<Neuron>())
+                foreach (var n in this.spikable.Network.GetItems<Neuron>())
                 {
                     var lvi = this.listView1.Items.Add(n.Id.ToString(), n.Tag, null);
                     lvi.SubItems.Add(n.Id.ToString());
                     lvi.Checked = true;
                     lvi.Tag = n;
                 }
+
+                this.Text = this.spikable.GetName(frmTree.FormDescription);
             }
         }
 
@@ -72,14 +101,14 @@ namespace ei8.Prototypes.HelloWorm
 
         private void tsbFocusReflexArc_Click(object sender, EventArgs e)
         {
-            if (this.worm.Network != null)
+            if (this.spikable.Network != null)
             {
                 IEnumerable<Neuron> checkedNeurons = this.GetCheckedNeurons();
 
                 var posts = new List<Neuron>();
                 foreach (var cn in checkedNeurons)
                 {
-                    posts.AddRange(this.worm.Network.GetPostsynapticNeurons(cn.Id));
+                    posts.AddRange(this.spikable.Network.GetPostsynapticNeurons(cn.Id));
                 }
 
                 var groups = posts.GroupBy(n => n)
@@ -100,7 +129,7 @@ namespace ei8.Prototypes.HelloWorm
                     if (inlvi != null)
                         inlvi.Checked = true;
 
-                    outputNeurons = this.worm.Network.GetPostsynapticNeurons(interneuron.Id);
+                    outputNeurons = this.spikable.Network.GetPostsynapticNeurons(interneuron.Id);
 
                     foreach (var on in outputNeurons)
                     {
@@ -125,6 +154,36 @@ namespace ei8.Prototypes.HelloWorm
                 .Cast<ListViewItem>()
                 .Where(lvi => lvi.Checked)
                 .Select(lvi => (Neuron)lvi.Tag!);
+        }
+
+        private void tsbSpike_Click(object sender, EventArgs e)
+        {
+            if (this.spikable.Network != null && this.spikable is ISpikableTemp spikableTemp)
+            {
+                IEnumerable<Neuron> checkedNeurons = this.GetCheckedNeurons();
+
+                spikableTemp.Spike(checkedNeurons.ToArray());
+            }
+        }
+
+        private void listView1_KeyDown(object sender, KeyEventArgs e)
+        {
+            switch (e.KeyCode)
+            {
+                case Keys.Enter:
+                    this.tsbSpike_Click(sender, EventArgs.Empty);
+                    break;
+            }
+        }
+
+        private void listView1_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            switch (e.KeyChar)
+            {
+                case ' ':
+                    this.tsbCheckSelected_Click(sender, EventArgs.Empty);
+                    break;
+            }
         }
     }
 }

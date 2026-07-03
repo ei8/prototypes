@@ -1,4 +1,7 @@
-﻿using NLog;
+﻿using ei8.Cortex.Coding;
+using ei8.Cortex.Coding.Spiker;
+using Microsoft.Msagl.Core.DataStructures;
+using NLog;
 using System.Drawing.Drawing2D;
 
 namespace ei8.Prototypes.HelloWorm
@@ -24,9 +27,155 @@ namespace ei8.Prototypes.HelloWorm
 
             return result;
         }
+
+        // TODO: promote to ei8.Cortex.Coding.Spiker.ExtensionMethods
+        public static void SubscribeReporting<T>(
+            this T reporting, 
+            ISpikeService spikeService, 
+            Logger logger,
+            EventHandler<TriggeredEventArgs> triggeredInvoker,
+            EventHandler<FiredEventArgs> firedInvoker,
+            Action<TriggeredEventArgs>? triggeredHandler = null, 
+            Action<FiredEventArgs>? firedHandler = null
+        )
+            where T : ISpikableReporting2, IComponent
+        {
+            spikeService.Triggered += (sender, e) =>
+            {
+                logger.Debug(
+                    new LogMessageGenerator(
+                        () => {
+                            var origin = e.ReflexArc.LastOrDefault();
+                            var result = $"{ reporting.GetFullName()} - " +
+                            $"Triggered: {e.Target.ToReadableString()}; " +
+                            $"By: {(origin != null ? origin.Target.ToReadableString() : "[Stimulus]")}; " +
+                            $"Count: {e.Charge.Excitations.Count() + e.Charge.Inhibitions.Count()}; " +
+                            $"Charge: ({ChargeInfo.RestingPotential}) + {e.Charge.Excitations.Sum(ChargeInfo.GetCharge)} + ({e.Charge.Inhibitions.Sum(ChargeInfo.GetCharge)}) = {e.Charge.Result} mV";
+
+                            return result;
+                        }
+                    )
+                );
+
+                if (triggeredHandler != null)
+                    triggeredHandler(e);
+
+                triggeredInvoker(sender, e);
+            };
+
+            spikeService.Fired += (sender, e) =>
+            {
+                logger.Debug(new LogMessageGenerator(() => $"{reporting.GetFullName()} - Fired: {e.FireInfo.Target.ToReadableString()}"));
+
+                if (firedHandler != null)
+                    firedHandler(e);
+
+                firedInvoker(sender, e);
+            };
+        }
+
+        // TODO: promote to ei8.Cortex.Coding.Spiker.ExtensionMethods
+
+        public static Neuron CreateNeuron(this Network network, string tag)
+        {
+            var result = network.CreateNeuron();
+            result.Tag = tag;
+            return result;
+        }
+        // TODO: promote to ei8.Cortex.Coding.Spiker.ExtensionMethods
+        public static Neuron CreateInterneuron(this Network network, params Neuron[] postsynapticNeurons)
+        {
+            Neuron neuron = network.CreateNeuron();
+            foreach(var post in postsynapticNeurons)
+                network.CreateTerminal(neuron, post);
+            return neuron;
+        }
+        // TODO: promote to ei8.Cortex.Coding.Spiker.ExtensionMethods
+        public static void LinkInputNeuronsToInterneuron(this Network network, Neuron interneuron, params Neuron[] inputNeurons)
+        {
+            foreach (Neuron input in inputNeurons)
+                network.CreateTerminal(input, interneuron, NeurotransmitterEffect.Excite, 1f / inputNeurons.Length);
+        }
+
+        // TODO: remove CreateRotationInterneuron from ei8.Cortex.Coding.Spiker.ExtensionMethods
+
+        public static void CreateTruthTableInterneurons(
+            this Network network, 
+            Neuron result1, 
+            Neuron result2, 
+            Neuron result3,
+            Neuron result4,
+            out Neuron result1Interneuron, 
+            out Neuron result2Interneuron, 
+            out Neuron result3Interneuron, 
+            out Neuron result4Interneuron
+        )
+        {
+            result1Interneuron = network.CreateInterneuron(result1);
+            result2Interneuron = network.CreateInterneuron(result2);
+            result3Interneuron = network.CreateInterneuron(result3);
+            result4Interneuron = network.CreateInterneuron(result4);
+        }
+
+        public static void LinkTruthTableInputNeuronsToInterneurons(
+            this Network network,
+            Neuron typeNeuron,
+            Neuron result1Interneuron,
+            Neuron result2Interneuron,
+            Neuron result3Interneuron,
+            Neuron result4Interneuron,
+            Neuron input1True,
+            Neuron input1False,
+            Neuron input2True,
+            Neuron input2False
+        )
+        {
+            network.LinkInputNeuronsToInterneuron(
+                result1Interneuron,
+                typeNeuron,
+                input1False,
+                input2False
+            );
+            network.LinkInputNeuronsToInterneuron(
+                result2Interneuron,
+                typeNeuron,
+                input1True,
+                input2False
+            );
+            network.LinkInputNeuronsToInterneuron(
+                result3Interneuron,
+                typeNeuron,
+                input1False,
+                input2True
+            );
+            network.LinkInputNeuronsToInterneuron(
+                result4Interneuron,
+                typeNeuron,
+                input1True,
+                input2True
+            );
+        }
         #endregion
 
         #region Forms
+        public static string GetName(this ISpikableReporting2 spikable, string formDescription)
+        {
+            var fullName = string.Empty;
+            var lifeText = string.Empty;
+            if (spikable is IComponent component)
+                fullName = component.GetFullName();
+            if (spikable is IPerishable perishable && perishable.Life <= 0)
+                lifeText = $"{(!string.IsNullOrEmpty(fullName) ? " " : string.Empty)}[Dead]";
+
+            return 
+                $"{fullName}{lifeText}" +
+                $"{(!(string.IsNullOrWhiteSpace(fullName) && string.IsNullOrWhiteSpace(lifeText)) ?
+                        " - " :
+                        string.Empty
+                    )}" +
+                $"{formDescription}";
+        }
+
         public static List<TreeNode> GetAllNodes(this TreeView treeView)
         {
             List<TreeNode> result = new List<TreeNode>();
@@ -280,7 +429,7 @@ namespace ei8.Prototypes.HelloWorm
         private static Rectangle Resize(this Rectangle cr, int offset)
         {
             cr.Offset(-offset, -offset);
-            cr.Size = new Size(cr.Size.Width + (offset * 2), cr.Size.Height + (offset * 2));
+            cr.Size = new System.Drawing.Size(cr.Size.Width + (offset * 2), cr.Size.Height + (offset * 2));
             return cr;
         }
 
@@ -347,7 +496,7 @@ namespace ei8.Prototypes.HelloWorm
             g.DrawString(text, font, brush, layoutRect, sf);
         }
 
-        internal static void DrawGrid(this Graphics g, Size dishSize, int gap)
+        internal static void DrawGrid(this Graphics g, System.Drawing.Size dishSize, int gap)
         {
             using Pen gridPen = new Pen(Color.Gray);
             for (int i = gap; i <= dishSize.Width; i += gap)

@@ -32,6 +32,7 @@
             toolStrip1 = new ToolStrip();
             tsbFood = new ToolStripButton();
             tsbWorm = new ToolStripButton();
+            tsbWorksheet = new ToolStripButton();
             tslblNoUsableControls = new ToolStripLabel();
             toolStrip1.SuspendLayout();
             SuspendLayout();
@@ -40,7 +41,7 @@
             // 
             toolStrip1.Dock = DockStyle.Fill;
             toolStrip1.GripStyle = ToolStripGripStyle.Hidden;
-            toolStrip1.Items.AddRange(new ToolStripItem[] { tsbFood, tsbWorm, tslblNoUsableControls });
+            toolStrip1.Items.AddRange(new ToolStripItem[] { tsbFood, tsbWorm, tsbWorksheet, tslblNoUsableControls });
             toolStrip1.LayoutStyle = ToolStripLayoutStyle.VerticalStackWithOverflow;
             toolStrip1.Location = new Point(0, 0);
             toolStrip1.Name = "toolStrip1";
@@ -70,6 +71,17 @@
             tsbWorm.Text = "Worm";
             tsbWorm.Click += tsbWorm_Click;
             // 
+            // tsbWorksheet
+            // 
+            tsbWorksheet.Image = (Image)resources.GetObject("tsbWorksheet.Image");
+            tsbWorksheet.ImageAlign = ContentAlignment.MiddleLeft;
+            tsbWorksheet.ImageTransparentColor = Color.Magenta;
+            tsbWorksheet.Name = "tsbWorksheet";
+            tsbWorksheet.Size = new Size(798, 20);
+            tsbWorksheet.Text = "Worksheet";
+            tsbWorksheet.ToolTipText = "Worksheet";
+            tsbWorksheet.Click += tsbWorksheet_Click;
+            // 
             // tslblNoUsableControls
             // 
             tslblNoUsableControls.Name = "tslblNoUsableControls";
@@ -95,5 +107,6 @@
         private ToolStripButton tsbWorm;
         private ToolStripLabel tslblNoUsableControls;
         private ToolStrip toolStrip1;
+        private ToolStripButton tsbWorksheet;
     }
 }

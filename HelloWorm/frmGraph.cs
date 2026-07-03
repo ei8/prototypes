@@ -14,6 +14,8 @@ namespace ei8.Prototypes.HelloWorm
         private const int FiredPreviouslyWidth = 3;
         private const int FiredWidth = 3;
         private const int InitialWidth = 1;
+        private const int EdgeFontSize = 10;
+        private const int NodeFontSize = 10;
         private static readonly Color InactiveColor = Color.Silver;
 
         private readonly ISelectionService selectionService;
@@ -70,7 +72,7 @@ namespace ei8.Prototypes.HelloWorm
                     {
                         var edge = graph.AddEdge(
                             t.PresynapticNeuronId.ToString(),
-                            (t.Effect == NeurotransmitterEffect.Excite ? "+" : "-") + t.Strength.ToString(),
+                            (t.Effect == NeurotransmitterEffect.Excite ? string.Empty : "-") + t.Strength.ToString("0.##"),
                             t.PostsynapticNeuronId.ToString()
                         );
 
@@ -105,7 +107,7 @@ namespace ei8.Prototypes.HelloWorm
                 this.gViewer1.CurrentLayoutMethod = LayoutMethod.MDS;
                 this.gViewer1.Graph = graph;
 
-                frmGraph.UpdateName(this.graph.Spikable, this);
+                this.Text = this.graph.Spikable.GetName(nameof(Graph));
             }
         }
 
@@ -134,7 +136,7 @@ namespace ei8.Prototypes.HelloWorm
                         process = false;
 
                     if (process)
-                        frmGraph.UpdateName(this.graph.Spikable, this);
+                        this.Text = this.graph.Spikable.GetName(nameof(Graph));
 
                     break;
             }
@@ -278,6 +280,7 @@ namespace ei8.Prototypes.HelloWorm
 
         private static void UpdateEdgeStyle(Edge edge, Color edgeColor, Color labelFontColor, double width)
         {
+            edge.Label.FontSize = frmGraph.EdgeFontSize;
             edge.Label.FontColor = labelFontColor;
             edge.Attr.Color = edgeColor;
             edge.Attr.LineWidth = width;
@@ -285,6 +288,7 @@ namespace ei8.Prototypes.HelloWorm
 
         private static void UpdateNodeStyle(Node node, Color nodeColor, Color labelFontColor, double width)
         {
+            node.Label.FontSize = frmGraph.NodeFontSize;
             node.Label.FontColor = labelFontColor;
             node.Attr.Color = nodeColor;
             node.Attr.LineWidth = width;
@@ -304,24 +308,6 @@ namespace ei8.Prototypes.HelloWorm
         {
             if (this.graph.Spikable.Network != null)
                 this.graph.Reload();
-        }
-
-        private static void UpdateName(ISpikableReporting2 spikable, frmGraph form)
-        {
-            var fullName = string.Empty;
-            var lifeText = string.Empty;
-            if (spikable is IComponent component)
-                fullName = component.GetFullName();
-            if (spikable is IPerishable perishable && perishable.Life <= 0)
-                lifeText = $"{(!string.IsNullOrEmpty(fullName) ? " " : string.Empty)}[Dead]";
-
-            form.Text =
-                $"{fullName}{lifeText}" +
-                $"{(!(string.IsNullOrWhiteSpace(fullName) && string.IsNullOrWhiteSpace(lifeText)) ?
-                        " - " :
-                        string.Empty
-                    )}" +
-                $"Graph";
         }
 
         private void gViewer1_MouseClick(object sender, MouseEventArgs e)

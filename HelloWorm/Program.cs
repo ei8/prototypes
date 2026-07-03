@@ -47,6 +47,7 @@ namespace ei8.Prototypes.HelloWorm
                     services.AddTransient<frmTree>();
                     services.AddTransient<ISpikeService, SpikeService>();
                     services.AddTransient<Worm>();
+                    services.AddTransient<Worksheet>();
                     services.AddTransient<Food>();
                     services.AddTransient<Dish>();
                     services.AddSingleton<IProjectService, ProjectService>();

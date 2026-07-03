@@ -35,6 +35,8 @@
             toolStrip1 = new ToolStrip();
             tsbReload = new ToolStripButton();
             toolStripSeparator1 = new ToolStripSeparator();
+            tsbSpike = new ToolStripButton();
+            toolStripSeparator3 = new ToolStripSeparator();
             tsbCheckAll = new ToolStripButton();
             tsbCheckSelected = new ToolStripButton();
             toolStripSeparator2 = new ToolStripSeparator();
@@ -54,6 +56,8 @@
             listView1.TabIndex = 2;
             listView1.UseCompatibleStateImageBehavior = false;
             listView1.View = View.Details;
+            listView1.KeyDown += listView1_KeyDown;
+            listView1.KeyPress += listView1_KeyPress;
             // 
             // columnHeader2
             // 
@@ -68,7 +72,7 @@
             // toolStrip1
             // 
             toolStrip1.GripStyle = ToolStripGripStyle.Hidden;
-            toolStrip1.Items.AddRange(new ToolStripItem[] { tsbReload, toolStripSeparator1, tsbCheckAll, tsbCheckSelected, toolStripSeparator2, tsbFocusReflexArc });
+            toolStrip1.Items.AddRange(new ToolStripItem[] { tsbReload, toolStripSeparator1, tsbSpike, toolStripSeparator3, tsbCheckAll, tsbCheckSelected, toolStripSeparator2, tsbFocusReflexArc });
             toolStrip1.Location = new Point(0, 0);
             toolStrip1.Name = "toolStrip1";
             toolStrip1.Size = new Size(800, 25);
@@ -90,6 +94,21 @@
             // 
             toolStripSeparator1.Name = "toolStripSeparator1";
             toolStripSeparator1.Size = new Size(6, 25);
+            // 
+            // tsbSpike
+            // 
+            tsbSpike.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            tsbSpike.Image = (Image)resources.GetObject("tsbSpike.Image");
+            tsbSpike.ImageTransparentColor = Color.Magenta;
+            tsbSpike.Name = "tsbSpike";
+            tsbSpike.Size = new Size(23, 22);
+            tsbSpike.Text = "Spike";
+            tsbSpike.Click += tsbSpike_Click;
+            // 
+            // toolStripSeparator3
+            // 
+            toolStripSeparator3.Name = "toolStripSeparator3";
+            toolStripSeparator3.Size = new Size(6, 25);
             // 
             // tsbCheckAll
             // 
@@ -157,5 +176,7 @@
         private ToolStripButton tsbCheckSelected;
         private ToolStripSeparator toolStripSeparator2;
         private ToolStripButton tsbFocusReflexArc;
+        private ToolStripButton tsbSpike;
+        private ToolStripSeparator toolStripSeparator3;
     }
 }

@@ -64,6 +64,7 @@
             imageList1.Images.SetKeyName(3, "icons8-worm-16.png");
             imageList1.Images.SetKeyName(4, "icons8-nose-15.png");
             imageList1.Images.SetKeyName(5, "icons8-10%-15.png");
+            imageList1.Images.SetKeyName(6, "icons8-table-15.png");
             // 
             // toolStrip1
             // 

@@ -11,7 +11,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace ei8.Prototypes.HelloWorm
 {
-    public class Worm : IMovable, IRectangularComposite, IElliptical, IPerishable, IRegenerative, ISpikableReporting2, INamed
+    public class Worm : IMovable, IRectangularComposite, IElliptical, IPerishable, IRegenerative, ISpikableReporting2, INamed, ISpikableTemp
     {
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
@@ -92,86 +92,67 @@ namespace ei8.Prototypes.HelloWorm
             this.sectorsValueDictionary = null;
             this.targetsValueDictionary = null;
             this.spikeService = spikeService;
-            this.spikeService.Triggered += this.SpikeService_Triggered;
-            this.spikeService.Fired += this.SpikeService_Fired;
-        }
 
-        private void SpikeService_Triggered(object? sender, TriggeredEventArgs e)
-        {
-            Worm.logger.Debug(
-                new LogMessageGenerator(
-                    () => {
-                        var origin = e.ReflexArc.LastOrDefault();
-                        var result = $"{this.GetFullName()} - " +
-                        $"Triggered: {e.Target.ToReadableString()}; " +
-                        $"By: {(origin != null ? origin.Target.ToReadableString() : "[Stimulus]")}; " +
-                        $"Count: {e.Charge.Excitations.Count() + e.Charge.Inhibitions.Count()}; " +
-                        $"Charge: ({ChargeInfo.RestingPotential}) + {e.Charge.Excitations.Sum(ChargeInfo.GetCharge)} + ({e.Charge.Inhibitions.Sum(ChargeInfo.GetCharge)}) = {e.Charge.Result} mV";
-
-                        return result;
-                    }
-                )
-            );
-
-            this.Triggered?.Invoke(this, e);
-        }
-
-        private void SpikeService_Fired(object? sender, FiredEventArgs e)
-        {
-            Worm.logger.Debug(new LogMessageGenerator(() => $"{this.GetFullName()} - Fired: {e.FireInfo.Target.ToReadableString()}"));
-
-            if (
-                this.rotationNeuron != null &&
-                this.directionValueDictionary != null &&
-                this.degreesValueDictionary != null &&
-                this.TryParseMotorNeurons(
-                    e.FireInfo,
-                    [
-                        new ResponseParser(
-                            new Predicate<FireInfo>(
-                                fi =>
-                                    this.directionValueDictionary.ContainsKey(fi.Target.Id) ||
-                                    this.degreesValueDictionary.ContainsKey(fi.Target.Id)
-                            ),
-                            this.rotationNeuron.Id,
-                            [
-                                // and any parameter1 was fired
-                                new ParameterConverter(
-                                    (fi, [NotNullWhen(true)] out or) =>
-                                        fi.TryGetFiredParameter(this.directionValueDictionary, out or)
-                                ),
-                                // and any parameter2 was fired
-                                new ParameterConverter(
-                                    (fi, [NotNullWhen(true)] out or2) =>
-                                        fi.TryGetFiredParameter(this.degreesValueDictionary, out or2)
-                                )
-                            ]
+            this.SubscribeReporting(
+                this.spikeService,
+                Worm.logger,
+                (s, e) => this.Triggered?.Invoke(this, e),
+                (s, e) => this.Fired?.Invoke(this, e),
+                null,
+                (e) =>
+                    {
+                        if (
+                            this.rotationNeuron != null &&
+                            this.directionValueDictionary != null &&
+                            this.degreesValueDictionary != null &&
+                            this.TryParseMotorNeurons(
+                                e.FireInfo,
+                                [
+                                    new ResponseParser(
+                                        new Predicate<FireInfo>(
+                                            fi =>
+                                                this.directionValueDictionary.ContainsKey(fi.Target.Id) ||
+                                                this.degreesValueDictionary.ContainsKey(fi.Target.Id)
+                                        ),
+                                        this.rotationNeuron.Id,
+                                        [
+                                            // and any parameter1 was fired
+                                            new ParameterConverter(
+                                                (fi, [NotNullWhen(true)] out or) =>
+                                                    fi.TryGetFiredParameter(this.directionValueDictionary, out or)
+                                            ),
+                                            // and any parameter2 was fired
+                                            new ParameterConverter(
+                                                (fi, [NotNullWhen(true)] out or2) =>
+                                                    fi.TryGetFiredParameter(this.degreesValueDictionary, out or2)
+                                            )
+                                        ]
+                                    )
+                                ],
+                                out IEnumerable<ParseMotorResult>? parseResult
+                            )
                         )
-                    ],
-                    out IEnumerable<ParseMotorResult>? parseResult
-                )
-            )
-            {
-                Worm.logger.Debug(
-                    new LogMessageGenerator(() =>
-                        $"{this.GetFullName()} - Related Fires (microseconds): {string.Join(
-                            ", ",
-                            parseResult.Select(rf =>
-                                rf.Neuron.ToReadableString() +
-                                " (" +
-                                    e.FireInfo.Timestamp.Subtract(rf.FireInfo.Timestamp).TotalMicroseconds +
-                                ")"
+                        {
+                            Worm.logger.Debug(
+                                new LogMessageGenerator(() =>
+                                    $"{this.GetFullName()} - Related Fires (microseconds): {string.Join(
+                                        ", ",
+                                        parseResult.Select(rf =>
+                                            rf.Neuron.ToReadableString() +
+                                            " (" +
+                                                e.FireInfo.Timestamp.Subtract(rf.FireInfo.Timestamp).TotalMicroseconds +
+                                            ")"
+                                            )
+                                    )}"
                                 )
-                        )}"
-                    )
-                );
-                var parseValues = parseResult.Select(pr => pr.Value);
-                this.Rotate(parseValues.OfType<RotationDirection>().Single(), parseValues.OfType<RotationDegrees>().Single());
-            }
-            else
-                Worm.logger.Trace(new LogMessageGenerator(() => $"Invoke failed: {this.invokeFailureCount++}"));
-
-            this.Fired?.Invoke(this, e);
+                            );
+                            var parseValues = parseResult.Select(pr => pr.Value);
+                            this.Rotate(parseValues.OfType<RotationDirection>().Single(), parseValues.OfType<RotationDegrees>().Single());
+                        }
+                        else
+                            Worm.logger.Trace(new LogMessageGenerator(() => $"Invoke failed: {this.invokeFailureCount++}"));
+                    }
+            );
         }
 
         private static IEnumerable<Sector> InitializeSectors(Nose nose)
@@ -487,6 +468,18 @@ namespace ei8.Prototypes.HelloWorm
             this.components.Remove(component);
 
             this.NotifyCollectionChanged?.Invoke(this, new(NotifyCollectionChangedAction.Remove, component));
+        }
+
+        public void Spike(params Neuron[] neurons)
+        {
+            if (this.network != null)
+            {
+                this.spikeService.Spike(
+                    neurons,
+                    this.network,
+                    this.refractoryPeriod
+                );
+            }
         }
     }
 }
