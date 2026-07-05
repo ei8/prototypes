@@ -1,5 +1,6 @@
 ﻿using ei8.Cortex.Coding;
 using System.ComponentModel.Design;
+using System.Runtime.CompilerServices;
 using WeifenLuo.WinFormsUI.Docking;
 
 namespace ei8.Prototypes.HelloWorm
@@ -65,14 +66,19 @@ namespace ei8.Prototypes.HelloWorm
 
                 foreach (var n in this.spikable.Network.GetItems<Neuron>())
                 {
-                    var lvi = this.listView1.Items.Add(n.Id.ToString(), n.Tag, null);
-                    lvi.SubItems.Add(n.Id.ToString());
-                    lvi.Checked = true;
-                    lvi.Tag = n;
+                    this.AddItem(n);
                 }
 
                 this.Text = this.spikable.GetName(frmTree.FormDescription);
             }
+        }
+
+        private void AddItem(Neuron n)
+        {
+            var lvi = this.listView1.Items.Add(n.Id.ToString(), n.Tag, null);
+            lvi.SubItems.Add(n.Id.ToString());
+            lvi.Checked = true;
+            lvi.Tag = n;
         }
 
         private void tsbCheckAll_Click(object sender, EventArgs e)
@@ -184,6 +190,15 @@ namespace ei8.Prototypes.HelloWorm
                     this.tsbCheckSelected_Click(sender, EventArgs.Empty);
                     break;
             }
+        }
+
+        private void tstbFilter_TextChanged(object sender, EventArgs e)
+        {
+            this.listView1.Items.Clear();
+
+            if (this.spikable.Network != null)
+                foreach (var n in this.spikable.Network.GetItems<Neuron>().Where(n => n.Tag.ToUpper().Contains(this.tstbFilter.Text.ToUpper())))
+                    this.AddItem(n);
         }
     }
 }

@@ -41,6 +41,7 @@
             tsbCheckSelected = new ToolStripButton();
             toolStripSeparator2 = new ToolStripSeparator();
             tsbFocusReflexArc = new ToolStripButton();
+            tstbFilter = new ToolStripTextBox();
             toolStrip1.SuspendLayout();
             SuspendLayout();
             // 
@@ -72,7 +73,7 @@
             // toolStrip1
             // 
             toolStrip1.GripStyle = ToolStripGripStyle.Hidden;
-            toolStrip1.Items.AddRange(new ToolStripItem[] { tsbReload, toolStripSeparator1, tsbSpike, toolStripSeparator3, tsbCheckAll, tsbCheckSelected, toolStripSeparator2, tsbFocusReflexArc });
+            toolStrip1.Items.AddRange(new ToolStripItem[] { tsbReload, toolStripSeparator1, tsbSpike, toolStripSeparator3, tsbCheckAll, tsbCheckSelected, tstbFilter, toolStripSeparator2, tsbFocusReflexArc });
             toolStrip1.Location = new Point(0, 0);
             toolStrip1.Name = "toolStrip1";
             toolStrip1.Size = new Size(800, 25);
@@ -148,6 +149,12 @@
             tsbFocusReflexArc.ToolTipText = "Focus Reflex Arc";
             tsbFocusReflexArc.Click += tsbFocusReflexArc_Click;
             // 
+            // tstbFilter
+            // 
+            tstbFilter.Name = "tstbFilter";
+            tstbFilter.Size = new Size(100, 25);
+            tstbFilter.TextChanged += tstbFilter_TextChanged;
+            // 
             // frmTree
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -178,5 +185,6 @@
         private ToolStripButton tsbFocusReflexArc;
         private ToolStripButton tsbSpike;
         private ToolStripSeparator toolStripSeparator3;
+        private ToolStripTextBox tstbFilter;
     }
 }

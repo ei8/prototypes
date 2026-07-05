@@ -88,7 +88,7 @@ namespace ei8.Prototypes.HelloWorm
                     if (node != null)
                     {
                         var tag = n.Tag;
-                        if (!string.IsNullOrWhiteSpace(tag) && this.graph.Settings.ShortenMirrorTags)
+                        if (!string.IsNullOrWhiteSpace(tag) && !string.IsNullOrWhiteSpace(n.MirrorUrl) && this.graph.Settings.ShortenMirrorTags)
                         {
                             var lastIndex = tag.LastIndexOfAny(['.', '+']);
                             if (lastIndex > -1)

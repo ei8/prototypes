@@ -76,18 +76,20 @@ namespace ei8.Prototypes.HelloWorm
 
         // TODO: promote to ei8.Cortex.Coding.Spiker.ExtensionMethods
 
-        public static Neuron CreateNeuron(this Network network, string tag)
+        public static Neuron CreateNeuron(this Network network, string? tag = null)
         {
-            var result = network.CreateNeuron();
-            result.Tag = tag;
-            return result;
+            Neuron neuron = Neuron.CreateTransient(Guid.NewGuid(), tag, null, null);
+            network.AddReplace(neuron);
+            return neuron;
         }
         // TODO: promote to ei8.Cortex.Coding.Spiker.ExtensionMethods
-        public static Neuron CreateInterneuron(this Network network, params Neuron[] postsynapticNeurons)
+        public static Neuron CreateInterneuron(this Network network, string? interneuronTag = null, params Neuron[] postsynapticNeurons)
         {
-            Neuron neuron = network.CreateNeuron();
+            Neuron neuron = network.CreateNeuron(interneuronTag);
+
             foreach(var post in postsynapticNeurons)
                 network.CreateTerminal(neuron, post);
+
             return neuron;
         }
         // TODO: promote to ei8.Cortex.Coding.Spiker.ExtensionMethods
@@ -98,7 +100,6 @@ namespace ei8.Prototypes.HelloWorm
         }
 
         // TODO: remove CreateRotationInterneuron from ei8.Cortex.Coding.Spiker.ExtensionMethods
-
         public static void CreateTruthTableInterneurons(
             this Network network, 
             Neuron result1, 
@@ -108,16 +109,20 @@ namespace ei8.Prototypes.HelloWorm
             out Neuron result1Interneuron, 
             out Neuron result2Interneuron, 
             out Neuron result3Interneuron, 
-            out Neuron result4Interneuron
+            out Neuron result4Interneuron,
+            string? result1InterneuronTag = null,
+            string? result2InterneuronTag = null,
+            string? result3InterneuronTag = null,
+            string? result4InterneuronTag = null
         )
         {
-            result1Interneuron = network.CreateInterneuron(result1);
-            result2Interneuron = network.CreateInterneuron(result2);
-            result3Interneuron = network.CreateInterneuron(result3);
-            result4Interneuron = network.CreateInterneuron(result4);
+            result1Interneuron = network.CreateInterneuron(result1InterneuronTag, result1);
+            result2Interneuron = network.CreateInterneuron(result2InterneuronTag, result2);
+            result3Interneuron = network.CreateInterneuron(result3InterneuronTag, result3);
+            result4Interneuron = network.CreateInterneuron(result4InterneuronTag, result4);
         }
 
-        public static void LinkTruthTableInputNeuronsToInterneurons(
+        public static void LinkTruthTableInputNeuronsToInterneuronsTyped(
             this Network network,
             Neuron typeNeuron,
             Neuron result1Interneuron,
@@ -151,6 +156,40 @@ namespace ei8.Prototypes.HelloWorm
             network.LinkInputNeuronsToInterneuron(
                 result4Interneuron,
                 typeNeuron,
+                input1True,
+                input2True
+            );
+        }
+
+        public static void LinkTruthTableInputNeuronsToInterneurons(
+            this Network network,
+            Neuron result1Interneuron,
+            Neuron result2Interneuron,
+            Neuron result3Interneuron,
+            Neuron result4Interneuron,
+            Neuron input1True,
+            Neuron input1False,
+            Neuron input2True,
+            Neuron input2False
+        )
+        {
+            network.LinkInputNeuronsToInterneuron(
+                result1Interneuron,
+                input1False,
+                input2False
+            );
+            network.LinkInputNeuronsToInterneuron(
+                result2Interneuron,
+                input1True,
+                input2False
+            );
+            network.LinkInputNeuronsToInterneuron(
+                result3Interneuron,
+                input1False,
+                input2True
+            );
+            network.LinkInputNeuronsToInterneuron(
+                result4Interneuron,
                 input1True,
                 input2True
             );
