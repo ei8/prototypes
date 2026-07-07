@@ -41,8 +41,8 @@
             tsbCheckSelected = new ToolStripButton();
             tstbFilter = new ToolStripTextBox();
             toolStripSeparator2 = new ToolStripSeparator();
-            tsbFocusReflexArc = new ToolStripButton();
             tsbFocusChecked = new ToolStripButton();
+            tsbFocusReflexArc = new ToolStripButton();
             tsbHideSelectedTags = new ToolStripButton();
             toolStrip1.SuspendLayout();
             SuspendLayout();
@@ -146,6 +146,16 @@
             toolStripSeparator2.Name = "toolStripSeparator2";
             toolStripSeparator2.Size = new Size(6, 25);
             // 
+            // tsbFocusChecked
+            // 
+            tsbFocusChecked.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            tsbFocusChecked.Image = (Image)resources.GetObject("tsbFocusChecked.Image");
+            tsbFocusChecked.ImageTransparentColor = Color.Magenta;
+            tsbFocusChecked.Name = "tsbFocusChecked";
+            tsbFocusChecked.Size = new Size(23, 22);
+            tsbFocusChecked.Text = "Focus Checked";
+            tsbFocusChecked.Click += tsbFocusChecked_Click;
+            // 
             // tsbFocusReflexArc
             // 
             tsbFocusReflexArc.DisplayStyle = ToolStripItemDisplayStyle.Image;
@@ -156,16 +166,6 @@
             tsbFocusReflexArc.Text = "toolStripButton1";
             tsbFocusReflexArc.ToolTipText = "Focus Reflex Arc in Graph";
             tsbFocusReflexArc.Click += tsbFocusReflexArc_Click;
-            // 
-            // tsbFocusChecked
-            // 
-            tsbFocusChecked.DisplayStyle = ToolStripItemDisplayStyle.Image;
-            tsbFocusChecked.Image = (Image)resources.GetObject("tsbFocusChecked.Image");
-            tsbFocusChecked.ImageTransparentColor = Color.Magenta;
-            tsbFocusChecked.Name = "tsbFocusChecked";
-            tsbFocusChecked.Size = new Size(23, 22);
-            tsbFocusChecked.Text = "Focus Checked";
-            tsbFocusChecked.Click += tsbFocusChecked_Click;
             // 
             // tsbHideSelectedTags
             // 
