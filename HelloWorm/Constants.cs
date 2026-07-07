@@ -13,8 +13,10 @@
 
         public struct Worm
         {
-            // 94% after 200 collisions
-            public static readonly TimeSpan InitialRefractoryPeriod = new TimeSpan(0, 0, 0, 0, 1, 0);
+            // NOTE: 94% after 200 collisions for Worm
+            // public static readonly TimeSpan InitialRefractoryPeriod = new TimeSpan(0, 0, 0, 0, 1, 0);
+            // NOTE: allowance for addition
+            public static readonly TimeSpan InitialRefractoryPeriod = new TimeSpan(0, 0, 0, 2, 0, 0);
             public static readonly TimeSpan InitialRelatedSpikesPeriod = new TimeSpan(0, 0, 0, 0, 0, 100);
 
             public const int InitialLife = 1000;

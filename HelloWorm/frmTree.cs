@@ -1,6 +1,5 @@
 ﻿using ei8.Cortex.Coding;
 using System.ComponentModel.Design;
-using System.Runtime.CompilerServices;
 using WeifenLuo.WinFormsUI.Docking;
 
 namespace ei8.Prototypes.HelloWorm
@@ -50,7 +49,9 @@ namespace ei8.Prototypes.HelloWorm
 
         private void SelectionService_SelectionChanged(object? sender, EventArgs e)
         {
-            this.tsbFocusReflexArc.Enabled = this.selectionService.PrimarySelection is IGraph;
+            this.tsbHideSelectedTags.Enabled =
+            this.tsbFocusReflexArc.Enabled = 
+            this.selectionService.PrimarySelection is IGraph;
         }
 
         private void frmTree_Load(object sender, EventArgs e)
@@ -77,7 +78,7 @@ namespace ei8.Prototypes.HelloWorm
         {
             var lvi = this.listView1.Items.Add(n.Id.ToString(), n.Tag, null);
             lvi.SubItems.Add(n.Id.ToString());
-            lvi.Checked = true;
+            lvi.Checked = false;
             lvi.Tag = n;
         }
 
@@ -148,7 +149,7 @@ namespace ei8.Prototypes.HelloWorm
 
                 if (this.selectionService.PrimarySelection is IGraph fg)
                 {
-                    fg.FilterNeurons = this.GetCheckedNeurons();
+                    fg.Settings.FilterNeurons = this.GetCheckedNeurons();
                     fg.Reload();
                 }
             }
@@ -194,11 +195,42 @@ namespace ei8.Prototypes.HelloWorm
 
         private void tstbFilter_TextChanged(object sender, EventArgs e)
         {
-            this.listView1.Items.Clear();
-
             if (this.spikable.Network != null)
+            {
+                this.listView1.Items.Clear();
+
                 foreach (var n in this.spikable.Network.GetItems<Neuron>().Where(n => n.Tag.ToUpper().Contains(this.tstbFilter.Text.ToUpper())))
                     this.AddItem(n);
+            }
+        }
+        
+        private void tsbFocusChecked_Click(object sender, EventArgs e)
+        {
+            if (this.spikable.Network != null)
+            {
+                IEnumerable<Neuron> checkedNeurons = this.GetCheckedNeurons().ToArray();
+
+                this.listView1.Items.Clear();
+
+                foreach (var n in this.spikable.Network.GetItems<Neuron>().Where(n => checkedNeurons.Any(cn => cn.Id == n.Id)))
+                    this.AddItem(n);
+            }
+        }
+
+        private void tsbHideSelectedTags_Click(object sender, EventArgs e)
+        {
+            if (this.spikable.Network != null)
+            {
+                IEnumerable<Neuron> checkedNeurons = [.. this.GetCheckedNeurons()];
+
+                if (this.selectionService.PrimarySelection is IGraph fg)
+                {
+                    var currentHideTagsNeurons = fg.Settings.HideTagsNeurons.ToArray();
+                    var newHideTagsNeurons = checkedNeurons.Except(currentHideTagsNeurons);
+                    fg.Settings.HideTagsNeurons = fg.Settings.HideTagsNeurons.Concat(newHideTagsNeurons);
+                    fg.Reload();
+                }
+            }
         }
     }
 }

@@ -12,8 +12,6 @@ namespace ei8.Prototypes.HelloWorm
 
         ISpikableReporting2 Spikable { get; }
 
-        IEnumerable<Neuron> FilterNeurons { get; set; }
-
         GraphSettings Settings { get; }
     }
 }

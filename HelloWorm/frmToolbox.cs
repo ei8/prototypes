@@ -380,13 +380,13 @@ namespace ei8.Prototypes.HelloWorm
         private static void CreateAdder(Network net)
         {
             // TODO: Unify CreateAdders
-            frmToolbox.CreateAdderTwoPowerOfZero(net, out Neuron carryOver_1, out Neuron carryOver_0, true);
-            frmToolbox.CreateAdder(net, 1, carryOver_1, carryOver_0, out Neuron carryOver2_1, out Neuron carryOver2_0, true);
-            frmToolbox.CreateAdder(net, 2, carryOver2_1, carryOver2_0, out Neuron carryOver3_1, out Neuron carryOver3_0, true);
-            frmToolbox.CreateAdder(net, 3, carryOver3_1, carryOver3_0, out Neuron carryOver4_1, out Neuron carryOver4_0, true);
+            frmToolbox.CreateAdderTwoPowerOfZero(net, out Neuron carryOver_1, out Neuron carryOver_0);
+            frmToolbox.CreateAdder(net, 1, carryOver_1, carryOver_0, out Neuron carryOver2_1, out Neuron carryOver2_0);
+            frmToolbox.CreateAdder(net, 2, carryOver2_1, carryOver2_0, out Neuron carryOver3_1, out Neuron carryOver3_0);
+            frmToolbox.CreateAdder(net, 3, carryOver3_1, carryOver3_0, out Neuron carryOver4_1, out Neuron carryOver4_0);
         }
 
-        private static void CreateAdderTwoPowerOfZero(Network net, out Neuron carryOver_1, out Neuron carryOver_0, bool clearOptionalTags = false)
+        private static void CreateAdderTwoPowerOfZero(Network net, out Neuron carryOver_1, out Neuron carryOver_0)
         {
             // 2^0
             #region Output neurons
@@ -449,21 +449,6 @@ namespace ei8.Prototypes.HelloWorm
                 adder1_Addend2_1,
                 adder1_Addend2_0
             );
-
-            if (clearOptionalTags)
-            {
-                adder1_Half1_Xor__Adder1_Addend1_0__Adder1_Addend2_0.Tag =
-                adder1_Half1_Xor__Adder1_Addend1_1__Adder1_Addend2_0.Tag =
-                adder1_Half1_Xor__Adder1_Addend1_0__Adder1_Addend2_1.Tag =
-                adder1_Half1_Xor__Adder1_Addend1_1__Adder1_Addend2_1.Tag =
-
-                adder1_Half1_And__Adder1_Addend1_0__Adder1_Addend2_0.Tag =
-                adder1_Half1_And__Adder1_Addend1_1__Adder1_Addend2_0.Tag =
-                adder1_Half1_And__Adder1_Addend1_0__Adder1_Addend2_1.Tag =
-                adder1_Half1_And__Adder1_Addend1_1__Adder1_Addend2_1.Tag = 
-                
-                string.Empty;
-            }
         }
 
         private static void CreateAdder(
@@ -472,8 +457,7 @@ namespace ei8.Prototypes.HelloWorm
             Neuron precedingCarryOver_1, 
             Neuron precedingCarryOver_0, 
             out Neuron carryOver_1, 
-            out Neuron carryOver_0, 
-            bool clearOptionalTags = false
+            out Neuron carryOver_0
         )
         {
             string precedingAdderName = $"Adder{base2Exponent}";
@@ -599,46 +583,6 @@ namespace ei8.Prototypes.HelloWorm
                 adder2_Half2_CarryOver_1,
                 adder2_Half2_CarryOver_0
             );
-
-            if (clearOptionalTags)
-            {
-                adder2_Half1_Xor_Result_1.Tag = 
-                adder2_Half1_Xor_Result_0.Tag =
-                adder2_Half1_CarryOver_1.Tag =
-                adder2_Half1_CarryOver_0.Tag =
-                adder2_Half2_CarryOver_1.Tag =
-                adder2_Half2_CarryOver_0.Tag =
-
-                // half2
-                adder2_Half2_Xor__PrecedingCarryOver_0__Adder2_Half1_Xor_Result_0.Tag =
-                adder2_Half2_Xor__PrecedingCarryOver_1__Adder2_Half1_Xor_Result_0.Tag =
-                adder2_Half2_Xor__PrecedingCarryOver_0__Adder2_Half1_Xor_Result_1.Tag =
-                adder2_Half2_Xor__PrecedingCarryOver_1__Adder2_Half1_Xor_Result_1.Tag =
-
-                adder2_Half2_And__PrecedingCarryOver_0__Adder2_Half1_Xor_Result_0.Tag =
-                adder2_Half2_And__PrecedingCarryOver_1__Adder2_Half1_Xor_Result_0.Tag =
-                adder2_Half2_And__PrecedingCarryOver_0__Adder2_Half1_Xor_Result_1.Tag =
-                adder2_Half2_And__PrecedingCarryOver_1__Adder2_Half1_Xor_Result_1.Tag =
-
-                // half1
-                adder2_Half1_Xor__Adder2_Addend1_0__Adder2_Addend2_0.Tag =
-                adder2_Half1_Xor__Adder2_Addend1_1__Adder2_Addend2_0.Tag =
-                adder2_Half1_Xor__Adder2_Addend1_0__Adder2_Addend2_1.Tag =
-                adder2_Half1_Xor__Adder2_Addend1_1__Adder2_Addend2_1.Tag =
-
-                adder2_Half1_And__Adder2_Addend1_0__Adder2_Addend2_0.Tag =
-                adder2_Half1_And__Adder2_Addend1_1__Adder2_Addend2_0.Tag =
-                adder2_Half1_And__Adder2_Addend1_0__Adder2_Addend2_1.Tag =
-                adder2_Half1_And__Adder2_Addend1_1__Adder2_Addend2_1.Tag =
-
-                // OR carryOvers
-                adder2_Or__Adder2_Half1_CarryOver_0__Adder2_Half2_CarryOver_0.Tag =
-                adder2_Or__Adder2_Half1_CarryOver_1__Adder2_Half2_CarryOver_0.Tag =
-                adder2_Or__Adder2_Half1_CarryOver_0__Adder2_Half2_CarryOver_1.Tag =
-                adder2_Or__Adder2_Half1_CarryOver_1__Adder2_Half2_CarryOver_1.Tag =
-
-                string.Empty;
-            }
         }
     }
 }

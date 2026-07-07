@@ -39,9 +39,11 @@
             toolStripSeparator3 = new ToolStripSeparator();
             tsbCheckAll = new ToolStripButton();
             tsbCheckSelected = new ToolStripButton();
+            tstbFilter = new ToolStripTextBox();
             toolStripSeparator2 = new ToolStripSeparator();
             tsbFocusReflexArc = new ToolStripButton();
-            tstbFilter = new ToolStripTextBox();
+            tsbFocusChecked = new ToolStripButton();
+            tsbHideSelectedTags = new ToolStripButton();
             toolStrip1.SuspendLayout();
             SuspendLayout();
             // 
@@ -73,7 +75,7 @@
             // toolStrip1
             // 
             toolStrip1.GripStyle = ToolStripGripStyle.Hidden;
-            toolStrip1.Items.AddRange(new ToolStripItem[] { tsbReload, toolStripSeparator1, tsbSpike, toolStripSeparator3, tsbCheckAll, tsbCheckSelected, tstbFilter, toolStripSeparator2, tsbFocusReflexArc });
+            toolStrip1.Items.AddRange(new ToolStripItem[] { tsbReload, toolStripSeparator1, tsbSpike, toolStripSeparator3, tsbCheckAll, tsbCheckSelected, tstbFilter, toolStripSeparator2, tsbFocusChecked, tsbFocusReflexArc, tsbHideSelectedTags });
             toolStrip1.Location = new Point(0, 0);
             toolStrip1.Name = "toolStrip1";
             toolStrip1.Size = new Size(800, 25);
@@ -133,6 +135,12 @@
             tsbCheckSelected.ToolTipText = "Check/Uncheck Selected";
             tsbCheckSelected.Click += tsbCheckSelected_Click;
             // 
+            // tstbFilter
+            // 
+            tstbFilter.Name = "tstbFilter";
+            tstbFilter.Size = new Size(100, 25);
+            tstbFilter.TextChanged += tstbFilter_TextChanged;
+            // 
             // toolStripSeparator2
             // 
             toolStripSeparator2.Name = "toolStripSeparator2";
@@ -146,14 +154,29 @@
             tsbFocusReflexArc.Name = "tsbFocusReflexArc";
             tsbFocusReflexArc.Size = new Size(23, 22);
             tsbFocusReflexArc.Text = "toolStripButton1";
-            tsbFocusReflexArc.ToolTipText = "Focus Reflex Arc";
+            tsbFocusReflexArc.ToolTipText = "Focus Reflex Arc in Graph";
             tsbFocusReflexArc.Click += tsbFocusReflexArc_Click;
             // 
-            // tstbFilter
+            // tsbFocusChecked
             // 
-            tstbFilter.Name = "tstbFilter";
-            tstbFilter.Size = new Size(100, 25);
-            tstbFilter.TextChanged += tstbFilter_TextChanged;
+            tsbFocusChecked.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            tsbFocusChecked.Image = (Image)resources.GetObject("tsbFocusChecked.Image");
+            tsbFocusChecked.ImageTransparentColor = Color.Magenta;
+            tsbFocusChecked.Name = "tsbFocusChecked";
+            tsbFocusChecked.Size = new Size(23, 22);
+            tsbFocusChecked.Text = "Focus Checked";
+            tsbFocusChecked.Click += tsbFocusChecked_Click;
+            // 
+            // tsbHideSelectedTags
+            // 
+            tsbHideSelectedTags.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            tsbHideSelectedTags.Image = (Image)resources.GetObject("tsbHideSelectedTags.Image");
+            tsbHideSelectedTags.ImageTransparentColor = Color.Magenta;
+            tsbHideSelectedTags.Name = "tsbHideSelectedTags";
+            tsbHideSelectedTags.Size = new Size(23, 22);
+            tsbHideSelectedTags.Text = "toolStripButton1";
+            tsbHideSelectedTags.ToolTipText = "Hide Selected Tags in Graph";
+            tsbHideSelectedTags.Click += tsbHideSelectedTags_Click;
             // 
             // frmTree
             // 
@@ -186,5 +209,7 @@
         private ToolStripButton tsbSpike;
         private ToolStripSeparator toolStripSeparator3;
         private ToolStripTextBox tstbFilter;
+        private ToolStripButton tsbFocusChecked;
+        private ToolStripButton tsbHideSelectedTags;
     }
 }

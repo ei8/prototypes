@@ -1,5 +1,4 @@
-﻿using ei8.Cortex.Coding;
-using ei8.Cortex.Coding.Spiker;
+﻿using ei8.Cortex.Coding.Spiker;
 using System.Collections.Concurrent;
 using System.ComponentModel;
 
@@ -11,7 +10,6 @@ namespace ei8.Prototypes.HelloWorm
         public event EventHandler Reloaded;
         public event EventHandler<ActivityLoggedEventArgs> ActivityLogged;
 
-        private IEnumerable<Neuron> filterNeurons;
         private readonly ConcurrentDictionary<Guid, NeuronSpikeInfo> spikes;
         private readonly GraphSettings settings;
         private bool isPlaying;
@@ -22,7 +20,6 @@ namespace ei8.Prototypes.HelloWorm
             this.Spikable.Triggered += this.Spikable_Triggered;
             this.Spikable.Fired += this.Spikable_Fired;
 
-            this.filterNeurons = Enumerable.Empty<Neuron>();
             this.spikes = new();
             this.settings = new GraphSettings();
 
@@ -46,19 +43,6 @@ namespace ei8.Prototypes.HelloWorm
         }
 
         public ISpikableReporting2 Spikable { get; }
-
-        public IEnumerable<Neuron> FilterNeurons
-        {
-            get => this.filterNeurons;
-            set
-            {
-                if (this.filterNeurons !=  value)
-                {
-                    this.filterNeurons = value;
-                    this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FilterNeurons)));
-                }
-            }
-        }
 
         public GraphSettings Settings => this.settings;
 

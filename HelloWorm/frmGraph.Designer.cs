@@ -32,6 +32,10 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmGraph));
             gViewer1 = new Microsoft.Msagl.GraphViewerGdi.GViewer();
             timer1 = new System.Windows.Forms.Timer(components);
+            contextMenuStrip1 = new ContextMenuStrip(components);
+            mnuResetFilters = new ToolStripMenuItem();
+            mnuReload = new ToolStripMenuItem();
+            contextMenuStrip1.SuspendLayout();
             SuspendLayout();
             // 
             // gViewer1
@@ -41,6 +45,7 @@
             gViewer1.AutoScroll = true;
             gViewer1.BackwardEnabled = false;
             gViewer1.BuildHitTree = true;
+            gViewer1.ContextMenuStrip = contextMenuStrip1;
             gViewer1.CurrentLayoutMethod = Microsoft.Msagl.GraphViewerGdi.LayoutMethod.UseSettingsOfTheGraph;
             gViewer1.Dock = DockStyle.Fill;
             gViewer1.EdgeInsertButtonVisible = true;
@@ -82,6 +87,26 @@
             timer1.Interval = 1000;
             timer1.Tick += timer1_Tick;
             // 
+            // contextMenuStrip1
+            // 
+            contextMenuStrip1.Items.AddRange(new ToolStripItem[] { mnuReload, mnuResetFilters });
+            contextMenuStrip1.Name = "contextMenuStrip1";
+            contextMenuStrip1.Size = new Size(181, 70);
+            // 
+            // mnuResetFilters
+            // 
+            mnuResetFilters.Name = "mnuResetFilters";
+            mnuResetFilters.Size = new Size(180, 22);
+            mnuResetFilters.Text = "Reset Filters";
+            mnuResetFilters.Click += mnuResetFilters_Click;
+            // 
+            // mnuReload
+            // 
+            mnuReload.Name = "mnuReload";
+            mnuReload.Size = new Size(180, 22);
+            mnuReload.Text = "Reload";
+            mnuReload.Click += mnuReload_Click;
+            // 
             // frmGraph
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -91,6 +116,7 @@
             Name = "frmGraph";
             Text = "Graph";
             Load += frmGraph_Load;
+            contextMenuStrip1.ResumeLayout(false);
             ResumeLayout(false);
         }
 
@@ -98,5 +124,8 @@
 
         private Microsoft.Msagl.GraphViewerGdi.GViewer gViewer1;
         private System.Windows.Forms.Timer timer1;
+        private ContextMenuStrip contextMenuStrip1;
+        private ToolStripMenuItem mnuResetFilters;
+        private ToolStripMenuItem mnuReload;
     }
 }

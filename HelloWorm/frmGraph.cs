@@ -24,6 +24,7 @@ namespace ei8.Prototypes.HelloWorm
         public frmGraph(ISelectionService selectionService)
         {
             InitializeComponent();
+            this.gViewer1.CurrentLayoutMethod = LayoutMethod.MDS;
 
             this.selectionService = selectionService;
 
@@ -62,8 +63,8 @@ namespace ei8.Prototypes.HelloWorm
             {
                 var filterNeurons = this.graph.Spikable.Network.GetItems<Neuron>();
 
-                if (this.graph.FilterNeurons.Any())
-                    filterNeurons = this.graph.FilterNeurons;
+                if (this.graph.Settings.FilterNeurons.Any())
+                    filterNeurons = this.graph.Settings.FilterNeurons;
 
                 var graph = new Microsoft.Msagl.Drawing.Graph("graph");
 
@@ -87,8 +88,15 @@ namespace ei8.Prototypes.HelloWorm
                     var node = graph.FindNode(n.Id.ToString());
                     if (node != null)
                     {
-                        var tag = n.Tag;
-                        if (!string.IsNullOrWhiteSpace(tag) && !string.IsNullOrWhiteSpace(n.MirrorUrl) && this.graph.Settings.ShortenMirrorTags)
+                        var tag = !this.graph.Settings.HideTagsNeurons.Any(htn => htn.Id == n.Id) ?
+                            n.Tag :
+                            string.Empty;
+
+                        if (
+                            !string.IsNullOrWhiteSpace(tag) &&
+                            !string.IsNullOrWhiteSpace(n.MirrorUrl) &&
+                            this.graph.Settings.ShortenMirrorTags
+                        )
                         {
                             var lastIndex = tag.LastIndexOfAny(['.', '+']);
                             if (lastIndex > -1)
@@ -104,7 +112,6 @@ namespace ei8.Prototypes.HelloWorm
                             frmGraph.UpdateNodeStyle(node, frmGraph.InactiveColor, frmGraph.InactiveColor, frmGraph.InitialWidth);
                     }
                 }
-                this.gViewer1.CurrentLayoutMethod = LayoutMethod.MDS;
                 this.gViewer1.Graph = graph;
 
                 this.Text = this.graph.Spikable.GetName(nameof(Graph));
@@ -129,7 +136,7 @@ namespace ei8.Prototypes.HelloWorm
                 case nameof(IPerishable.Life):
                     bool process = true;
                     if (
-                        e.PropertyName == nameof(IPerishable.Life) && 
+                        e.PropertyName == nameof(IPerishable.Life) &&
                         sender is IPerishable perishable &&
                         perishable.Life > 0
                     )
@@ -322,6 +329,23 @@ namespace ei8.Prototypes.HelloWorm
         private void timer1_Tick(object sender, EventArgs e)
         {
             this.graph.ProcessTick();
+        }
+
+        private void mnuResetFilters_Click(object sender, EventArgs e)
+        {
+            if (this.graph.Spikable.Network != null)
+            {
+                this.graph.Settings.ResetFilters();
+                this.graph.Reload();
+            }
+        }
+
+        private void mnuReload_Click(object sender, EventArgs e)
+        {
+            if (this.graph.Spikable.Network != null)
+            {
+                this.graph.Reload();
+            }
         }
     }
 }
