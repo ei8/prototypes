@@ -1,6 +1,5 @@
 ﻿using ei8.Cortex.Coding;
 using ei8.Cortex.Coding.Spiker;
-using Microsoft.Msagl.Core.DataStructures;
 using NLog;
 using System.Drawing.Drawing2D;
 
@@ -75,6 +74,36 @@ namespace ei8.Prototypes.HelloWorm
         }
 
         // TODO: promote to ei8.Cortex.Coding.Spiker.ExtensionMethods
+        public static BinaryNeuronInfo CreateBinaryNeurons(
+            this Network network,
+            string tagPrefix,
+            string trueString = "1",
+            string falseString = "0"
+        ) =>
+            new(
+                network.CreateNeuron($"{tagPrefix} = {trueString}"),
+                network.CreateNeuron($"{tagPrefix} = {falseString}")
+            );
+
+        public static InputInfo CreateInputNeurons(
+            this Network network,
+            string input1TagPrefix,
+            string input2TagPrefix,
+            string trueString = "1",
+            string falseString = "0"
+        ) =>
+            new(
+                network.CreateBinaryNeurons(
+                    input1TagPrefix,
+                    trueString,
+                    falseString
+                ),
+                network.CreateBinaryNeurons(
+                    input2TagPrefix,
+                    trueString,
+                    falseString
+                )
+            );
 
         public static Neuron CreateNeuron(this Network network, string? tag = null)
         {
@@ -99,99 +128,128 @@ namespace ei8.Prototypes.HelloWorm
                 network.CreateTerminal(input, interneuron, NeurotransmitterEffect.Excite, 1f / inputNeurons.Length);
         }
 
-        // TODO: remove CreateRotationInterneuron from ei8.Cortex.Coding.Spiker.ExtensionMethods
-        public static void CreateTruthTableInterneurons(
-            this Network network, 
-            Neuron result1, 
-            Neuron result2, 
-            Neuron result3,
-            Neuron result4,
-            out Neuron result1Interneuron, 
-            out Neuron result2Interneuron, 
-            out Neuron result3Interneuron, 
-            out Neuron result4Interneuron,
-            string? result1InterneuronTag = null,
-            string? result2InterneuronTag = null,
-            string? result3InterneuronTag = null,
-            string? result4InterneuronTag = null
-        )
+        public enum LogicGateType
         {
-            result1Interneuron = network.CreateInterneuron(result1InterneuronTag, result1);
-            result2Interneuron = network.CreateInterneuron(result2InterneuronTag, result2);
-            result3Interneuron = network.CreateInterneuron(result3InterneuronTag, result3);
-            result4Interneuron = network.CreateInterneuron(result4InterneuronTag, result4);
+            And,
+            Or,
+            Nand,
+            Nor,
+            Xor,
+            Xnor,
+            Imply,
+            Nimply
         }
 
-        public static void LinkTruthTableInputNeuronsToInterneuronsTyped(
+        public static TruthTableInterneuronInfo CreateTruthTableInterneurons(
             this Network network,
-            Neuron typeNeuron,
-            Neuron result1Interneuron,
-            Neuron result2Interneuron,
-            Neuron result3Interneuron,
-            Neuron result4Interneuron,
-            Neuron input1True,
-            Neuron input1False,
-            Neuron input2True,
-            Neuron input2False
+            LogicGateType type,
+            BinaryNeuronInfo outputs,
+            TruthTableInterneuronTagInfo? truthTableInterneuronTags = null
         )
         {
-            network.LinkInputNeuronsToInterneuron(
-                result1Interneuron,
-                typeNeuron,
-                input1False,
-                input2False
-            );
-            network.LinkInputNeuronsToInterneuron(
-                result2Interneuron,
-                typeNeuron,
-                input1True,
-                input2False
-            );
-            network.LinkInputNeuronsToInterneuron(
-                result3Interneuron,
-                typeNeuron,
-                input1False,
-                input2True
-            );
-            network.LinkInputNeuronsToInterneuron(
-                result4Interneuron,
-                typeNeuron,
-                input1True,
-                input2True
-            );
+            OutputInterneuronTagInfo outputInterneuronTags = new OutputInterneuronTagInfo();
+
+            if (truthTableInterneuronTags != null)
+            {
+                outputInterneuronTags = new OutputInterneuronTagInfo(
+                    $"{truthTableInterneuronTags.Input1TagPrefix} = 0 {truthTableInterneuronTags.TypeTagPrefix}.{type.ToString().ToUpper()} {truthTableInterneuronTags.Input2TagPrefix} = 0",
+                    $"{truthTableInterneuronTags.Input1TagPrefix} = 1 {truthTableInterneuronTags.TypeTagPrefix}.{type.ToString().ToUpper()} {truthTableInterneuronTags.Input2TagPrefix} = 0",
+                    $"{truthTableInterneuronTags.Input1TagPrefix} = 0 {truthTableInterneuronTags.TypeTagPrefix}.{type.ToString().ToUpper()} {truthTableInterneuronTags.Input2TagPrefix} = 1",
+                    $"{truthTableInterneuronTags.Input1TagPrefix} = 1 {truthTableInterneuronTags.TypeTagPrefix}.{type.ToString().ToUpper()} {truthTableInterneuronTags.Input2TagPrefix} = 0"
+                );
+            }
+
+            switch (type)
+            {
+                default:
+                case LogicGateType.And:
+                    return network.CreateTruthTableInterneurons(
+                        outputs.Neuron0, outputs.Neuron0, outputs.Neuron0, outputs.Neuron1, outputInterneuronTags
+                    );
+                case LogicGateType.Or:
+                    return network.CreateTruthTableInterneurons(
+                        outputs.Neuron0, outputs.Neuron1, outputs.Neuron1, outputs.Neuron1, outputInterneuronTags
+                    );
+                case LogicGateType.Nand:
+                    return network.CreateTruthTableInterneurons(
+                        outputs.Neuron1, outputs.Neuron1, outputs.Neuron1, outputs.Neuron0, outputInterneuronTags
+                    );
+                case LogicGateType.Nor:
+                    return network.CreateTruthTableInterneurons(
+                        outputs.Neuron1, outputs.Neuron0, outputs.Neuron0, outputs.Neuron0, outputInterneuronTags
+                    );
+                case LogicGateType.Xor:
+                    return network.CreateTruthTableInterneurons(
+                        outputs.Neuron0, outputs.Neuron1, outputs.Neuron1, outputs.Neuron0, outputInterneuronTags
+                    );
+                case LogicGateType.Xnor:
+                    return network.CreateTruthTableInterneurons(
+                        outputs.Neuron1, outputs.Neuron0, outputs.Neuron0, outputs.Neuron1, outputInterneuronTags
+                    );
+                case LogicGateType.Imply:
+                    return network.CreateTruthTableInterneurons(
+                        outputs.Neuron1, outputs.Neuron0, outputs.Neuron1, outputs.Neuron1, outputInterneuronTags
+                    );
+                case LogicGateType.Nimply:
+                    return network.CreateTruthTableInterneurons(
+                        outputs.Neuron0, outputs.Neuron1, outputs.Neuron0, outputs.Neuron0, outputInterneuronTags
+                    );
+            }
         }
+
+        // TODO: remove CreateRotationInterneuron from ei8.Cortex.Coding.Spiker.ExtensionMethods
+        public static TruthTableInterneuronInfo CreateTruthTableInterneurons(
+            this Network network, 
+            Neuron output1, 
+            Neuron output2, 
+            Neuron output3,
+            Neuron output4,
+            OutputInterneuronTagInfo outputInterneuronTags
+        ) => new TruthTableInterneuronInfo(
+            network.CreateInterneuron(outputInterneuronTags.Output1, output1),
+            network.CreateInterneuron(outputInterneuronTags.Output2, output2),
+            network.CreateInterneuron(outputInterneuronTags.Output3, output3),
+            network.CreateInterneuron(outputInterneuronTags.Output4, output4)
+        );
 
         public static void LinkTruthTableInputNeuronsToInterneurons(
             this Network network,
-            Neuron result1Interneuron,
-            Neuron result2Interneuron,
-            Neuron result3Interneuron,
-            Neuron result4Interneuron,
-            Neuron input1True,
-            Neuron input1False,
-            Neuron input2True,
-            Neuron input2False
+            TruthTableInterneuronInfo truthTableInterneurons,
+            InputInfo inputs,
+            params Neuron[] additionalInputNeurons
         )
         {
             network.LinkInputNeuronsToInterneuron(
-                result1Interneuron,
-                input1False,
-                input2False
+                truthTableInterneurons.Interneuron1,
+                [
+                    inputs.Input1.Neuron0,
+                    inputs.Input2.Neuron0,
+                    .. additionalInputNeurons
+                ]
             );
             network.LinkInputNeuronsToInterneuron(
-                result2Interneuron,
-                input1True,
-                input2False
+                truthTableInterneurons.Interneuron2,
+                [
+                    inputs.Input1.Neuron1,
+                    inputs.Input2.Neuron0,
+                    .. additionalInputNeurons
+                ]
             );
             network.LinkInputNeuronsToInterneuron(
-                result3Interneuron,
-                input1False,
-                input2True
+                truthTableInterneurons.Interneuron3,
+                [
+                    inputs.Input1.Neuron0,
+                    inputs.Input2.Neuron1,
+                    .. additionalInputNeurons
+                ]
             );
             network.LinkInputNeuronsToInterneuron(
-                result4Interneuron,
-                input1True,
-                input2True
+                truthTableInterneurons.Interneuron4,
+                [
+                    inputs.Input1.Neuron1,
+                    inputs.Input2.Neuron1,
+                    .. additionalInputNeurons
+                ]
             );
         }
         #endregion

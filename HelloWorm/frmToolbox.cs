@@ -1,11 +1,10 @@
 ﻿using ei8.Cortex.Coding;
-using ei8.Cortex.Coding.Spiker;
 using ei8.Cortex.Library.Client;
 using ei8.Cortex.Library.Client.Out;
 using Microsoft.Extensions.DependencyInjection;
+using neurUL.Common.Domain.Model;
 using System.ComponentModel.Design;
 using WeifenLuo.WinFormsUI.Docking;
-using static SQLite.SQLite3;
 
 namespace ei8.Prototypes.HelloWorm
 {
@@ -109,8 +108,8 @@ namespace ei8.Prototypes.HelloWorm
 
                 var net = new Network();
 
-                // TODO: frmToolbox.CreateLogicGates(net);
-                frmToolbox.CreateAdder(net);
+                // frmToolbox.CreateLogicGates(net);
+                frmToolbox.CreateAdders(net);
 
                 sheet.Initialize(net, this.settingsService.Mirrors);
                 dish.Add(sheet);
@@ -119,102 +118,26 @@ namespace ei8.Prototypes.HelloWorm
 
         private static void CreateLogicGates(Network net)
         {
-            #region Output neurons
-            var resultTrue = net.CreateNeuron("Result = TRUE"); // rotateConfig);
-            var resultFalse = net.CreateNeuron("Result = FALSE");
-            #endregion
+            var outputs = net.CreateBinaryNeurons("Result", Boolean.TrueString.ToUpper(), Boolean.FalseString.ToUpper()); // rotateConfig);
 
-            #region Interneurons
-            net.CreateTruthTableInterneurons(
-                resultTrue, resultFalse, resultTrue, resultFalse,
-                out Neuron notInput1False,
-                out Neuron notInput1True,
-                out Neuron notInput2False,
-                out Neuron notInput2True
-            );
-
-            net.CreateTruthTableInterneurons(
-                resultFalse, resultFalse, resultFalse, resultTrue,
-                out Neuron andInput1FalseInput2False,
-                out Neuron andInput1TrueInput2False,
-                out Neuron andInput1FalseInput2True,
-                out Neuron andInput1TrueInput2True
-            );
-
-            net.CreateTruthTableInterneurons(
-                resultFalse, resultTrue, resultTrue, resultTrue,
-                out Neuron orInput1FalseInput2False,
-                out Neuron orInput1TrueInput2False,
-                out Neuron orInput1FalseInput2True,
-                out Neuron orInput1TrueInput2True
-            );
-
-            net.CreateTruthTableInterneurons(
-                resultTrue, resultTrue, resultTrue, resultFalse,
-                out Neuron nandInput1FalseInput2False,
-                out Neuron nandInput1TrueInput2False,
-                out Neuron nandInput1FalseInput2True,
-                out Neuron nandInput1TrueInput2True
-            );
-
-            net.CreateTruthTableInterneurons(
-                resultTrue, resultFalse, resultFalse, resultFalse,
-                out Neuron norInput1FalseInput2False,
-                out Neuron norInput1TrueInput2False,
-                out Neuron norInput1FalseInput2True,
-                out Neuron norInput1TrueInput2True
-            );
-
-            net.CreateTruthTableInterneurons(
-                resultFalse, resultTrue, resultTrue, resultFalse,
-                out Neuron xorInput1FalseInput2False,
-                out Neuron xorInput1TrueInput2False,
-                out Neuron xorInput1FalseInput2True,
-                out Neuron xorInput1TrueInput2True
-            );
-
-            net.CreateTruthTableInterneurons(
-                resultTrue, resultFalse, resultFalse, resultTrue,
-                out Neuron xnorInput1FalseInput2False,
-                out Neuron xnorInput1TrueInput2False,
-                out Neuron xnorInput1FalseInput2True,
-                out Neuron xnorInput1TrueInput2True
-            );
-
-            net.CreateTruthTableInterneurons(
-                resultTrue, resultFalse, resultTrue, resultTrue,
-                out Neuron implyInput1FalseInput2False,
-                out Neuron implyInput1TrueInput2False,
-                out Neuron implyInput1FalseInput2True,
-                out Neuron implyInput1TrueInput2True
-            );
-
-            net.CreateTruthTableInterneurons(
-                resultFalse, resultTrue, resultFalse, resultFalse,
-                out Neuron nimplyInput1FalseInput2False,
-                out Neuron nimplyInput1TrueInput2False,
-                out Neuron nimplyInput1FalseInput2True,
-                out Neuron nimplyInput1TrueInput2True
-            );
-            #endregion
+            var notInterneurons = net.CreateTruthTableInterneurons(outputs.Neuron1, outputs.Neuron0, outputs.Neuron1, outputs.Neuron0, new OutputInterneuronTagInfo());
+            var andInterneurons = net.CreateTruthTableInterneurons(ExtensionMethods.LogicGateType.And, outputs);
+            var orInterneurons = net.CreateTruthTableInterneurons(ExtensionMethods.LogicGateType.Or, outputs);
+            var nandInterneurons = net.CreateTruthTableInterneurons(ExtensionMethods.LogicGateType.Nand, outputs);
+            var norInterneurons = net.CreateTruthTableInterneurons(ExtensionMethods.LogicGateType.Nor, outputs);
+            var xorInterneurons = net.CreateTruthTableInterneurons(ExtensionMethods.LogicGateType.Xor, outputs);
+            var xnorInterneurons = net.CreateTruthTableInterneurons(ExtensionMethods.LogicGateType.Xnor, outputs);
+            var implyInterneurons = net.CreateTruthTableInterneurons(ExtensionMethods.LogicGateType.Imply, outputs);
+            var nimplyInterneurons = net.CreateTruthTableInterneurons(ExtensionMethods.LogicGateType.Nimply, outputs);
 
             #region Input Neurons
-            var input1True = net.CreateNeuron(
+            var inputs = net.CreateInputNeurons(
                 // input1TrueConfig,
-                "Input 1 = TRUE"
-            );
-
-            var input1False = net.CreateNeuron(
-                "Input 1 = FALSE"
-            );
-
-            var input2True = net.CreateNeuron(
+                "Input 1",
                 // input2TrueConfig,
-                "Input 2 = TRUE"
-            );
-
-            var input2False = net.CreateNeuron(
-                "Input 2 = FALSE"
+                "Input 2",
+                Boolean.TrueString.ToUpper(),
+                Boolean.FalseString.ToUpper()
             );
 
             var not = net.CreateNeuron(
@@ -256,333 +179,227 @@ namespace ei8.Prototypes.HelloWorm
 
             #region Link Input Neurons to Interneurons
             // "Nothing is True, Everything is permitted"
-            #region AND
+            #region Not
             net.LinkInputNeuronsToInterneuron(
-                notInput1False,
+                notInterneurons.Interneuron1,
                 not,
-                input1False
+                inputs.Input1.Neuron0
             );
             net.LinkInputNeuronsToInterneuron(
-                notInput1True,
+                notInterneurons.Interneuron2,
                 not,
-                input1True
+                inputs.Input1.Neuron1
             );
             net.LinkInputNeuronsToInterneuron(
-                notInput2False,
+                notInterneurons.Interneuron3,
                 not,
-                input2False
+                inputs.Input2.Neuron0
             );
             net.LinkInputNeuronsToInterneuron(
-                notInput2True,
+                notInterneurons.Interneuron4,
                 not,
-                input2True
+                inputs.Input2.Neuron1
             );
             #endregion
 
-            net.LinkTruthTableInputNeuronsToInterneuronsTyped(
-                and,
-                andInput1FalseInput2False,
-                andInput1TrueInput2False,
-                andInput1FalseInput2True,
-                andInput1TrueInput2True,
-                input1True,
-                input1False,
-                input2True,
-                input2False
+            net.LinkTruthTableInputNeuronsToInterneurons(
+                andInterneurons,
+                inputs,
+                and
             );
 
-            net.LinkTruthTableInputNeuronsToInterneuronsTyped(
-                or,
-                orInput1FalseInput2False,
-                orInput1TrueInput2False,
-                orInput1FalseInput2True,
-                orInput1TrueInput2True,
-                input1True,
-                input1False,
-                input2True,
-                input2False
+            net.LinkTruthTableInputNeuronsToInterneurons(
+                orInterneurons,
+                inputs,
+                or
             );
 
-            net.LinkTruthTableInputNeuronsToInterneuronsTyped(
-                nand,
-                nandInput1FalseInput2False,
-                nandInput1TrueInput2False,
-                nandInput1FalseInput2True,
-                nandInput1TrueInput2True,
-                input1True,
-                input1False,
-                input2True,
-                input2False
+            net.LinkTruthTableInputNeuronsToInterneurons(
+                nandInterneurons,
+                inputs,
+                nand
             );
 
-            net.LinkTruthTableInputNeuronsToInterneuronsTyped(
-                nor,
-                norInput1FalseInput2False,
-                norInput1TrueInput2False,
-                norInput1FalseInput2True,
-                norInput1TrueInput2True,
-                input1True,
-                input1False,
-                input2True,
-                input2False
+            net.LinkTruthTableInputNeuronsToInterneurons(
+                norInterneurons,
+                inputs,
+                nor
             );
 
-            net.LinkTruthTableInputNeuronsToInterneuronsTyped(
-                xor,
-                xorInput1FalseInput2False,
-                xorInput1TrueInput2False,
-                xorInput1FalseInput2True,
-                xorInput1TrueInput2True,
-                input1True,
-                input1False,
-                input2True,
-                input2False
+            net.LinkTruthTableInputNeuronsToInterneurons(
+                xorInterneurons,
+                inputs,
+                xor
             );
 
-            net.LinkTruthTableInputNeuronsToInterneuronsTyped(
-                xnor,
-                xnorInput1FalseInput2False,
-                xnorInput1TrueInput2False,
-                xnorInput1FalseInput2True,
-                xnorInput1TrueInput2True,
-                input1True,
-                input1False,
-                input2True,
-                input2False
+            net.LinkTruthTableInputNeuronsToInterneurons(
+                xnorInterneurons,
+                inputs,
+                xnor
             );
 
-            net.LinkTruthTableInputNeuronsToInterneuronsTyped(
-                imply,
-                implyInput1FalseInput2False,
-                implyInput1TrueInput2False,
-                implyInput1FalseInput2True,
-                implyInput1TrueInput2True,
-                input1True,
-                input1False,
-                input2True,
-                input2False
+            net.LinkTruthTableInputNeuronsToInterneurons(
+                implyInterneurons,
+                inputs,
+                imply
             );
 
-            net.LinkTruthTableInputNeuronsToInterneuronsTyped(
-                nimply,
-                nimplyInput1FalseInput2False,
-                nimplyInput1TrueInput2False,
-                nimplyInput1FalseInput2True,
-                nimplyInput1TrueInput2True,
-                input1True,
-                input1False,
-                input2True,
-                input2False
+            net.LinkTruthTableInputNeuronsToInterneurons(
+                nimplyInterneurons,
+                inputs,
+                nimply
             );
             #endregion
         }
 
-        private static void CreateAdder(Network net)
+        private static void CreateAdders(Network net)
         {
-            // TODO: Unify CreateAdders
-            frmToolbox.CreateAdderTwoPowerOfZero(net, out Neuron carryOver_1, out Neuron carryOver_0);
-            frmToolbox.CreateAdder(net, 1, carryOver_1, carryOver_0, out Neuron carryOver2_1, out Neuron carryOver2_0);
-            frmToolbox.CreateAdder(net, 2, carryOver2_1, carryOver2_0, out Neuron carryOver3_1, out Neuron carryOver3_0);
-            frmToolbox.CreateAdder(net, 3, carryOver3_1, carryOver3_0, out Neuron carryOver4_1, out Neuron carryOver4_0);
-        }
-
-        private static void CreateAdderTwoPowerOfZero(Network net, out Neuron carryOver_1, out Neuron carryOver_0)
-        {
-            // 2^0
-            #region Output neurons
-            var adder1_Result_1 = net.CreateNeuron("Adder1.Result = 1");
-            var adder1_Result_0 = net.CreateNeuron("Adder1.Result = 0");
-
-            carryOver_1 = net.CreateNeuron("Adder1.CarryOver = 1");
-            carryOver_0 = net.CreateNeuron("Adder1.CarryOver = 0");
-            #endregion
-
-            #region Interneurons
-            Neuron adder1_Half1_Xor__Adder1_Addend1_0__Adder1_Addend2_0 = net.CreateInterneuron("Adder1.Addend1 = 0 Adder1.Half1.XOR Adder1.Addend2 = 0", adder1_Result_0);
-            Neuron adder1_Half1_Xor__Adder1_Addend1_1__Adder1_Addend2_0 = net.CreateInterneuron("Adder1.Addend1 = 1 Adder1.Half1.XOR Adder1.Addend2 = 0", adder1_Result_1);
-            Neuron adder1_Half1_Xor__Adder1_Addend1_0__Adder1_Addend2_1 = net.CreateInterneuron("Adder1.Addend1 = 0 Adder1.Half1.XOR Adder1.Addend2 = 1", adder1_Result_1);
-            Neuron adder1_Half1_Xor__Adder1_Addend1_1__Adder1_Addend2_1 = net.CreateInterneuron("Adder1.Addend1 = 1 Adder1.Half1.XOR Adder1.Addend2 = 1", adder1_Result_0);
-
-            Neuron adder1_Half1_And__Adder1_Addend1_0__Adder1_Addend2_0 = net.CreateInterneuron("Adder1.Addend1 = 0 Adder1.Half1.AND Adder1.Addend2 = 0", carryOver_0);
-            Neuron adder1_Half1_And__Adder1_Addend1_1__Adder1_Addend2_0 = net.CreateInterneuron("Adder1.Addend1 = 1 Adder1.Half1.AND Adder1.Addend2 = 0", carryOver_0);
-            Neuron adder1_Half1_And__Adder1_Addend1_0__Adder1_Addend2_1 = net.CreateInterneuron("Adder1.Addend1 = 0 Adder1.Half1.AND Adder1.Addend2 = 1", carryOver_0);
-            Neuron adder1_Half1_And__Adder1_Addend1_1__Adder1_Addend2_1 = net.CreateInterneuron("Adder1.Addend1 = 1 Adder1.Half1.AND Adder1.Addend2 = 1", carryOver_1);
-            #endregion
-
-            #region Input Neurons
-            var adder1_Addend1_1 = net.CreateNeuron(
-                "Adder1.Addend1 = 1"
-            );
-
-            var adder1_Addend1_0 = net.CreateNeuron(
-                "Adder1.Addend1 = 0"
-            );
-
-            var adder1_Addend2_1 = net.CreateNeuron(
-                "Adder1.Addend2 = 1"
-            );
-
-            var adder1_Addend2_0 = net.CreateNeuron(
-                "Adder1.Addend2 = 0"
-            );
-            #endregion
-
-            // Link Input Neurons to Interneurons
-            net.LinkTruthTableInputNeuronsToInterneurons(
-                adder1_Half1_Xor__Adder1_Addend1_0__Adder1_Addend2_0,
-                adder1_Half1_Xor__Adder1_Addend1_1__Adder1_Addend2_0,
-                adder1_Half1_Xor__Adder1_Addend1_0__Adder1_Addend2_1,
-                adder1_Half1_Xor__Adder1_Addend1_1__Adder1_Addend2_1,
-                adder1_Addend1_1,
-                adder1_Addend1_0,
-                adder1_Addend2_1,
-                adder1_Addend2_0
-            );
-
-            net.LinkTruthTableInputNeuronsToInterneurons(
-                adder1_Half1_And__Adder1_Addend1_0__Adder1_Addend2_0,
-                adder1_Half1_And__Adder1_Addend1_1__Adder1_Addend2_0,
-                adder1_Half1_And__Adder1_Addend1_0__Adder1_Addend2_1,
-                adder1_Half1_And__Adder1_Addend1_1__Adder1_Addend2_1,
-                adder1_Addend1_1,
-                adder1_Addend1_0,
-                adder1_Addend2_1,
-                adder1_Addend2_0
-            );
+            frmToolbox.CreateAdder(net, out BinaryNeuronInfo carryOver1);
+            frmToolbox.CreateAdder(net, out BinaryNeuronInfo carryOver2, 1, carryOver1);
+            frmToolbox.CreateAdder(net, out BinaryNeuronInfo carryOver3, 2, carryOver2);
+            frmToolbox.CreateAdder(net, out BinaryNeuronInfo carryOver4, 3, carryOver3);
         }
 
         private static void CreateAdder(
             Network net, 
-            int base2Exponent, 
-            Neuron precedingCarryOver_1, 
-            Neuron precedingCarryOver_0, 
-            out Neuron carryOver_1, 
-            out Neuron carryOver_0
+            out BinaryNeuronInfo carryOver,
+            int base2Exponent = 0,
+            BinaryNeuronInfo? precedingCarryOver = null
         )
         {
-            string precedingAdderName = $"Adder{base2Exponent}";
             string adderName = $"Adder{base2Exponent + 1}";
+            bool isFirstAdder = precedingCarryOver == null;
 
             #region Output neurons
-            var adder2_Result_1 = net.CreateNeuron($"{adderName}.Result = 1");
-            var adder2_Result_0 = net.CreateNeuron($"{adderName}.Result = 0");
+            var result = net.CreateBinaryNeurons($"{adderName}.Result");
 
-            var adder2_Half1_Xor_Result_1 = net.CreateNeuron($"{adderName}.Half1.XOR.Result = 1");
-            var adder2_Half1_Xor_Result_0 = net.CreateNeuron($"{adderName}.Half1.XOR.Result = 0");
-            var adder2_Half1_CarryOver_1 = net.CreateNeuron($"{adderName}.Half1.CarryOver = 1");
-            var adder2_Half1_CarryOver_0 = net.CreateNeuron($"{adderName}.Half1.CarryOver = 0");
-            var adder2_Half2_CarryOver_1 = net.CreateNeuron($"{adderName}.Half2.CarryOver = 1");
-            var adder2_Half2_CarryOver_0 = net.CreateNeuron($"{adderName}.Half2.CarryOver = 0");
+            BinaryNeuronInfo? 
+                half1_Xor_Result = null, 
+                half1_CarryOver = null, 
+                half2_CarryOver = null;
 
-            carryOver_1 = net.CreateNeuron($"{adderName}.CarryOver = 1");
-            carryOver_0 = net.CreateNeuron($"{adderName}.CarryOver = 0");
+            if (!isFirstAdder)
+            {
+                half1_Xor_Result = net.CreateBinaryNeurons($"{adderName}.Half1.XOR.Result");
+                half1_CarryOver = net.CreateBinaryNeurons($"{adderName}.Half1.CarryOver");
+                half2_CarryOver = net.CreateBinaryNeurons($"{adderName}.Half2.CarryOver");
+            }
+
+            carryOver = net.CreateBinaryNeurons($"{adderName}.CarryOver");
             #endregion
 
             #region Interneurons
-            // half2
-            Neuron adder2_Half2_Xor__PrecedingCarryOver_0__Adder2_Half1_Xor_Result_0 = net.CreateInterneuron($"{precedingAdderName}.CarryOver = 0 Adder2.Half2.XOR Adder2.Half1.XOR.Result = 0", adder2_Result_0);
-            Neuron adder2_Half2_Xor__PrecedingCarryOver_1__Adder2_Half1_Xor_Result_0 = net.CreateInterneuron($"{precedingAdderName}.CarryOver = 1 Adder2.Half2.XOR Adder2.Half1.XOR.Result = 0", adder2_Result_1);
-            Neuron adder2_Half2_Xor__PrecedingCarryOver_0__Adder2_Half1_Xor_Result_1 = net.CreateInterneuron($"{precedingAdderName}.CarryOver = 0 Adder2.Half2.XOR Adder2.Half1.XOR.Result = 1", adder2_Result_1);
-            Neuron adder2_Half2_Xor__PrecedingCarryOver_1__Adder2_Half1_Xor_Result_1 = net.CreateInterneuron($"{precedingAdderName}.CarryOver = 1 Adder2.Half2.XOR Adder2.Half1.XOR.Result = 1", adder2_Result_0);
-
-            Neuron adder2_Half2_And__PrecedingCarryOver_0__Adder2_Half1_Xor_Result_0 = net.CreateInterneuron($"{precedingAdderName}.CarryOver = 0 Adder2.Half2.AND Adder2.Half1.XOR.Result = 0", adder2_Half2_CarryOver_0);
-            Neuron adder2_Half2_And__PrecedingCarryOver_1__Adder2_Half1_Xor_Result_0 = net.CreateInterneuron($"{precedingAdderName}.CarryOver = 1 Adder2.Half2.AND Adder2.Half1.XOR.Result = 0", adder2_Half2_CarryOver_0);
-            Neuron adder2_Half2_And__PrecedingCarryOver_0__Adder2_Half1_Xor_Result_1 = net.CreateInterneuron($"{precedingAdderName}.CarryOver = 0 Adder2.Half2.AND Adder2.Half1.XOR.Result = 1", adder2_Half2_CarryOver_0);
-            Neuron adder2_Half2_And__PrecedingCarryOver_1__Adder2_Half1_Xor_Result_1 = net.CreateInterneuron($"{precedingAdderName}.CarryOver = 1 Adder2.Half2.AND Adder2.Half1.XOR.Result = 1", adder2_Half2_CarryOver_1);
-
             // half1
-            Neuron adder2_Half1_Xor__Adder2_Addend1_0__Adder2_Addend2_0 = net.CreateInterneuron($"{adderName}.Addend1 = 0 Adder2.Half1.XOR Adder2.Addend2 = 0", adder2_Half1_Xor_Result_0);
-            Neuron adder2_Half1_Xor__Adder2_Addend1_1__Adder2_Addend2_0 = net.CreateInterneuron($"{adderName}.Addend1 = 1 Adder2.Half1.XOR Adder2.Addend2 = 0", adder2_Half1_Xor_Result_1);
-            Neuron adder2_Half1_Xor__Adder2_Addend1_0__Adder2_Addend2_1 = net.CreateInterneuron($"{adderName}.Addend1 = 0 Adder2.Half1.XOR Adder2.Addend2 = 1", adder2_Half1_Xor_Result_1);
-            Neuron adder2_Half1_Xor__Adder2_Addend1_1__Adder2_Addend2_1 = net.CreateInterneuron($"{adderName}.Addend1 = 1 Adder2.Half1.XOR Adder2.Addend2 = 1", adder2_Half1_Xor_Result_0);
+            var half1_Xor__Addend1__Addend2 = net.CreateTruthTableInterneurons(
+                ExtensionMethods.LogicGateType.Xor,
+                half1_Xor_Result ?? result,
+                new TruthTableInterneuronTagInfo(
+                    $"{adderName}.Addend1",
+                    $"{adderName}.Addend2",
+                    $"{adderName}.Half1"
+                )
+            );
+            
+            var half1_And__Addend1__Addend2 = net.CreateTruthTableInterneurons(
+                ExtensionMethods.LogicGateType.And,
+                half1_CarryOver ?? carryOver,
+                new TruthTableInterneuronTagInfo(
+                    $"{adderName}.Addend1",
+                    $"{adderName}.Addend2",
+                    $"{adderName}.Half1"
+                )
+            );
 
-            Neuron adder2_Half1_And__Adder2_Addend1_0__Adder2_Addend2_0 = net.CreateInterneuron($"{adderName}.Addend1 = 0 Adder2.Half1.AND Adder2.Addend2 = 0", adder2_Half1_CarryOver_0);
-            Neuron adder2_Half1_And__Adder2_Addend1_1__Adder2_Addend2_0 = net.CreateInterneuron($"{adderName}.Addend1 = 1 Adder2.Half1.AND Adder2.Addend2 = 0", adder2_Half1_CarryOver_0);
-            Neuron adder2_Half1_And__Adder2_Addend1_0__Adder2_Addend2_1 = net.CreateInterneuron($"{adderName}.Addend1 = 0 Adder2.Half1.AND Adder2.Addend2 = 1", adder2_Half1_CarryOver_0);
-            Neuron adder2_Half1_And__Adder2_Addend1_1__Adder2_Addend2_1 = net.CreateInterneuron($"{adderName}.Addend1 = 1 Adder2.Half1.AND Adder2.Addend2 = 1", adder2_Half1_CarryOver_1);
+            TruthTableInterneuronInfo?
+                half2_Xor__PrecedingCarryOver__half1_Xor_Result = null,
+                half2_And__PrecedingCarryOver__half1_Xor_Result = null,
+                or__Half1_CarryOver__Half2_CarryOver = null;
 
-            // OR carryOvers
-            Neuron adder2_Or__Adder2_Half1_CarryOver_0__Adder2_Half2_CarryOver_0 = net.CreateInterneuron($"{adderName}.Half1.CarryOver = 0 Adder2.OR Adder2.Half2.CarryOver = 0", carryOver_0);
-            Neuron adder2_Or__Adder2_Half1_CarryOver_1__Adder2_Half2_CarryOver_0 = net.CreateInterneuron($"{adderName}.Half1.CarryOver = 1 Adder2.OR Adder2.Half2.CarryOver = 0", carryOver_1);
-            Neuron adder2_Or__Adder2_Half1_CarryOver_0__Adder2_Half2_CarryOver_1 = net.CreateInterneuron($"{adderName}.Half1.CarryOver = 0 Adder2.OR Adder2.Half2.CarryOver = 1", carryOver_1);
-            Neuron adder2_Or__Adder2_Half1_CarryOver_1__Adder2_Half2_CarryOver_1 = net.CreateInterneuron($"{adderName}.Half1.CarryOver = 1 Adder2.OR Adder2.Half2.CarryOver = 1", carryOver_1);
+            if (
+                !isFirstAdder && 
+                half2_CarryOver != null
+            )
+            {
+                string precedingAdderName = $"Adder{base2Exponent}";
+
+                // half2
+                half2_Xor__PrecedingCarryOver__half1_Xor_Result = net.CreateTruthTableInterneurons(
+                    ExtensionMethods.LogicGateType.Xor,
+                    result,
+                    new TruthTableInterneuronTagInfo(
+                        $"{precedingAdderName}.CarryOver",
+                        $"{adderName}.Half1.XOR.Result",
+                        $"{adderName}.Half2"
+                    )
+                );
+
+                half2_And__PrecedingCarryOver__half1_Xor_Result = net.CreateTruthTableInterneurons(
+                    ExtensionMethods.LogicGateType.And,
+                    half2_CarryOver,
+                    new TruthTableInterneuronTagInfo(
+                        $"{precedingAdderName}.CarryOver",
+                        $"{adderName}.Half1.XOR.Result",
+                        $"{adderName}.Half2"
+                    )
+                );
+                // OR carryOvers
+                or__Half1_CarryOver__Half2_CarryOver = net.CreateTruthTableInterneurons(
+                    ExtensionMethods.LogicGateType.Or,
+                    carryOver,
+                    new TruthTableInterneuronTagInfo(
+                        $"{adderName}.Half1.CarryOver",
+                        $"{adderName}.Half2.CarryOver",
+                        adderName
+                    )
+                );
+            }
             #endregion
 
             #region Input Neurons
-            var adder2_Addend1_1 = net.CreateNeuron(
-                $"{adderName}.Addend1 = 1"
-            );
-
-            var adder2_Addend1_0 = net.CreateNeuron(
-                $"{adderName}.Addend1 = 0"
-            );
-
-            var adder2_Addend2_1 = net.CreateNeuron(
-                $"{adderName}.Addend2 = 1"
-            );
-
-            var adder2_Addend2_0 = net.CreateNeuron(
-                $"{adderName}.Addend2 = 0"
-            );
+            var addends = net.CreateInputNeurons($"{adderName}.Addend1", $"{adderName}.Addend2");
             #endregion
 
-            // Link Input Neurons to Half1 Interneurons
-            net.LinkTruthTableInputNeuronsToInterneurons(
-                adder2_Half1_Xor__Adder2_Addend1_0__Adder2_Addend2_0,
-                adder2_Half1_Xor__Adder2_Addend1_1__Adder2_Addend2_0,
-                adder2_Half1_Xor__Adder2_Addend1_0__Adder2_Addend2_1,
-                adder2_Half1_Xor__Adder2_Addend1_1__Adder2_Addend2_1,
-                adder2_Addend1_1,
-                adder2_Addend1_0,
-                adder2_Addend2_1,
-                adder2_Addend2_0
-            );
+            // Link Input Neurons to Half1 Interneuron
+            net.LinkTruthTableInputNeuronsToInterneurons(half1_Xor__Addend1__Addend2, addends);
+            net.LinkTruthTableInputNeuronsToInterneurons(half1_And__Addend1__Addend2, addends);
 
-            net.LinkTruthTableInputNeuronsToInterneurons(
-                adder2_Half1_And__Adder2_Addend1_0__Adder2_Addend2_0,
-                adder2_Half1_And__Adder2_Addend1_1__Adder2_Addend2_0,
-                adder2_Half1_And__Adder2_Addend1_0__Adder2_Addend2_1,
-                adder2_Half1_And__Adder2_Addend1_1__Adder2_Addend2_1,
-                adder2_Addend1_1,
-                adder2_Addend1_0,
-                adder2_Addend2_1,
-                adder2_Addend2_0
-            );
+            if (
+                !isFirstAdder && 
+                half2_Xor__PrecedingCarryOver__half1_Xor_Result != null && 
+                precedingCarryOver != null &&
+                half1_Xor_Result != null &&
+                half2_And__PrecedingCarryOver__half1_Xor_Result != null &&
+                or__Half1_CarryOver__Half2_CarryOver != null &&
+                half1_CarryOver != null &&
+                half2_CarryOver != null
+            )
+            {
+                // Link Half1 interneurons and precedingCarryOver to Half2 interneurons
+                net.LinkTruthTableInputNeuronsToInterneurons(
+                    half2_Xor__PrecedingCarryOver__half1_Xor_Result,
+                    new InputInfo(
+                        precedingCarryOver,
+                        half1_Xor_Result
+                    )
+                );
 
-            // Link Half1 interneurons and precedingCarryOver to Half2 interneurons
-            net.LinkTruthTableInputNeuronsToInterneurons(
-                adder2_Half2_Xor__PrecedingCarryOver_0__Adder2_Half1_Xor_Result_0,
-                adder2_Half2_Xor__PrecedingCarryOver_1__Adder2_Half1_Xor_Result_0,
-                adder2_Half2_Xor__PrecedingCarryOver_0__Adder2_Half1_Xor_Result_1,
-                adder2_Half2_Xor__PrecedingCarryOver_1__Adder2_Half1_Xor_Result_1,
-                precedingCarryOver_1,
-                precedingCarryOver_0,
-                adder2_Half1_Xor_Result_1,
-                adder2_Half1_Xor_Result_0
-            );
+                net.LinkTruthTableInputNeuronsToInterneurons(
+                    half2_And__PrecedingCarryOver__half1_Xor_Result,
+                    new InputInfo(
+                        precedingCarryOver,
+                        half1_Xor_Result
+                    )
+                );
 
-            net.LinkTruthTableInputNeuronsToInterneurons(
-                adder2_Half2_And__PrecedingCarryOver_0__Adder2_Half1_Xor_Result_0,
-                adder2_Half2_And__PrecedingCarryOver_1__Adder2_Half1_Xor_Result_0,
-                adder2_Half2_And__PrecedingCarryOver_0__Adder2_Half1_Xor_Result_1,
-                adder2_Half2_And__PrecedingCarryOver_1__Adder2_Half1_Xor_Result_1,
-                precedingCarryOver_1,
-                precedingCarryOver_0,
-                adder2_Half1_Xor_Result_1,
-                adder2_Half1_Xor_Result_0
-            );
-
-            // OR carryOvers
-            net.LinkTruthTableInputNeuronsToInterneurons(
-                adder2_Or__Adder2_Half1_CarryOver_0__Adder2_Half2_CarryOver_0,
-                adder2_Or__Adder2_Half1_CarryOver_1__Adder2_Half2_CarryOver_0,
-                adder2_Or__Adder2_Half1_CarryOver_0__Adder2_Half2_CarryOver_1,
-                adder2_Or__Adder2_Half1_CarryOver_1__Adder2_Half2_CarryOver_1,
-                adder2_Half1_CarryOver_1,
-                adder2_Half1_CarryOver_0,
-                adder2_Half2_CarryOver_1,
-                adder2_Half2_CarryOver_0
-            );
+                // OR carryOvers
+                net.LinkTruthTableInputNeuronsToInterneurons(
+                    or__Half1_CarryOver__Half2_CarryOver,
+                    new InputInfo(
+                        half1_CarryOver,
+                        half2_CarryOver
+                    )
+                );
+            }
         }
     }
 }
