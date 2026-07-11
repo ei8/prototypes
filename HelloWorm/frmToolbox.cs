@@ -131,7 +131,7 @@ namespace ei8.Prototypes.HelloWorm
             var nimplyInterneurons = net.CreateTruthTableInterneurons(ExtensionMethods.LogicGateType.Nimply, outputs);
 
             #region Input Neurons
-            var inputs = net.CreateInputNeurons(
+            var inputs = net.CreateTruthTableInputNeurons(
                 // input1TrueConfig,
                 "Input 1",
                 // input2TrueConfig,
@@ -356,7 +356,7 @@ namespace ei8.Prototypes.HelloWorm
             #endregion
 
             #region Input Neurons
-            var addends = net.CreateInputNeurons($"{adderName}.Addend1", $"{adderName}.Addend2");
+            var addends = net.CreateTruthTableInputNeurons($"{adderName}.Addend1", $"{adderName}.Addend2");
             #endregion
 
             // Link Input Neurons to Half1 Interneuron

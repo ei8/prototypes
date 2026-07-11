@@ -85,7 +85,7 @@ namespace ei8.Prototypes.HelloWorm
                 network.CreateNeuron($"{tagPrefix} = {falseString}")
             );
 
-        public static InputInfo CreateInputNeurons(
+        public static InputInfo CreateTruthTableInputNeurons(
             this Network network,
             string input1TagPrefix,
             string input2TagPrefix,
