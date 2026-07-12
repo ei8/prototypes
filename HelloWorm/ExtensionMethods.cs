@@ -140,6 +140,18 @@ namespace ei8.Prototypes.HelloWorm
             Nimply
         }
 
+        public static InverterInterneuronInfo CreateInverterInterneurons(
+            this Network network,
+            BinaryNeuronInfo outputs,
+            string? inputTagPrefix = null
+        )
+        {
+            return new InverterInterneuronInfo(
+               network.CreateInterneuron(inputTagPrefix == null ? inputTagPrefix : $"NOT {inputTagPrefix} = 0", outputs.Neuron1),
+               network.CreateInterneuron(inputTagPrefix == null ? inputTagPrefix : $"NOT {inputTagPrefix} = 1", outputs.Neuron0)
+            );
+        }
+
         public static TruthTableInterneuronInfo CreateTruthTableInterneurons(
             this Network network,
             LogicGateType type,
@@ -147,16 +159,16 @@ namespace ei8.Prototypes.HelloWorm
             TruthTableInterneuronTagInfo? truthTableInterneuronTags = null
         )
         {
-            OutputInterneuronTagInfo outputInterneuronTags = new OutputInterneuronTagInfo();
+            string?[] outputInterneuronTags = { null, null, null, null };
 
             if (truthTableInterneuronTags != null)
             {
-                outputInterneuronTags = new OutputInterneuronTagInfo(
+                outputInterneuronTags = [
                     $"{truthTableInterneuronTags.Input1TagPrefix} = 0 {truthTableInterneuronTags.TypeTagPrefix}.{type.ToString().ToUpper()} {truthTableInterneuronTags.Input2TagPrefix} = 0",
                     $"{truthTableInterneuronTags.Input1TagPrefix} = 0 {truthTableInterneuronTags.TypeTagPrefix}.{type.ToString().ToUpper()} {truthTableInterneuronTags.Input2TagPrefix} = 1",
                     $"{truthTableInterneuronTags.Input1TagPrefix} = 1 {truthTableInterneuronTags.TypeTagPrefix}.{type.ToString().ToUpper()} {truthTableInterneuronTags.Input2TagPrefix} = 0",
                     $"{truthTableInterneuronTags.Input1TagPrefix} = 1 {truthTableInterneuronTags.TypeTagPrefix}.{type.ToString().ToUpper()} {truthTableInterneuronTags.Input2TagPrefix} = 0"
-                );
+                ];
             }
 
             switch (type)
@@ -198,18 +210,18 @@ namespace ei8.Prototypes.HelloWorm
         }
 
         // TODO: remove CreateRotationInterneuron from ei8.Cortex.Coding.Spiker.ExtensionMethods
-        public static TruthTableInterneuronInfo CreateTruthTableInterneurons(
+        private static TruthTableInterneuronInfo CreateTruthTableInterneurons(
             this Network network, 
             Neuron output1, 
             Neuron output2, 
             Neuron output3,
             Neuron output4,
-            OutputInterneuronTagInfo outputInterneuronTags
+            string?[] outputInterneuronTags
         ) => new TruthTableInterneuronInfo(
-            network.CreateInterneuron(outputInterneuronTags.Output1, output1),
-            network.CreateInterneuron(outputInterneuronTags.Output2, output2),
-            network.CreateInterneuron(outputInterneuronTags.Output3, output3),
-            network.CreateInterneuron(outputInterneuronTags.Output4, output4)
+            network.CreateInterneuron(outputInterneuronTags[0], output1),
+            network.CreateInterneuron(outputInterneuronTags[1], output2),
+            network.CreateInterneuron(outputInterneuronTags[2], output3),
+            network.CreateInterneuron(outputInterneuronTags[3], output4)
         );
 
         public static void LinkTruthTableInputNeuronsToInterneurons(
@@ -248,6 +260,29 @@ namespace ei8.Prototypes.HelloWorm
                 [
                     inputs.Input1.Neuron1,
                     inputs.Input2.Neuron1,
+                    .. additionalInputNeurons
+                ]
+            );
+        }
+
+        public static void LinkInverterInputNeuronsToInterneurons(
+            this Network network,
+            InverterInterneuronInfo inverterInterneurons,
+            BinaryNeuronInfo input,
+            params Neuron[] additionalInputNeurons
+        )
+        {
+            network.LinkInputNeuronsToInterneuron(
+                inverterInterneurons.Interneuron1,
+                [
+                    input.Neuron0,
+                    .. additionalInputNeurons
+                ]
+            );
+            network.LinkInputNeuronsToInterneuron(
+                inverterInterneurons.Interneuron2,
+                [
+                    input.Neuron1,
                     .. additionalInputNeurons
                 ]
             );

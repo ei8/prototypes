@@ -108,8 +108,9 @@ namespace ei8.Prototypes.HelloWorm
 
                 var net = new Network();
 
-                // frmToolbox.CreateLogicGates(net);
-                frmToolbox.CreateAdders(net);
+                frmToolbox.CreateLogicGates(net);
+                // frmToolbox.CreateAdders(net);
+                // frmToolbox.CreateSubtractors(net);
 
                 sheet.Initialize(net, this.settingsService.Mirrors);
                 dish.Add(sheet);
@@ -120,7 +121,8 @@ namespace ei8.Prototypes.HelloWorm
         {
             var outputs = net.CreateBinaryNeurons("Result", Boolean.TrueString.ToUpper(), Boolean.FalseString.ToUpper()); // rotateConfig);
 
-            var notInterneurons = net.CreateTruthTableInterneurons(outputs.Neuron1, outputs.Neuron0, outputs.Neuron1, outputs.Neuron0, new OutputInterneuronTagInfo());
+            var not1Interneurons = net.CreateInverterInterneurons(outputs);
+            var not2Interneurons = net.CreateInverterInterneurons(outputs);
             var andInterneurons = net.CreateTruthTableInterneurons(ExtensionMethods.LogicGateType.And, outputs);
             var orInterneurons = net.CreateTruthTableInterneurons(ExtensionMethods.LogicGateType.Or, outputs);
             var nandInterneurons = net.CreateTruthTableInterneurons(ExtensionMethods.LogicGateType.Nand, outputs);
@@ -180,25 +182,15 @@ namespace ei8.Prototypes.HelloWorm
             #region Link Input Neurons to Interneurons
             // "Nothing is True, Everything is permitted"
             #region Not
-            net.LinkInputNeuronsToInterneuron(
-                notInterneurons.Interneuron1,
-                not,
-                inputs.Input1.Neuron0
+            net.LinkInverterInputNeuronsToInterneurons(
+                not1Interneurons,
+                inputs.Input1,
+                not
             );
-            net.LinkInputNeuronsToInterneuron(
-                notInterneurons.Interneuron2,
-                not,
-                inputs.Input1.Neuron1
-            );
-            net.LinkInputNeuronsToInterneuron(
-                notInterneurons.Interneuron3,
-                not,
-                inputs.Input2.Neuron0
-            );
-            net.LinkInputNeuronsToInterneuron(
-                notInterneurons.Interneuron4,
-                not,
-                inputs.Input2.Neuron1
+            net.LinkInverterInputNeuronsToInterneurons(
+                not2Interneurons,
+                inputs.Input2,
+                not
             );
             #endregion
 
