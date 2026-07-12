@@ -153,8 +153,8 @@ namespace ei8.Prototypes.HelloWorm
             {
                 outputInterneuronTags = new OutputInterneuronTagInfo(
                     $"{truthTableInterneuronTags.Input1TagPrefix} = 0 {truthTableInterneuronTags.TypeTagPrefix}.{type.ToString().ToUpper()} {truthTableInterneuronTags.Input2TagPrefix} = 0",
-                    $"{truthTableInterneuronTags.Input1TagPrefix} = 1 {truthTableInterneuronTags.TypeTagPrefix}.{type.ToString().ToUpper()} {truthTableInterneuronTags.Input2TagPrefix} = 0",
                     $"{truthTableInterneuronTags.Input1TagPrefix} = 0 {truthTableInterneuronTags.TypeTagPrefix}.{type.ToString().ToUpper()} {truthTableInterneuronTags.Input2TagPrefix} = 1",
+                    $"{truthTableInterneuronTags.Input1TagPrefix} = 1 {truthTableInterneuronTags.TypeTagPrefix}.{type.ToString().ToUpper()} {truthTableInterneuronTags.Input2TagPrefix} = 0",
                     $"{truthTableInterneuronTags.Input1TagPrefix} = 1 {truthTableInterneuronTags.TypeTagPrefix}.{type.ToString().ToUpper()} {truthTableInterneuronTags.Input2TagPrefix} = 0"
                 );
             }
@@ -188,11 +188,11 @@ namespace ei8.Prototypes.HelloWorm
                     );
                 case LogicGateType.Imply:
                     return network.CreateTruthTableInterneurons(
-                        outputs.Neuron1, outputs.Neuron0, outputs.Neuron1, outputs.Neuron1, outputInterneuronTags
+                        outputs.Neuron1, outputs.Neuron1, outputs.Neuron0, outputs.Neuron1, outputInterneuronTags
                     );
                 case LogicGateType.Nimply:
                     return network.CreateTruthTableInterneurons(
-                        outputs.Neuron0, outputs.Neuron1, outputs.Neuron0, outputs.Neuron0, outputInterneuronTags
+                        outputs.Neuron0, outputs.Neuron0, outputs.Neuron1, outputs.Neuron0, outputInterneuronTags
                     );
             }
         }
@@ -230,16 +230,16 @@ namespace ei8.Prototypes.HelloWorm
             network.LinkInputNeuronsToInterneuron(
                 truthTableInterneurons.Interneuron2,
                 [
-                    inputs.Input1.Neuron1,
-                    inputs.Input2.Neuron0,
+                    inputs.Input1.Neuron0,
+                    inputs.Input2.Neuron1,
                     .. additionalInputNeurons
                 ]
             );
             network.LinkInputNeuronsToInterneuron(
                 truthTableInterneurons.Interneuron3,
                 [
-                    inputs.Input1.Neuron0,
-                    inputs.Input2.Neuron1,
+                    inputs.Input1.Neuron1,
+                    inputs.Input2.Neuron0,
                     .. additionalInputNeurons
                 ]
             );
