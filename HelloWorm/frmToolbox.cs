@@ -109,8 +109,8 @@ namespace ei8.Prototypes.HelloWorm
                 var net = new Network();
 
                 // frmToolbox.CreateLogicGates(net);
-                // frmToolbox.CreateAdders(net);
-                frmToolbox.CreateSubtractors(net);
+                frmToolbox.CreateAdders(net);
+                // frmToolbox.CreateSubtractors(net);
 
                 sheet.Initialize(net, this.settingsService.Mirrors);
                 dish.Add(sheet);
@@ -246,10 +246,12 @@ namespace ei8.Prototypes.HelloWorm
 
         private static void CreateAdders(Network net)
         {
-            frmToolbox.CreateAdder(net, out BinaryNeuronInfo carryOver1);
-            frmToolbox.CreateAdder(net, out BinaryNeuronInfo carryOver2, 1, carryOver1);
-            frmToolbox.CreateAdder(net, out BinaryNeuronInfo carryOver3, 2, carryOver2);
-            frmToolbox.CreateAdder(net, out BinaryNeuronInfo carryOver4, 3, carryOver3);
+            BinaryNeuronInfo? precedingCarryOver = null;
+            for (int i = 0; i < 4; i++)
+            {
+                frmToolbox.CreateAdder(net, out BinaryNeuronInfo carryOver, i, precedingCarryOver);
+                precedingCarryOver = carryOver;
+            }
         }
 
         private static void CreateAdder(
@@ -396,10 +398,12 @@ namespace ei8.Prototypes.HelloWorm
 
         private static void CreateSubtractors(Network net)
         {
-            frmToolbox.CreateSubtractor(net, out BinaryNeuronInfo carryOver1);
-            frmToolbox.CreateSubtractor(net, out BinaryNeuronInfo carryOver2, 1, carryOver1);
-            frmToolbox.CreateSubtractor(net, out BinaryNeuronInfo carryOver3, 2, carryOver2);
-            frmToolbox.CreateSubtractor(net, out BinaryNeuronInfo carryOver4, 3, carryOver3);
+            BinaryNeuronInfo? precedingBorrow = null;
+            for (int i = 0; i < 4; i++)
+            {
+                frmToolbox.CreateSubtractor(net, out BinaryNeuronInfo borrow, i, precedingBorrow);
+                precedingBorrow = borrow;
+            }
         }
 
         private static void CreateSubtractor(
