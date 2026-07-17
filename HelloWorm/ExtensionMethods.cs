@@ -1,7 +1,9 @@
 ﻿using ei8.Cortex.Coding;
 using ei8.Cortex.Coding.Spiker;
 using NLog;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing.Drawing2D;
+using System.Runtime.CompilerServices;
 
 namespace ei8.Prototypes.HelloWorm
 {
@@ -74,7 +76,34 @@ namespace ei8.Prototypes.HelloWorm
         }
 
         // TODO: promote to ei8.Cortex.Coding.Spiker.ExtensionMethods
-        public static BinaryNeuronInfo CreateBinaryNeurons(
+        public static bool TryCreateBinaryNeurons(
+            this Network network, 
+            [NotNullWhen(true)] out BinaryNeuronInfo? result,
+            string? tagPrefix = null,
+            [CallerArgumentExpression(nameof(result))] string parameterExpression = "",
+            string trueString = "1",
+            string falseString = "0"
+        )
+        {
+            bool bResult = false;
+            result = null;
+
+            if (VariableInfo.TryParse(parameterExpression, out var variableInfo))
+            {
+                result = network.CreateBinaryNeurons(
+                    $"{tagPrefix}" +
+                    (string.IsNullOrWhiteSpace(tagPrefix) ? string.Empty : ".") +
+                    variableInfo.ToString(),
+                    trueString,
+                    falseString
+                );
+                bResult = true;
+            }
+
+            return bResult;
+        }
+
+        private static BinaryNeuronInfo CreateBinaryNeurons(
             this Network network,
             string tagPrefix,
             string trueString = "1",
@@ -140,36 +169,107 @@ namespace ei8.Prototypes.HelloWorm
             Nimply
         }
 
-        public static InverterInterneuronInfo CreateInverterInterneurons(
+        public static bool TryCreateInverterInterneurons(
+            this Network network,
+            [NotNullWhen(true)] out InverterInterneuronInfo? result,
+            BinaryNeuronInfo outputs,
+            string? operatorPrefix = null,
+            string? inputTagPrefix = null,
+            [CallerArgumentExpression(nameof(result))] string parameterExpression = ""
+        )
+        {
+            bool bResult = false;
+            result = null;
+            if (VariableInfo.TryParse(parameterExpression, out var variableInfo))
+            {
+                result = network.CreateInverterInterneurons(
+                    outputs,
+                    variableInfo,
+                    operatorPrefix,
+                    inputTagPrefix
+                );
+                bResult = true;
+            }
+
+            return bResult;
+        }
+
+        private static InverterInterneuronInfo CreateInverterInterneurons(
             this Network network,
             BinaryNeuronInfo outputs,
+            VariableInfo variableInfo,
+            string? operatorPrefix = null,
             string? inputTagPrefix = null
         )
         {
+            string coreOperatorPrefix = string.Empty,
+                coreInputTagPrefix = string.Empty;
+
+            if (!string.IsNullOrEmpty(operatorPrefix))
+                coreOperatorPrefix = $"{operatorPrefix}.";
+            if (!string.IsNullOrEmpty(inputTagPrefix))
+                coreInputTagPrefix = $"{inputTagPrefix}.";
+
             return new InverterInterneuronInfo(
-               network.CreateInterneuron(inputTagPrefix == null ? inputTagPrefix : $"NOT {inputTagPrefix} = 0", outputs.Neuron1),
-               network.CreateInterneuron(inputTagPrefix == null ? inputTagPrefix : $"NOT {inputTagPrefix} = 1", outputs.Neuron0)
+               network.CreateInterneuron($"{coreOperatorPrefix}{variableInfo.Function}({coreInputTagPrefix}{variableInfo.Inputs.First()} = 0)", outputs.Neuron1),
+               network.CreateInterneuron($"{coreOperatorPrefix}{variableInfo.Function}({coreInputTagPrefix}{variableInfo.Inputs.First()} = 1)", outputs.Neuron0)
             );
         }
 
-        public static TruthTableInterneuronInfo CreateTruthTableInterneurons(
+        public static bool TryCreateTruthTableInterneurons(
+            this Network network,
+            [NotNullWhen(true)] out TruthTableInterneuronInfo? result,
+            LogicGateType type,
+            BinaryNeuronInfo outputs,
+            TruthTableInterneuronTagInfo? interneuronTags = null,
+            [CallerArgumentExpression(nameof(result))] string parameterExpression = ""
+        )
+        {
+            bool bResult = false;
+            result = null;
+            if (VariableInfo.TryParse(parameterExpression, out var variableInfo))
+            {
+                result = network.CreateTruthTableInterneurons(
+                    type,
+                    outputs,
+                    variableInfo,
+                    interneuronTags
+                );
+                bResult = true;
+            }
+
+            return bResult;
+        }
+
+        private static TruthTableInterneuronInfo CreateTruthTableInterneurons(
             this Network network,
             LogicGateType type,
             BinaryNeuronInfo outputs,
-            TruthTableInterneuronTagInfo? truthTableInterneuronTags = null
+            VariableInfo variableInfo,
+            TruthTableInterneuronTagInfo? interneuronTags = null
         )
         {
-            string?[] outputInterneuronTags = { null, null, null, null };
+            string typeTagPrefix = string.Empty,
+                input1TagPrefix = string.Empty,
+                input2TagPrefix = string.Empty;
 
-            if (truthTableInterneuronTags != null)
+            if (interneuronTags != null)
             {
-                outputInterneuronTags = [
-                    $"{truthTableInterneuronTags.Input1TagPrefix} = 0 {truthTableInterneuronTags.TypeTagPrefix}.{type.ToString().ToUpper()} {truthTableInterneuronTags.Input2TagPrefix} = 0",
-                    $"{truthTableInterneuronTags.Input1TagPrefix} = 0 {truthTableInterneuronTags.TypeTagPrefix}.{type.ToString().ToUpper()} {truthTableInterneuronTags.Input2TagPrefix} = 1",
-                    $"{truthTableInterneuronTags.Input1TagPrefix} = 1 {truthTableInterneuronTags.TypeTagPrefix}.{type.ToString().ToUpper()} {truthTableInterneuronTags.Input2TagPrefix} = 0",
-                    $"{truthTableInterneuronTags.Input1TagPrefix} = 1 {truthTableInterneuronTags.TypeTagPrefix}.{type.ToString().ToUpper()} {truthTableInterneuronTags.Input2TagPrefix} = 0"
-                ];
+                typeTagPrefix = $"{interneuronTags.TypeTagPrefix}.";
+                input1TagPrefix = $"{interneuronTags.Input1TagPrefix}.";
+                input2TagPrefix = $"{interneuronTags.Input2TagPrefix}.";
             }
+
+            string?[] outputInterneuronTags = [
+                $"{typeTagPrefix}{variableInfo.Function}({input1TagPrefix}{variableInfo.Inputs.First()} = 0," +
+                $"{input2TagPrefix}{variableInfo.Inputs.ElementAt(1)} = 0)",
+                $"{typeTagPrefix}{variableInfo.Function}({input1TagPrefix}{variableInfo.Inputs.First()} = 0," +
+                $"{input2TagPrefix}{variableInfo.Inputs.ElementAt(1)} = 1)",
+                $"{typeTagPrefix}{variableInfo.Function}({input1TagPrefix}{variableInfo.Inputs.First()} = 1," +
+                $"{input2TagPrefix}{variableInfo.Inputs.ElementAt(1)} = 0)",
+                $"{typeTagPrefix}{variableInfo.Function}({input1TagPrefix}{variableInfo.Inputs.First()} = 1," +
+                $"{input2TagPrefix}{variableInfo.Inputs.ElementAt(1)} = 1)",
+            ];
 
             switch (type)
             {
@@ -226,64 +326,64 @@ namespace ei8.Prototypes.HelloWorm
 
         public static void LinkTruthTableInputNeuronsToInterneurons(
             this Network network,
-            TruthTableInterneuronInfo truthTableInterneurons,
             InputInfo inputs,
-            params Neuron[] additionalInputNeurons
+            TruthTableInterneuronInfo interneurons,
+            params Neuron[] additionalInputs
         )
         {
             network.LinkInputNeuronsToInterneuron(
-                truthTableInterneurons.Interneuron1,
+                interneurons.Interneuron1,
                 [
                     inputs.Input1.Neuron0,
                     inputs.Input2.Neuron0,
-                    .. additionalInputNeurons
+                    .. additionalInputs
                 ]
             );
             network.LinkInputNeuronsToInterneuron(
-                truthTableInterneurons.Interneuron2,
+                interneurons.Interneuron2,
                 [
                     inputs.Input1.Neuron0,
                     inputs.Input2.Neuron1,
-                    .. additionalInputNeurons
+                    .. additionalInputs
                 ]
             );
             network.LinkInputNeuronsToInterneuron(
-                truthTableInterneurons.Interneuron3,
+                interneurons.Interneuron3,
                 [
                     inputs.Input1.Neuron1,
                     inputs.Input2.Neuron0,
-                    .. additionalInputNeurons
+                    .. additionalInputs
                 ]
             );
             network.LinkInputNeuronsToInterneuron(
-                truthTableInterneurons.Interneuron4,
+                interneurons.Interneuron4,
                 [
                     inputs.Input1.Neuron1,
                     inputs.Input2.Neuron1,
-                    .. additionalInputNeurons
+                    .. additionalInputs
                 ]
             );
         }
 
         public static void LinkInverterInputNeuronsToInterneurons(
             this Network network,
-            InverterInterneuronInfo inverterInterneurons,
             BinaryNeuronInfo input,
-            params Neuron[] additionalInputNeurons
+            InverterInterneuronInfo interneurons,
+            params Neuron[] additionalInputs
         )
         {
             network.LinkInputNeuronsToInterneuron(
-                inverterInterneurons.Interneuron1,
+                interneurons.Interneuron1,
                 [
                     input.Neuron0,
-                    .. additionalInputNeurons
+                    .. additionalInputs
                 ]
             );
             network.LinkInputNeuronsToInterneuron(
-                inverterInterneurons.Interneuron2,
+                interneurons.Interneuron2,
                 [
                     input.Neuron1,
-                    .. additionalInputNeurons
+                    .. additionalInputs
                 ]
             );
         }
@@ -524,8 +624,8 @@ namespace ei8.Prototypes.HelloWorm
 
         public static void InvalidateDish(this DishPanel dishPanel)
         {
-            if (dishPanel.Dish == null)
-                throw new ArgumentNullException(nameof(dishPanel.Dish));
+            ArgumentNullException.ThrowIfNull(dishPanel);
+            ArgumentNullException.ThrowIfNull(dishPanel.Dish);
 
             dishPanel.InvalidateRectangularComposite(dishPanel.Dish);
         }

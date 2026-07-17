@@ -4,7 +4,9 @@
     {
         public EmittedEventArgs(IEnumerable<IComponent> emission)
         {
-            this.Emission = emission ?? throw new ArgumentNullException(nameof(emission));
+            ArgumentNullException.ThrowIfNull(emission);
+
+            this.Emission = emission;
         }
 
         public IEnumerable<IComponent> Emission { get; }
