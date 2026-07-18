@@ -211,8 +211,8 @@ namespace ei8.Prototypes.HelloWorm
                 coreInputTagPrefix = $"{inputTagPrefix}.";
 
             return new InverterInterneuronInfo(
-               network.CreateInterneuron($"{coreOperatorPrefix}{variableInfo.Function}({coreInputTagPrefix}{variableInfo.Inputs.First()} = 0)", outputs.Neuron1),
-               network.CreateInterneuron($"{coreOperatorPrefix}{variableInfo.Function}({coreInputTagPrefix}{variableInfo.Inputs.First()} = 1)", outputs.Neuron0)
+               network.CreateInterneuron($"{coreOperatorPrefix}{variableInfo.Function}({coreInputTagPrefix}{variableInfo.Inputs.Single()} = 0)", outputs.Neuron1),
+               network.CreateInterneuron($"{coreOperatorPrefix}{variableInfo.Function}({coreInputTagPrefix}{variableInfo.Inputs.Single()} = 1)", outputs.Neuron0)
             );
         }
 
