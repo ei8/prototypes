@@ -14,17 +14,8 @@ namespace ei8.Prototypes.HelloWorm
             bool bResult = false;
             result = null;
 
-            if (!string.IsNullOrWhiteSpace(parameterExpression))
+            if (parameterExpression.TryGetVariableName(out var tempResult))
             {
-                var tempResult = string.Empty;
-
-                // if variableName contains type
-                if (parameterExpression.Contains(' '))
-                    // ... separate variable name from type 
-                    tempResult = parameterExpression.Split(' ').ElementAt(1);
-                else
-                    tempResult = parameterExpression;
-
                 // capitalize first letter
                 tempResult = tempResult[0].ToString().ToUpper() + tempResult.Substring(1);
 

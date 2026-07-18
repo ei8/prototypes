@@ -134,14 +134,52 @@ namespace ei8.Prototypes.HelloWorm
                 )
             );
 
-        public static Neuron CreateNeuron(this Network network, string? tag = null)
+        public static bool TryCreateNeuron(
+            this Network network,
+            [NotNullWhen(true)] out Neuron? result,
+            [CallerArgumentExpression(nameof(result))] string parameterExpression = ""
+        )
+        {
+            bool bResult = false;
+            result = null;
+            if (VariableInfo.TryParse(parameterExpression, out var variable))
+            {
+                result = network.CreateNeuron(variable.Inputs.Single());
+                bResult = true;
+            }
+
+            return bResult;
+        }
+
+        public static bool TryGetVariableName(
+            this string parameterExpression,
+            [NotNullWhen(true)] out string? result
+        )
+        {
+            var bResult = false;
+            result = null;
+            if (!string.IsNullOrWhiteSpace(parameterExpression))
+            {
+                // if variableName contains type
+                if (parameterExpression.Contains(' '))
+                    // ... separate variable name from type 
+                    result = parameterExpression.Split(' ').ElementAt(1);
+                else
+                    result = parameterExpression;
+
+                bResult = true;
+            }
+
+            return bResult;
+        }
+        private static Neuron CreateNeuron(this Network network, string? tag = null)
         {
             Neuron neuron = Neuron.CreateTransient(Guid.NewGuid(), tag, null, null);
             network.AddReplace(neuron);
             return neuron;
         }
         // TODO: promote to ei8.Cortex.Coding.Spiker.ExtensionMethods
-        public static Neuron CreateInterneuron(this Network network, string? interneuronTag = null, params Neuron[] postsynapticNeurons)
+        private static Neuron CreateInterneuron(this Network network, string? interneuronTag = null, params Neuron[] postsynapticNeurons)
         {
             Neuron neuron = network.CreateNeuron(interneuronTag);
 
@@ -151,7 +189,7 @@ namespace ei8.Prototypes.HelloWorm
             return neuron;
         }
         // TODO: promote to ei8.Cortex.Coding.Spiker.ExtensionMethods
-        public static void LinkInputNeuronsToInterneuron(this Network network, Neuron interneuron, params Neuron[] inputNeurons)
+        private static void LinkInputNeuronsToInterneuron(this Network network, Neuron interneuron, params Neuron[] inputNeurons)
         {
             foreach (Neuron input in inputNeurons)
                 network.CreateTerminal(input, interneuron, NeurotransmitterEffect.Excite, 1f / inputNeurons.Length);
@@ -159,6 +197,7 @@ namespace ei8.Prototypes.HelloWorm
 
         public enum LogicGateType
         {
+            Not,
             And,
             Or,
             Nand,
