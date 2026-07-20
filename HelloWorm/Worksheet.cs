@@ -8,7 +8,7 @@ using System.ComponentModel;
 
 namespace ei8.Prototypes.HelloWorm
 {
-    public class Worksheet : ICreatable, ILocated, ISpikableReporting2, ISpikableTemp
+    public class Worksheet : ICreatable, ILocated, ISpikableReporting, ISpikable
     {
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
@@ -60,10 +60,9 @@ namespace ei8.Prototypes.HelloWorm
             );
         }
 
-        public void Initialize(Network? network, IEnumerable<MirrorConfig>? mirrorConfigs)
+        public void Initialize(IEnumerable<MirrorConfig>? mirrorConfigs)
         {
             AssertionConcern.AssertArgumentNotNull(mirrorConfigs, nameof(mirrorConfigs));
-            this.Initialize(network);
         }
 
         public void Initialize(Network? network)

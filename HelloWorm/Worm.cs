@@ -2,7 +2,6 @@
 using ei8.Cortex.Coding.Mirrors;
 using ei8.Cortex.Coding.Model.Reflection;
 using ei8.Cortex.Coding.Spiker;
-using neurUL.Common.Domain.Model;
 using NLog;
 using System.Collections.Concurrent;
 using System.Collections.Specialized;
@@ -11,7 +10,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace ei8.Prototypes.HelloWorm
 {
-    public class Worm : IMovable, IRectangularComposite, IElliptical, IPerishable, IRegenerative, ISpikableReporting2, INamed, ISpikableTemp
+    public class Worm : IMovable, IRectangularComposite, IElliptical, IPerishable, IRegenerative, ISpikableReporting, INamed, ISpikable
     {
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
@@ -45,7 +44,7 @@ namespace ei8.Prototypes.HelloWorm
         private int rotationCount;
         private int collisionCount;
         private Size size;
-        private Network? network;
+        private Network network;
         private readonly ConcurrentDictionary<DateTime, FireInfo> fireHistory;
         private Neuron? rotationNeuron;
         private IDictionary<Guid, RotationDirection>? directionValueDictionary;
@@ -82,7 +81,7 @@ namespace ei8.Prototypes.HelloWorm
 
             this.Add(nose);
 
-            this.network = null;
+            this.network = new Network();
 
             this.fireHistory = new ConcurrentDictionary<DateTime, FireInfo>();
 
@@ -207,7 +206,7 @@ namespace ei8.Prototypes.HelloWorm
 
         public IEnumerable<IComponent> Components => this.components;
 
-        public Network? Network => this.network;
+        public Network Network => this.network;
 
         public IDictionary<DateTime, FireInfo> FireHistory => this.fireHistory;
 
@@ -238,7 +237,7 @@ namespace ei8.Prototypes.HelloWorm
                 new LogMessageGenerator(
                     () => 
                     $"{this.GetFullName()} - Invoking {nameof(Worm.Rotate)}({direction}, {degrees}). [Total: {++this.rotationCount}; " +
-                    $"Processing ratio: { Math.Round(this.ProcessingRatio)}%]"
+                    $"Processing ratio: { System.Math.Round(this.ProcessingRatio)}%]"
                 )
             );
 
@@ -353,7 +352,11 @@ namespace ei8.Prototypes.HelloWorm
         public void Inherit(IRegenerative original)
         {
             var originalWorm = (Worm) original;
-            this.Initialize(originalWorm.Network);
+            
+            ArgumentNullException.ThrowIfNull(originalWorm.Network);
+            ArgumentNullException.ThrowIfNull(this.network);
+
+            this.network.AddReplaceItems(originalWorm.Network);
             this.Parent = originalWorm.Parent;
             this.Name = originalWorm.Name;
             Worm.UpdateCaches(
@@ -380,53 +383,49 @@ namespace ei8.Prototypes.HelloWorm
             this.Parent = parent;
         }
 
-        public void Initialize(Network? network, IEnumerable<MirrorConfig>? mirrorConfigs)
+        public void Initialize(IEnumerable<MirrorConfig>? mirrorConfigs)
         {
-            AssertionConcern.AssertArgumentNotNull(mirrorConfigs, nameof(mirrorConfigs));
-            this.Initialize(network);
+            ArgumentNullException.ThrowIfNull(mirrorConfigs);
 
-            if (this.network != null && mirrorConfigs != null)
-            {
-                var directionValueDictionary = Enum.GetValues<RotationDirection>().ConvertToNeuronValueMap(mirrorConfigs, this.network).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
-                var degreesValueDictionary = Enum.GetValues<RotationDegrees>().ConvertToNeuronValueMap(mirrorConfigs, this.network).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
-                var sectorsValueDictionary = Enum.GetValues<SectorValues>().ConvertToNeuronValueMap(mirrorConfigs, this.network).ToDictionary(kvp => kvp.Value, kvp => kvp.Key);
+            var directionValueDictionary = Enum.GetValues<RotationDirection>().ConvertToNeuronValueMap(mirrorConfigs, this.network).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+            var degreesValueDictionary = Enum.GetValues<RotationDegrees>().ConvertToNeuronValueMap(mirrorConfigs, this.network).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+            var sectorsValueDictionary = Enum.GetValues<SectorValues>().ConvertToNeuronValueMap(mirrorConfigs, this.network).ToDictionary(kvp => kvp.Value, kvp => kvp.Key);
 
-                if (
-                    mirrorConfigs.TryGetMirrorNeuron(
-                        typeof(Worm).ToMethodKeyString(
-                            nameof(Worm.Rotate),
-                            typeof(RotationDirection),
-                            typeof(RotationDegrees)
-                        ),
-                        this.network,
-                        out Neuron? rotationNeuron
-                    ) &&
-                    mirrorConfigs.TryGetMirrorNeuron(
-                        typeof(Dish).ToKeyString(),
-                        this.network,
-                        out Neuron? dishNeuron
-                    ) &&
-                    mirrorConfigs.TryGetMirrorNeuron(
-                        typeof(Odor).ToKeyString(),
-                        this.network,
-                        out Neuron? odorNeuron
-                    )
+            if (
+                mirrorConfigs.TryGetMirrorNeuron(
+                    typeof(Worm).ToMethodKeyString(
+                        nameof(Worm.Rotate),
+                        typeof(RotationDirection),
+                        typeof(RotationDegrees)
+                    ),
+                    this.network,
+                    out Neuron? rotationNeuron
+                ) &&
+                mirrorConfigs.TryGetMirrorNeuron(
+                    typeof(Dish).ToKeyString(),
+                    this.network,
+                    out Neuron? dishNeuron
+                ) &&
+                mirrorConfigs.TryGetMirrorNeuron(
+                    typeof(Odor).ToKeyString(),
+                    this.network,
+                    out Neuron? odorNeuron
                 )
-                {
-                    var targetsValueDictionary = new Dictionary<string, Guid>{
+            )
+            {
+                var targetsValueDictionary = new Dictionary<string, Guid>{
                     { typeof(Dish).ToKeyString(), dishNeuron.Id },
                     { typeof(Odor).ToKeyString(), odorNeuron.Id },
                 };
 
-                    Worm.UpdateCaches(
-                        this,
-                        rotationNeuron,
-                        directionValueDictionary,
-                        degreesValueDictionary,
-                        sectorsValueDictionary,
-                        targetsValueDictionary
-                    );
-                }
+                Worm.UpdateCaches(
+                    this,
+                    rotationNeuron,
+                    directionValueDictionary,
+                    degreesValueDictionary,
+                    sectorsValueDictionary,
+                    targetsValueDictionary
+                );
             }
         }
 
@@ -444,16 +443,6 @@ namespace ei8.Prototypes.HelloWorm
             worm.degreesValueDictionary = degreesValueDictionary;
             worm.sectorsValueDictionary = sectorsValueDictionary;
             worm.targetsValueDictionary = targetsValueDictionary;
-        }
-
-        public void Initialize(Network? network)
-        {
-            if (this.network != network)
-            {
-                AssertionConcern.AssertArgumentNotNull(network, nameof(network));
-
-                this.network = network;
-            }
         }
 
         public void Add(IComponent component)

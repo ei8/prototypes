@@ -39,7 +39,7 @@ namespace ei8.Prototypes.HelloWorm
             Action<TriggeredEventArgs>? triggeredHandler = null, 
             Action<FiredEventArgs>? firedHandler = null
         )
-            where T : ISpikableReporting2, IComponent
+            where T : ISpikableReporting, IComponent
         {
             spikeService.Triggered += (sender, e) =>
             {
@@ -179,7 +179,9 @@ namespace ei8.Prototypes.HelloWorm
             return neuron;
         }
         // TODO: promote to ei8.Cortex.Coding.Spiker.ExtensionMethods
-        private static Neuron CreateInterneuron(this Network network, string? interneuronTag = null, params Neuron[] postsynapticNeurons)
+        public static Neuron CreateInterneuron(this Network network, params Neuron[] postsynapticNeurons) =>
+            network.CreateInterneuron(null, postsynapticNeurons);
+        public static Neuron CreateInterneuron(this Network network, string? interneuronTag = null, params Neuron[] postsynapticNeurons)
         {
             Neuron neuron = network.CreateNeuron(interneuronTag);
 
@@ -348,7 +350,6 @@ namespace ei8.Prototypes.HelloWorm
             }
         }
 
-        // TODO: remove CreateRotationInterneuron from ei8.Cortex.Coding.Spiker.ExtensionMethods
         private static TruthTableInterneuronInfo CreateTruthTableInterneurons(
             this Network network, 
             Neuron output1, 
@@ -429,7 +430,7 @@ namespace ei8.Prototypes.HelloWorm
         #endregion
 
         #region Forms
-        public static string GetName(this ISpikableReporting2 spikable, string formDescription)
+        public static string GetName(this ISpikableReporting spikable, string formDescription)
         {
             var fullName = string.Empty;
             var lifeText = string.Empty;
@@ -549,7 +550,7 @@ namespace ei8.Prototypes.HelloWorm
         {
             bool result = false;
 
-                float directionRemainder = Math.Abs(movable.Direction % 360f) / 360f;
+                float directionRemainder = System.Math.Abs(movable.Direction % 360f) / 360f;
                 result =
                     (movable.Direction > 0 && positiveRemainderEvaluator(directionRemainder)) ||
                     (movable.Direction < 0 && negativeRemainderEvaluator(directionRemainder)); ;
@@ -725,11 +726,11 @@ namespace ei8.Prototypes.HelloWorm
         internal static Point GetLocationByHypotenuseAndAngle(this Point original, float angle, double hypotenuse)
         {
             // 0 degrees is East
-            var rad = angle * (Math.PI / 180d);
+            var rad = angle * (System.Math.PI / 180d);
 
             var newLocation = new Point(
-                original.X + Convert.ToInt32(Math.Cos(rad) * hypotenuse),
-                original.Y + Convert.ToInt32(Math.Sin(rad) * hypotenuse)
+                original.X + Convert.ToInt32(System.Math.Cos(rad) * hypotenuse),
+                original.Y + Convert.ToInt32(System.Math.Sin(rad) * hypotenuse)
             );
 
             return newLocation;

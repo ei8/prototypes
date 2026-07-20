@@ -1,4 +1,5 @@
 ﻿using ei8.Cortex.Coding;
+using ei8.Cortex.Coding.Spiker;
 using Microsoft.Msagl.Drawing;
 using Microsoft.Msagl.GraphViewerGdi;
 using System.ComponentModel.Design;
@@ -28,7 +29,7 @@ namespace ei8.Prototypes.HelloWorm
 
             this.selectionService = selectionService;
 
-            if (this.selectionService.PrimarySelection is ISpikableReporting2 spikable)
+            if (this.selectionService.PrimarySelection is ISpikableReporting spikable)
             {
                 this.graph = new Graph(spikable);
 

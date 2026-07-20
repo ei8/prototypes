@@ -88,7 +88,7 @@ namespace ei8.Prototypes.HelloWorm
             if (this.selectionService.PrimarySelection is Dish d)
                 d.NotifyCollectionChanged += this.Dish_NotifyCollectionChanged;
 
-            this.mnuViewCode.Enabled = this.selectionService.PrimarySelection is ISpikableReporting2;
+            this.mnuViewCode.Enabled = this.selectionService.PrimarySelection is ISpikableReporting;
 
             if (this.selectionService.PrimarySelection is INotifyPropertyChanged t)
             {
@@ -200,19 +200,19 @@ namespace ei8.Prototypes.HelloWorm
                 var extraLargeNeuron = ns.CreateNeuron(extraLargeConfig);
 
                 // ... Interneurons
-                var dishSector1Neuron = ns.CreateRotationInterneuron(rotateNeuron, counterClockwiseNeuron, mediumNeuron);
-                var dishSector2Neuron = ns.CreateRotationInterneuron(rotateNeuron, counterClockwiseNeuron, smallNeuron);
-                var dishSector7Neuron = ns.CreateRotationInterneuron(rotateNeuron, clockwiseNeuron, smallNeuron);
-                var dishSector8Neuron = ns.CreateRotationInterneuron(rotateNeuron, clockwiseNeuron, mediumNeuron);
+                var dishSector1Neuron = ns.CreateInterneuron(rotateNeuron, counterClockwiseNeuron, mediumNeuron);
+                var dishSector2Neuron = ns.CreateInterneuron(rotateNeuron, counterClockwiseNeuron, smallNeuron);
+                var dishSector7Neuron = ns.CreateInterneuron(rotateNeuron, clockwiseNeuron, smallNeuron);
+                var dishSector8Neuron = ns.CreateInterneuron(rotateNeuron, clockwiseNeuron, mediumNeuron);
 
-                var odorSector1Neuron = ns.CreateRotationInterneuron(rotateNeuron, clockwiseNeuron, smallNeuron);
-                var odorSector2Neuron = ns.CreateRotationInterneuron(rotateNeuron, clockwiseNeuron, mediumNeuron);
-                var odorSector3Neuron = ns.CreateRotationInterneuron(rotateNeuron, clockwiseNeuron, largeNeuron);
-                var odorSector4Neuron = ns.CreateRotationInterneuron(rotateNeuron, clockwiseNeuron, extraLargeNeuron);
-                var odorSector5Neuron = ns.CreateRotationInterneuron(rotateNeuron, counterClockwiseNeuron, extraLargeNeuron);
-                var odorSector6Neuron = ns.CreateRotationInterneuron(rotateNeuron, counterClockwiseNeuron, largeNeuron);
-                var odorSector7Neuron = ns.CreateRotationInterneuron(rotateNeuron, counterClockwiseNeuron, mediumNeuron);
-                var odorSector8Neuron = ns.CreateRotationInterneuron(rotateNeuron, counterClockwiseNeuron, smallNeuron);
+                var odorSector1Neuron = ns.CreateInterneuron(rotateNeuron, clockwiseNeuron, smallNeuron);
+                var odorSector2Neuron = ns.CreateInterneuron(rotateNeuron, clockwiseNeuron, mediumNeuron);
+                var odorSector3Neuron = ns.CreateInterneuron(rotateNeuron, clockwiseNeuron, largeNeuron);
+                var odorSector4Neuron = ns.CreateInterneuron(rotateNeuron, clockwiseNeuron, extraLargeNeuron);
+                var odorSector5Neuron = ns.CreateInterneuron(rotateNeuron, counterClockwiseNeuron, extraLargeNeuron);
+                var odorSector6Neuron = ns.CreateInterneuron(rotateNeuron, counterClockwiseNeuron, largeNeuron);
+                var odorSector7Neuron = ns.CreateInterneuron(rotateNeuron, counterClockwiseNeuron, mediumNeuron);
+                var odorSector8Neuron = ns.CreateInterneuron(rotateNeuron, counterClockwiseNeuron, smallNeuron);
 
                 // ... Input Neurons
                 ns.CreateInputNeuron(
@@ -363,7 +363,7 @@ namespace ei8.Prototypes.HelloWorm
 
         private void mnuViewCodeGraph_Click(object sender, EventArgs e)
         {
-            if (this.selectionService.PrimarySelection is ISpikableReporting2)
+            if (this.selectionService.PrimarySelection is ISpikableReporting)
             {
                 var fc = this.serviceProvider.GetRequiredService<frmGraph>();
                 fc.Show(this.dockPanel1, DockState.Document);

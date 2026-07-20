@@ -18,7 +18,7 @@
     <PackageReference Include="DockPanelSuite.ThemeVS2015" Version="3.1.1" />
     <PackageReference Include="ei8.Cortex.Coding" Version="0.3.5" />
     <PackageReference Include="ei8.Cortex.Coding.Persistence" Version="0.3.8" />
-    <PackageReference Include="ei8.Cortex.Coding.Spiker" Version="0.1.0" />
+    <PackageReference Include="ei8.Cortex.Coding.Spiker" Version="0.1.2" />
     <PackageReference Include="ei8.Cortex.Diary.Nucleus.Client" Version="0.2.9" />
     <PackageReference Include="ei8.Cortex.Library.Client" Version="0.4.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.7" />
@@ -47,6 +47,10 @@
     <None Update="customSettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Math\Logic\" />
   </ItemGroup>
 
 </Project>
