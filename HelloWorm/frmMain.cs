@@ -1,15 +1,19 @@
 ﻿using ei8.Cortex.Coding;
 using ei8.Cortex.Coding.Mirrors;
 using ei8.Cortex.Coding.Model.Reflection;
+using ei8.Cortex.Coding.Persistence;
 using ei8.Cortex.Coding.Spiker;
 using ei8.Cortex.Diary.Nucleus.Client.In;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Msagl.Core.Geometry;
 using neurUL.Common.Domain.Model;
 using neurUL.Common.Http;
 using NLog;
 using System.ComponentModel;
 using System.ComponentModel.Design;
 using WeifenLuo.WinFormsUI.Docking;
+
+using SpikerNetworkHelper = ei8.Cortex.Coding.Spiker.NetworkHelper;
 
 namespace ei8.Prototypes.HelloWorm
 {
@@ -188,106 +192,144 @@ namespace ei8.Prototypes.HelloWorm
                 this.settingsService.Mirrors.TryGetByKey(Worm.SectorValues.Sector8.ToKeyString(), out MirrorConfig? sector8Config)
             )
             {
-                var ns = new Network();
-
                 // ... Output neurons
-                var rotateNeuron = ns.CreateNeuron(rotateConfig);
-                var clockwiseNeuron = ns.CreateNeuron(clockwiseConfig);
-                var counterClockwiseNeuron = ns.CreateNeuron(counterClockwiseConfig);
-                var smallNeuron = ns.CreateNeuron(smallConfig);
-                var mediumNeuron = ns.CreateNeuron(mediumConfig);
-                var largeNeuron = ns.CreateNeuron(largeConfig);
-                var extraLargeNeuron = ns.CreateNeuron(extraLargeConfig);
+                var rotateNeuron = SpikerNetworkHelper.CreateNeuron(rotateConfig);
+                var clockwiseNeuron = SpikerNetworkHelper.CreateNeuron(clockwiseConfig);
+                var counterClockwiseNeuron = SpikerNetworkHelper.CreateNeuron(counterClockwiseConfig);
+                var smallNeuron = SpikerNetworkHelper.CreateNeuron(smallConfig);
+                var mediumNeuron = SpikerNetworkHelper.CreateNeuron(mediumConfig);
+                var largeNeuron = SpikerNetworkHelper.CreateNeuron(largeConfig);
+                var extraLargeNeuron = SpikerNetworkHelper.CreateNeuron(extraLargeConfig);
 
                 // ... Interneurons
-                var dishSector1Neuron = ns.CreateInterneuron(rotateNeuron, counterClockwiseNeuron, mediumNeuron);
-                var dishSector2Neuron = ns.CreateInterneuron(rotateNeuron, counterClockwiseNeuron, smallNeuron);
-                var dishSector7Neuron = ns.CreateInterneuron(rotateNeuron, clockwiseNeuron, smallNeuron);
-                var dishSector8Neuron = ns.CreateInterneuron(rotateNeuron, clockwiseNeuron, mediumNeuron);
+                var dishSector1Neuron = NetworkHelper.CreateInterneuronNetwork(rotateNeuron, counterClockwiseNeuron, mediumNeuron);
+                var dishSector2Neuron = NetworkHelper.CreateInterneuronNetwork(rotateNeuron, counterClockwiseNeuron, smallNeuron);
+                var dishSector7Neuron = NetworkHelper.CreateInterneuronNetwork(rotateNeuron, clockwiseNeuron, smallNeuron);
+                var dishSector8Neuron = NetworkHelper.CreateInterneuronNetwork(rotateNeuron, clockwiseNeuron, mediumNeuron);
 
-                var odorSector1Neuron = ns.CreateInterneuron(rotateNeuron, clockwiseNeuron, smallNeuron);
-                var odorSector2Neuron = ns.CreateInterneuron(rotateNeuron, clockwiseNeuron, mediumNeuron);
-                var odorSector3Neuron = ns.CreateInterneuron(rotateNeuron, clockwiseNeuron, largeNeuron);
-                var odorSector4Neuron = ns.CreateInterneuron(rotateNeuron, clockwiseNeuron, extraLargeNeuron);
-                var odorSector5Neuron = ns.CreateInterneuron(rotateNeuron, counterClockwiseNeuron, extraLargeNeuron);
-                var odorSector6Neuron = ns.CreateInterneuron(rotateNeuron, counterClockwiseNeuron, largeNeuron);
-                var odorSector7Neuron = ns.CreateInterneuron(rotateNeuron, counterClockwiseNeuron, mediumNeuron);
-                var odorSector8Neuron = ns.CreateInterneuron(rotateNeuron, counterClockwiseNeuron, smallNeuron);
+                var odorSector1Neuron = NetworkHelper.CreateInterneuronNetwork(rotateNeuron, clockwiseNeuron, smallNeuron);
+                var odorSector2Neuron = NetworkHelper.CreateInterneuronNetwork(rotateNeuron, clockwiseNeuron, mediumNeuron);
+                var odorSector3Neuron = NetworkHelper.CreateInterneuronNetwork(rotateNeuron, clockwiseNeuron, largeNeuron);
+                var odorSector4Neuron = NetworkHelper.CreateInterneuronNetwork(rotateNeuron, clockwiseNeuron, extraLargeNeuron);
+                var odorSector5Neuron = NetworkHelper.CreateInterneuronNetwork(rotateNeuron, counterClockwiseNeuron, extraLargeNeuron);
+                var odorSector6Neuron = NetworkHelper.CreateInterneuronNetwork(rotateNeuron, counterClockwiseNeuron, largeNeuron);
+                var odorSector7Neuron = NetworkHelper.CreateInterneuronNetwork(rotateNeuron, counterClockwiseNeuron, mediumNeuron);
+                var odorSector8Neuron = NetworkHelper.CreateInterneuronNetwork(rotateNeuron, counterClockwiseNeuron, smallNeuron);
 
                 // ... Input Neurons
-                ns.CreateInputNeuron(
-                    odorConfig,
-                    0.5f,
-                    odorSector1Neuron,
-                    odorSector2Neuron,
-                    odorSector3Neuron,
-                    odorSector4Neuron,
-                    odorSector5Neuron,
-                    odorSector6Neuron,
-                    odorSector7Neuron,
-                    odorSector8Neuron
+                IEnumerable<Network> inputNeuronNetworks = [
+                    NetworkHelper.CreateInputNeuronNetwork(
+                        odorConfig,
+                        0.5f,
+                        odorSector1Neuron,
+                        odorSector2Neuron,
+                        odorSector3Neuron,
+                        odorSector4Neuron,
+                        odorSector5Neuron,
+                        odorSector6Neuron,
+                        odorSector7Neuron,
+                        odorSector8Neuron
+                    ),
+                    NetworkHelper.CreateInputNeuronNetwork(
+                        dishConfig,
+                        0.5f,
+                        dishSector1Neuron,
+                        dishSector2Neuron,
+                        dishSector7Neuron,
+                        dishSector8Neuron
+                    ),
+                    NetworkHelper.CreateInputNeuronNetwork(
+                        sector1Config,
+                        0.5f,
+                        odorSector1Neuron,
+                        dishSector1Neuron
+                    ),
+                    NetworkHelper.CreateInputNeuronNetwork(
+                        sector2Config,
+                        0.5f,
+                        odorSector2Neuron,
+                        dishSector2Neuron
+                    ),
+                    NetworkHelper.CreateInputNeuronNetwork(
+                        sector3Config,
+                        0.5f,
+                        odorSector3Neuron
+                    ),
+                    NetworkHelper.CreateInputNeuronNetwork(
+                        sector4Config,
+                        0.5f,
+                        odorSector4Neuron
+                    ),
+                    NetworkHelper.CreateInputNeuronNetwork(
+                        sector5Config,
+                        0.5f,
+                        odorSector5Neuron
+                    ),
+                    NetworkHelper.CreateInputNeuronNetwork(
+                        sector6Config,
+                        0.5f,
+                        odorSector6Neuron
+                    ),
+                    NetworkHelper.CreateInputNeuronNetwork(
+                        sector7Config,
+                        0.5f,
+                        odorSector7Neuron,
+                        dishSector7Neuron
+                    ),
+                    NetworkHelper.CreateInputNeuronNetwork(
+                        sector8Config,
+                        0.5f,
+                        odorSector8Neuron,
+                        dishSector8Neuron
+                    )
+                ];
+
+                var ns = new Network();
+                ns.AddReplaceItems(
+                    [
+                        rotateNeuron,
+                        clockwiseNeuron,
+                        counterClockwiseNeuron,
+                        smallNeuron,
+                        mediumNeuron,
+                        largeNeuron,
+                        extraLargeNeuron
+                    ]
+                );
+                ns.AddReplaceItems(
+                    [
+                        dishSector1Neuron,
+                        dishSector2Neuron,
+                        dishSector7Neuron,
+                        dishSector8Neuron,
+                        odorSector1Neuron,
+                        odorSector2Neuron,
+                        odorSector3Neuron,
+                        odorSector4Neuron,
+                        odorSector5Neuron,
+                        odorSector6Neuron,
+                        odorSector7Neuron,
+                        odorSector8Neuron,
+                        .. inputNeuronNetworks
+                    ]
                 );
 
-                ns.CreateInputNeuron(
-                    dishConfig,
-                    0.5f,
-                    dishSector1Neuron,
-                    dishSector2Neuron,
-                    dishSector7Neuron,
-                    dishSector8Neuron
-                );
-
-                ns.CreateInputNeuron(
-                    sector1Config,
-                    0.5f,
-                    odorSector1Neuron,
-                    dishSector1Neuron
-                );
-
-                ns.CreateInputNeuron(
-                    sector2Config,
-                    0.5f,
-                    odorSector2Neuron,
-                    dishSector2Neuron
-                );
-
-                ns.CreateInputNeuron(
-                    sector3Config,
-                    0.5f,
-                    odorSector3Neuron
-                );
-
-                ns.CreateInputNeuron(
-                    sector4Config,
-                    0.5f,
-                    odorSector4Neuron
-                );
-
-                ns.CreateInputNeuron(
-                    sector5Config,
-                    0.5f,
-                    odorSector5Neuron
-                );
-
-                ns.CreateInputNeuron(
-                    sector6Config,
-                    0.5f,
-                    odorSector6Neuron
-                );
-
-                ns.CreateInputNeuron(
-                    sector7Config,
-                    0.5f,
-                    odorSector7Neuron,
-                    dishSector7Neuron
-                );
-
-                ns.CreateInputNeuron(
-                    sector8Config,
-                    0.5f,
-                    odorSector8Neuron,
-                    dishSector8Neuron
-                );
+                // HACK: use to add worm without need for an Avatar
+                // var matchingDishForm = this.dockPanel1.Documents.SingleOrDefault(d => d is frmDish);
+                //if (matchingDishForm is frmDish fd && fd.Dish != null)
+                //{
+                //    var newWorm = this.serviceProvider.GetRequiredService<Worm>();
+                //    newWorm.Initialize(
+                //        ExtensionMethods.CreateUnusedName(
+                //            (i) => $"{nameof(Worm)}{i.ToString()}",
+                //            (s) => fd.Dish.Components.OfType<INamed>().Any(dcn => dcn.Name == s)
+                //        ),
+                //        fd.Dish
+                //    );
+                //    newWorm.Network.AddReplaceItems(ns);
+                //    newWorm.Initialize(this.settingsService.Mirrors);
+                //    fd.Dish.Add(newWorm);
+                //}
 
                 // Create neurons
                 var rp = new RequestProvider();

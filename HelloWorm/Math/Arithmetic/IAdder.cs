@@ -7,5 +7,7 @@ namespace ei8.Prototypes.HelloWorm.Math.Arithmetic
         InputInfo Addends { get; }
 
         BinaryNeuronInfo CarryOver { get; }
+
+        BinaryNeuronInfo Sum { get; }
     }
 }
