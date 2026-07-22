@@ -143,29 +143,27 @@ namespace ei8.Prototypes.HelloWorm
                 NetworkHelper.TryCreateNeuron(out var NIMPLY)
             )
             {                 
-                var inputs = InputInfo.Create(
-                    // input1TrueConfig,
-                    "Input1",
-                    // input2TrueConfig,
-                    "Input2",
-                    Boolean.TrueString.ToUpper(),
-                    Boolean.FalseString.ToUpper()
-                );
+                BinaryNeuronInfo[] inputs = [
+                    BinaryNeuronInfo.Create("Input1", Boolean.TrueString.ToUpper(), Boolean.FalseString.ToUpper()),
+                    BinaryNeuronInfo.Create("Input2", Boolean.TrueString.ToUpper(), Boolean.FalseString.ToUpper())
+                ];
 
                 // "Nothing is True, Everything is permitted"
                 net.AddReplaceItems(
-                    result,
-                    NOT___Input1,
-                    NOT___Input2,
-                    AND___Input1__Input2,
-                    OR___Input1__Input2,
-                    NAND___Input1__Input2,
-                    NOR___Input1__Input2,
-                    XOR___Input1__Input2,
-                    XNOR___Input1__Input2,
-                    IMPLY___Input1__Input2,
-                    NIMPLY___Input1__Input2,
-                    inputs
+                    [
+                        result,
+                        NOT___Input1,
+                        NOT___Input2,
+                        AND___Input1__Input2,
+                        OR___Input1__Input2,
+                        NAND___Input1__Input2,
+                        NOR___Input1__Input2,
+                        XOR___Input1__Input2,
+                        XNOR___Input1__Input2,
+                        IMPLY___Input1__Input2,
+                        NIMPLY___Input1__Input2,
+                        ..inputs
+                    ]
                 );
                 net.AddReplaceItems(
                     [
@@ -183,11 +181,11 @@ namespace ei8.Prototypes.HelloWorm
                 // Link Input Neurons to Interneurons
                 net.AddReplaceItems(
                     NOT___Input1.LinkInputNeurons(
-                        inputs.Input1,
+                        inputs[0],
                         NOT
                     ),
                     NOT___Input2.LinkInputNeurons(
-                        inputs.Input2,
+                        inputs[1],
                         NOT
                     ),
                     AND___Input1__Input2.LinkInputNeurons(
@@ -233,7 +231,7 @@ namespace ei8.Prototypes.HelloWorm
             {
                 Adder a;
                 net.AddReplaceItems(a = new Adder(i, precedingCarryOver));
-                precedingCarryOver = a.CarryOver;
+                precedingCarryOver = a.Parameters.Outputs[(int) Adder.Output.CarryOver];
             }
         }
 
@@ -244,7 +242,7 @@ namespace ei8.Prototypes.HelloWorm
             {
                 Subtractor s;
                 net.AddReplaceItems(s = new Subtractor(i, precedingBorrow));
-                precedingBorrow = s.Borrow;
+                precedingBorrow = s.Parameters.Outputs[(int) Subtractor.Output.Borrow];
             }
         }
     }

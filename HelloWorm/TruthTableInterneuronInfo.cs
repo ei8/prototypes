@@ -147,42 +147,44 @@ namespace ei8.Prototypes.HelloWorm
         );
 
         public Network LinkInputNeurons(
-            InputInfo inputs,
+            BinaryNeuronInfo[] inputs,
             params Neuron[] additionalInputs
         )
         {
+            ArgumentOutOfRangeException.ThrowIfNotEqual(inputs.Length, 2);
+
             var result = new Network();
 
             result.AddReplaceItems(
                 NetworkHelper.LinkInputNeuronsToInterneuron(
                     this.Interneuron1.GetInterneuron(),
                     [
-                        inputs.Input1.Neuron0,
-                        inputs.Input2.Neuron0,
+                        inputs[0].Neuron0,
+                        inputs[1].Neuron0,
                         .. additionalInputs
                     ]
                 ),
                 NetworkHelper.LinkInputNeuronsToInterneuron(
                     this.Interneuron2.GetInterneuron(),
                     [
-                        inputs.Input1.Neuron0,
-                        inputs.Input2.Neuron1,
+                        inputs[0].Neuron0,
+                        inputs[1].Neuron1,
                         .. additionalInputs
                     ]
                 ),
                 NetworkHelper.LinkInputNeuronsToInterneuron(
                     this.Interneuron3.GetInterneuron(),
                     [
-                        inputs.Input1.Neuron1,
-                        inputs.Input2.Neuron0,
+                        inputs[0].Neuron1,
+                        inputs[1].Neuron0,
                         .. additionalInputs
                     ]
                 ),
                 NetworkHelper.LinkInputNeuronsToInterneuron(
                     this.Interneuron4.GetInterneuron(),
                     [
-                        inputs.Input1.Neuron1,
-                        inputs.Input2.Neuron1,
+                        inputs[0].Neuron1,
+                        inputs[1].Neuron1,
                         .. additionalInputs
                     ]
                 )

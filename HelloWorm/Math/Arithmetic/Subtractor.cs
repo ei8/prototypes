@@ -2,16 +2,35 @@
 
 namespace ei8.Prototypes.HelloWorm.Math.Arithmetic
 {
-    public class Subtractor : ISubtractor
+    public class Subtractor : ICircuit
     {
+        public enum Input
+        {
+            Minuend,
+            Subtrahend
+        }
+
+        public enum Output
+        {
+            Difference,
+            Borrow
+        }
+
         public Subtractor(
             int exponent = 0,
             BinaryNeuronInfo? precedingBorrow = null
         ) :
         this(
-            InputInfo.Create($"{nameof(Subtractor)}{exponent + 1}.Minuend", $"{nameof(Subtractor)}{exponent + 1}.Subtrahend"),
-            BinaryNeuronInfo.Create($"{nameof(Subtractor)}{exponent + 1}.{nameof(Difference)}"),
-            BinaryNeuronInfo.Create($"{nameof(Subtractor)}{exponent + 1}.{nameof(Borrow)}"),
+            new(
+                [
+                    BinaryNeuronInfo.Create($"{nameof(Subtractor)}{exponent + 1}.{nameof(Input.Minuend)}"), 
+                    BinaryNeuronInfo.Create($"{nameof(Subtractor)}{exponent + 1}.{nameof(Input.Subtrahend)}"),
+                ],
+                [
+                    BinaryNeuronInfo.Create($"{nameof(Subtractor)}{exponent + 1}.{nameof(Output.Difference)}"),
+                    BinaryNeuronInfo.Create($"{nameof(Subtractor)}{exponent + 1}.{nameof(Output.Borrow)}")
+                ]
+            ),
             exponent,
             precedingBorrow
         )
@@ -19,20 +38,14 @@ namespace ei8.Prototypes.HelloWorm.Math.Arithmetic
         }
 
         public Subtractor(
-            InputInfo operands,
-            BinaryNeuronInfo difference,
-            BinaryNeuronInfo borrow,
+            ParameterInfo parameters,
             int exponent = 0,
             BinaryNeuronInfo? precedingBorrow = null
             )
         {
             this.Network = new();
             this.Network.AddReplaceItems(
-                // Inputs
-                this.Operands = operands,
-                // Outputs
-                this.Difference = difference,
-                this.Borrow = borrow
+                this.Parameters = parameters
             );
 
             string subtractorName = $"Subtractor{exponent + 1}";
@@ -62,7 +75,7 @@ namespace ei8.Prototypes.HelloWorm.Math.Arithmetic
                     // half1 interneurons
                     CreateSubtractorHalf1Interneurons(
                         this.Network,
-                        operands,
+                        this.Parameters.Inputs,
                         half1_XOR_Result,
                         half1_OUT___Half1_NOT___Minuend,
                         half1_Borrow,
@@ -74,7 +87,7 @@ namespace ei8.Prototypes.HelloWorm.Math.Arithmetic
                         TruthTableInterneuronInfo.TryCreate(
                             out var half2_XOR___Borrow__Half1_XOR_Result,
                             TruthTableInterneuronInfo.LogicGateType.Xor,
-                            this.Difference,
+                            this.Parameters.Outputs[(int) Output.Difference],
                             new(
                                 precedingSubtractorName,
                                 subtractorName,
@@ -101,7 +114,7 @@ namespace ei8.Prototypes.HelloWorm.Math.Arithmetic
                         TruthTableInterneuronInfo.TryCreate(
                             out var OR___Half1_Borrow__Half2_Borrow,
                             TruthTableInterneuronInfo.LogicGateType.Or,
-                            borrow,
+                            this.Parameters.Outputs[(int) Output.Borrow],
                             new(subtractorName)
                         )
                     )
@@ -116,26 +129,26 @@ namespace ei8.Prototypes.HelloWorm.Math.Arithmetic
                         this.Network.AddReplaceItems(
                             // Link Half1 interneurons and precedingBorrow to Half2 interneurons
                             half2_XOR___Borrow__Half1_XOR_Result.LinkInputNeurons(
-                                new(
+                                [
                                     precedingBorrow,
                                     half1_XOR_Result
-                                )
+                                ]
                             ),
                             half2_NOT___Half1_XOR_Result.LinkInputNeurons(
                                 half1_XOR_Result
                             ),
                             half2_AND___Borrow__Half2_OUT___Half2_NOT___Half1_XOR_Result.LinkInputNeurons(
-                                new(
+                                [
                                     precedingBorrow,
                                     half2_OUT___Half2_NOT___Half1_XOR_Result
-                                )
+                                ]
                             ),
                             // OR Borrows
                             OR___Half1_Borrow__Half2_Borrow.LinkInputNeurons(
-                                new(
+                                [
                                     half1_Borrow,
                                     half2_Borrow
-                                )
+                                ]
                             )
                         );
                     }
@@ -145,10 +158,10 @@ namespace ei8.Prototypes.HelloWorm.Math.Arithmetic
                     // half1
                     CreateSubtractorHalf1Interneurons(
                         this.Network,
-                        operands,
-                        this.Difference,
+                        this.Parameters.Inputs,
+                        this.Parameters.Outputs[(int)Output.Difference],
                         half1_OUT___Half1_NOT___Minuend,
-                        borrow,
+                        this.Parameters.Outputs[(int)Output.Borrow],
                         subtractorName
                     );
                 }
@@ -157,7 +170,7 @@ namespace ei8.Prototypes.HelloWorm.Math.Arithmetic
 
         private static void CreateSubtractorHalf1Interneurons(
             Network network,
-            InputInfo operands,
+            BinaryNeuronInfo[] inputs,
             BinaryNeuronInfo xorOutput,
             BinaryNeuronInfo notOutput,
             BinaryNeuronInfo andOutput,
@@ -194,25 +207,21 @@ namespace ei8.Prototypes.HelloWorm.Math.Arithmetic
 
                 network.AddReplaceItems(
                     // Input Neurons to Interneurons
-                    half1_XOR___Minuend__Subtrahend.LinkInputNeurons(operands),
-                    half1_NOT___Minuend.LinkInputNeurons(operands.Input1),
+                    half1_XOR___Minuend__Subtrahend.LinkInputNeurons(inputs),
+                    half1_NOT___Minuend.LinkInputNeurons(inputs[(int) Input.Minuend]),
                     // Intermediate Results to Interneurons
                     half1_AND___Subtrahend__Half1_OUT___Half1_NOT___Minuend.LinkInputNeurons(
-                        new InputInfo(
+                        [
                             notOutput,
-                            operands.Input2
-                        )
+                            inputs[(int) Input.Subtrahend]
+                        ]
                     )
                 );
             }
         }
 
-        public InputInfo Operands { get; }
-
-        public BinaryNeuronInfo Borrow { get; }
-
-        public BinaryNeuronInfo Difference { get; }
-
         public Network Network { get; }
+
+        public ParameterInfo Parameters { get; }
     }
 }

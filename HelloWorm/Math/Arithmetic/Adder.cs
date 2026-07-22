@@ -1,17 +1,36 @@
 ﻿using ei8.Cortex.Coding;
 
 namespace ei8.Prototypes.HelloWorm.Math.Arithmetic
-{ 
-    public class Adder : IAdder
+{
+    public class Adder : ICircuit
     {
+        public enum Input
+        {
+            Addend1,
+            Addend2
+        }
+
+        public enum Output
+        {
+            Sum,
+            CarryOver
+        }
+
         public Adder(
-            int exponent = 0, 
+            int exponent = 0,
             BinaryNeuronInfo? precedingCarryOver = null
-        ) : 
+        ) :
         this(
-            InputInfo.Create($"{nameof(Adder)}{exponent + 1}.Addend1", $"{nameof(Adder)}{exponent + 1}.Addend2"),
-            BinaryNeuronInfo.Create($"{nameof(Adder)}{exponent + 1}.{nameof(Sum)}"),
-            BinaryNeuronInfo.Create($"{nameof(Adder)}{exponent + 1}.{nameof(CarryOver)}"),
+            new(
+                [
+                    BinaryNeuronInfo.Create($"{nameof(Adder)}{exponent + 1}.{nameof(Input.Addend1)}"),
+                    BinaryNeuronInfo.Create($"{nameof(Adder)}{exponent + 1}.{nameof(Input.Addend2)}"),
+                ],
+                [
+                    BinaryNeuronInfo.Create($"{nameof(Adder)}{exponent + 1}.{nameof(Output.Sum)}"),
+                    BinaryNeuronInfo.Create($"{nameof(Adder)}{exponent + 1}.{nameof(Output.CarryOver)}")
+                ]
+            ),
             exponent,
             precedingCarryOver
         )
@@ -19,20 +38,14 @@ namespace ei8.Prototypes.HelloWorm.Math.Arithmetic
         }
 
         public Adder(
-            InputInfo addends,
-            BinaryNeuronInfo sum,
-            BinaryNeuronInfo carryOver,
+            ParameterInfo parameters,
             int exponent = 0,
             BinaryNeuronInfo? precedingCarryOver = null
         )
         {
             this.Network = new();
             this.Network.AddReplaceItems(
-                // Inputs
-                this.Addends = addends,
-                // Outputs
-                this.Sum = sum,
-                this.CarryOver = carryOver
+                this.Parameters = parameters
             );
 
             string adderName = $"Adder{exponent + 1}";
@@ -55,7 +68,7 @@ namespace ei8.Prototypes.HelloWorm.Math.Arithmetic
 
                 CreateAdderHalf1Interneurons(
                     this.Network,
-                    addends,
+                    this.Parameters.Inputs,
                     half1_XOR_Result,
                     half1_CarryOver,
                     adderName
@@ -66,7 +79,7 @@ namespace ei8.Prototypes.HelloWorm.Math.Arithmetic
                     TruthTableInterneuronInfo.TryCreate(
                         out var half2_XOR___CarryOver__Half1_XOR_Result,
                         TruthTableInterneuronInfo.LogicGateType.Xor,
-                        this.Sum,
+                        this.Parameters.Outputs[(int) Output.Sum],
                         new(
                             precedingAdderName,
                             adderName,
@@ -87,7 +100,7 @@ namespace ei8.Prototypes.HelloWorm.Math.Arithmetic
                     TruthTableInterneuronInfo.TryCreate(
                         out var OR___Half1_CarryOver__Half2_CarryOver,
                         TruthTableInterneuronInfo.LogicGateType.Or,
-                        this.CarryOver,
+                        this.Parameters.Outputs[(int) Output.CarryOver],
                         new(adderName)
                     )
                 )
@@ -100,23 +113,23 @@ namespace ei8.Prototypes.HelloWorm.Math.Arithmetic
                     this.Network.AddReplaceItems(
                         // Link Half1 interneurons and precedingCarryOver to Half2 interneurons
                         half2_XOR___CarryOver__Half1_XOR_Result.LinkInputNeurons(
-                            new(
+                            [
                                 precedingCarryOver,
                                 half1_XOR_Result
-                            )
+                            ]
                         ),
                         half2_AND___CarryOver__Half1_XOR_Result.LinkInputNeurons(
-                            new(
+                            [
                                 precedingCarryOver,
                                 half1_XOR_Result
-                            )
+                            ]
                         ),
                         // OR carryOvers
                         OR___Half1_CarryOver__Half2_CarryOver.LinkInputNeurons(
-                            new(
+                            [
                                 half1_CarryOver,
                                 half2_CarryOver
-                            )
+                            ]
                         )
                     );
                 }
@@ -125,9 +138,9 @@ namespace ei8.Prototypes.HelloWorm.Math.Arithmetic
             {
                 CreateAdderHalf1Interneurons(
                     this.Network,
-                    addends,
-                    this.Sum,
-                    this.CarryOver,
+                    this.Parameters.Inputs,
+                    this.Parameters.Outputs[(int) Output.Sum],
+                    this.Parameters.Outputs[(int) Output.CarryOver],
                     adderName
                 );
             }
@@ -135,7 +148,7 @@ namespace ei8.Prototypes.HelloWorm.Math.Arithmetic
 
         private static void CreateAdderHalf1Interneurons(
             Network network,
-            InputInfo addends,
+            BinaryNeuronInfo[] addends,
             BinaryNeuronInfo xorOutput,
             BinaryNeuronInfo andOutput,
             string prefix
@@ -171,10 +184,6 @@ namespace ei8.Prototypes.HelloWorm.Math.Arithmetic
 
         public Network Network { get; }
 
-        public InputInfo Addends { get; }
-
-        public BinaryNeuronInfo CarryOver { get; }
-
-        public BinaryNeuronInfo Sum { get; }
+        public ParameterInfo Parameters { get; }
     }
 }

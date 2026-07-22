@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 
 namespace ei8.Prototypes.HelloWorm
 {
+    // TODO: Rename IneurULized to IneurUL, can generate Network based on contained IneurULs (InputInfo)
     // TODO: Create NotGate, inherit from LogicGateBase
     public class InverterInterneuronInfo : IneurULized
     {
