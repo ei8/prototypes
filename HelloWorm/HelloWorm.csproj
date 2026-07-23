@@ -49,8 +49,4 @@
     </None>
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Math\Logic\" />
-  </ItemGroup>
-
 </Project>

@@ -315,49 +315,49 @@ namespace ei8.Prototypes.HelloWorm
                 );
 
                 // HACK: use to add worm without need for an Avatar
-                // var matchingDishForm = this.dockPanel1.Documents.SingleOrDefault(d => d is frmDish);
-                //if (matchingDishForm is frmDish fd && fd.Dish != null)
-                //{
-                //    var newWorm = this.serviceProvider.GetRequiredService<Worm>();
-                //    newWorm.Initialize(
-                //        ExtensionMethods.CreateUnusedName(
-                //            (i) => $"{nameof(Worm)}{i.ToString()}",
-                //            (s) => fd.Dish.Components.OfType<INamed>().Any(dcn => dcn.Name == s)
-                //        ),
-                //        fd.Dish
-                //    );
-                //    newWorm.Network.AddReplaceItems(ns);
-                //    newWorm.Initialize(this.settingsService.Mirrors);
-                //    fd.Dish.Add(newWorm);
-                //}
+                var matchingDishForm = this.dockPanel1.Documents.SingleOrDefault(d => d is frmDish);
+                if (matchingDishForm is frmDish fd && fd.Dish != null)
+                {
+                    var newWorm = this.serviceProvider.GetRequiredService<Worm>();
+                    newWorm.Initialize(
+                        ExtensionMethods.CreateUnusedName(
+                            (i) => $"{nameof(Worm)}{i.ToString()}",
+                            (s) => fd.Dish.Components.OfType<INamed>().Any(dcn => dcn.Name == s)
+                        ),
+                        fd.Dish
+                    );
+                    newWorm.Network.AddReplaceItems(ns);
+                    newWorm.Initialize(this.settingsService.Mirrors);
+                    fd.Dish.Add(newWorm);
+                }
 
                 // Create neurons
-                var rp = new RequestProvider();
-                rp.SetHttpClientHandler(new HttpClientHandler());
-                var neuronClient = new HttpNeuronClient(rp);
+                // HACK: var rp = new RequestProvider();
+                //rp.SetHttpClientHandler(new HttpClientHandler());
+                //var neuronClient = new HttpNeuronClient(rp);
 
-                foreach (var n in ns.GetItems<Neuron>())
-                    await neuronClient.CreateNeuron(
-                        avatarUrl,
-                        n.Id.ToString(),
-                        n.Tag,
-                        null,
-                        n.MirrorUrl,
-                        "bearerToken"
-                    );
+                //foreach (var n in ns.GetItems<Neuron>())
+                //    await neuronClient.CreateNeuron(
+                //        avatarUrl,
+                //        n.Id.ToString(),
+                //        n.Tag,
+                //        null,
+                //        n.MirrorUrl,
+                //        "bearerToken"
+                //    );
 
-                var terminalClient = new HttpTerminalClient(rp);
-                foreach (var t in ns.GetItems<Terminal>())
-                    await terminalClient.CreateTerminal(
-                        avatarUrl,
-                        t.Id.ToString(),
-                        t.PresynapticNeuronId.ToString(),
-                        t.PostsynapticNeuronId.ToString(),
-                        Enum.Parse<neurUL.Cortex.Common.NeurotransmitterEffect>(t.Effect.ToString()),
-                        t.Strength,
-                        null,
-                        "bearerToken"
-                    );
+                //var terminalClient = new HttpTerminalClient(rp);
+                //foreach (var t in ns.GetItems<Terminal>())
+                //    await terminalClient.CreateTerminal(
+                //        avatarUrl,
+                //        t.Id.ToString(),
+                //        t.PresynapticNeuronId.ToString(),
+                //        t.PostsynapticNeuronId.ToString(),
+                //        Enum.Parse<neurUL.Cortex.Common.NeurotransmitterEffect>(t.Effect.ToString()),
+                //        t.Strength,
+                //        null,
+                //        "bearerToken"
+                //    );
             }
         }
 

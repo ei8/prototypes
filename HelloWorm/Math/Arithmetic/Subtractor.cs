@@ -1,4 +1,5 @@
 ﻿using ei8.Cortex.Coding;
+using ei8.Prototypes.HelloWorm.Math.Logic;
 
 namespace ei8.Prototypes.HelloWorm.Math.Arithmetic
 {
@@ -84,38 +85,65 @@ namespace ei8.Prototypes.HelloWorm.Math.Arithmetic
 
                     // half2 interneurons
                     if (
-                        TruthTableInterneuronInfo.TryCreate(
-                            out var half2_XOR___Borrow__Half1_XOR_Result,
-                            TruthTableInterneuronInfo.LogicGateType.Xor,
-                            this.Parameters.Outputs[(int) Output.Difference],
+                        LogicGateBase.TryCreate(
+                            out XorGate? half2_XOR___Borrow__Half1_XOR_Result,
                             new(
-                                precedingSubtractorName,
-                                subtractorName,
+                                [
+                                    precedingBorrow,
+                                    half1_XOR_Result
+                                ],
+                                [
+                                    this.Parameters.Outputs[(int) Output.Difference]
+                                ]
+                            ),
+                            new(
+                                [
+                                    precedingSubtractorName,
+                                    subtractorName,
+                                ],
                                 subtractorName
                             )
                         ) &&
-                        InverterInterneuronInfo.TryCreate(
-                            out var half2_NOT___Half1_XOR_Result,
-                            half2_OUT___Half2_NOT___Half1_XOR_Result,
-                            subtractorName,
-                            subtractorName
-                        ) &&
-                        TruthTableInterneuronInfo.TryCreate(
-                            out var half2_AND___Borrow__Half2_OUT___Half2_NOT___Half1_XOR_Result,
-                            TruthTableInterneuronInfo.LogicGateType.And,
-                            half2_Borrow,
+                        LogicGateBase.TryCreate(
+                            out NotGate? half2_NOT___Half1_XOR_Result,
                             new(
-                                precedingSubtractorName,
-                                subtractorName,
+                                [half1_XOR_Result],
+                                [half2_OUT___Half2_NOT___Half1_XOR_Result]
+                            ),
+                            LogicGateInterneuronTagInfo.CreateSameTagForSingleInput(subtractorName)
+                        ) &&
+                        LogicGateBase.TryCreate(
+                            out AndGate? half2_AND___Borrow__Half2_OUT___Half2_NOT___Half1_XOR_Result,
+                            new(
+                                [
+                                    precedingBorrow,
+                                    half2_OUT___Half2_NOT___Half1_XOR_Result
+                                ],
+                                [ 
+                                    half2_Borrow 
+                                ]
+                            ),
+                            new(
+                                [
+                                    precedingSubtractorName,
+                                    subtractorName
+                                ],
                                 subtractorName
                             )
                         ) &&
                         // OR Borrows
-                        TruthTableInterneuronInfo.TryCreate(
-                            out var OR___Half1_Borrow__Half2_Borrow,
-                            TruthTableInterneuronInfo.LogicGateType.Or,
-                            this.Parameters.Outputs[(int) Output.Borrow],
-                            new(subtractorName)
+                        LogicGateBase.TryCreate(
+                            out OrGate? OR___Half1_Borrow__Half2_Borrow,
+                            new(
+                                [
+                                    half1_Borrow,
+                                    half2_Borrow
+                                ],
+                                [
+                                    this.Parameters.Outputs[(int) Output.Borrow]
+                                ]
+                            ),
+                            LogicGateInterneuronTagInfo.CreateSameTagForDualInput(subtractorName)
                         )
                     )
                     {
@@ -124,32 +152,6 @@ namespace ei8.Prototypes.HelloWorm.Math.Arithmetic
                             half2_NOT___Half1_XOR_Result,
                             half2_AND___Borrow__Half2_OUT___Half2_NOT___Half1_XOR_Result,
                             OR___Half1_Borrow__Half2_Borrow
-                        );
-
-                        this.Network.AddReplaceItems(
-                            // Link Half1 interneurons and precedingBorrow to Half2 interneurons
-                            half2_XOR___Borrow__Half1_XOR_Result.LinkInputNeurons(
-                                [
-                                    precedingBorrow,
-                                    half1_XOR_Result
-                                ]
-                            ),
-                            half2_NOT___Half1_XOR_Result.LinkInputNeurons(
-                                half1_XOR_Result
-                            ),
-                            half2_AND___Borrow__Half2_OUT___Half2_NOT___Half1_XOR_Result.LinkInputNeurons(
-                                [
-                                    precedingBorrow,
-                                    half2_OUT___Half2_NOT___Half1_XOR_Result
-                                ]
-                            ),
-                            // OR Borrows
-                            OR___Half1_Borrow__Half2_Borrow.LinkInputNeurons(
-                                [
-                                    half1_Borrow,
-                                    half2_Borrow
-                                ]
-                            )
                         );
                     }
                 }
@@ -179,23 +181,41 @@ namespace ei8.Prototypes.HelloWorm.Math.Arithmetic
         {
             // Link half1 interneurons
             if (
-                TruthTableInterneuronInfo.TryCreate(
-                    out var half1_XOR___Minuend__Subtrahend,
-                    TruthTableInterneuronInfo.LogicGateType.Xor,
-                    xorOutput,
-                    new(prefix)
+                LogicGateBase.TryCreate(
+                    out XorGate? half1_XOR___Minuend__Subtrahend,
+                    new(
+                        inputs,
+                        [
+                            xorOutput
+                        ]
+                    ),
+                    LogicGateInterneuronTagInfo.CreateSameTagForDualInput(prefix)
                 ) &&
-                InverterInterneuronInfo.TryCreate(
-                    out var half1_NOT___Minuend,
-                    notOutput,
-                    prefix,
+                LogicGateBase.TryCreate(
+                    out NotGate? half1_NOT___Minuend,
+                    new(
+                        [
+                            inputs[(int)Input.Minuend]
+                        ],
+                        [
+                            notOutput
+                        ]
+                    ),
+                    LogicGateInterneuronTagInfo.CreateSameTagForSingleInput(prefix),
                     prefix
                 ) &&
-                TruthTableInterneuronInfo.TryCreate(
-                    out var half1_AND___Subtrahend__Half1_OUT___Half1_NOT___Minuend,
-                    TruthTableInterneuronInfo.LogicGateType.And,
-                    andOutput,
-                    new(prefix)
+                LogicGateBase.TryCreate(
+                    out AndGate? half1_AND___Subtrahend__Half1_OUT___Half1_NOT___Minuend,
+                    new(
+                        [
+                            notOutput,
+                            inputs[(int) Input.Subtrahend]
+                        ],
+                        [
+                            andOutput
+                        ]
+                    ),
+                    LogicGateInterneuronTagInfo.CreateSameTagForDualInput(prefix)
                 )
             )
             {
@@ -203,19 +223,6 @@ namespace ei8.Prototypes.HelloWorm.Math.Arithmetic
                     half1_XOR___Minuend__Subtrahend,
                     half1_NOT___Minuend,
                     half1_AND___Subtrahend__Half1_OUT___Half1_NOT___Minuend
-                );
-
-                network.AddReplaceItems(
-                    // Input Neurons to Interneurons
-                    half1_XOR___Minuend__Subtrahend.LinkInputNeurons(inputs),
-                    half1_NOT___Minuend.LinkInputNeurons(inputs[(int) Input.Minuend]),
-                    // Intermediate Results to Interneurons
-                    half1_AND___Subtrahend__Half1_OUT___Half1_NOT___Minuend.LinkInputNeurons(
-                        [
-                            notOutput,
-                            inputs[(int) Input.Subtrahend]
-                        ]
-                    )
                 );
             }
         }

@@ -3,6 +3,7 @@ using ei8.Cortex.Coding.Persistence;
 using ei8.Cortex.Library.Client;
 using ei8.Cortex.Library.Client.Out;
 using ei8.Prototypes.HelloWorm.Math.Arithmetic;
+using ei8.Prototypes.HelloWorm.Math.Logic;
 using Microsoft.Extensions.DependencyInjection;
 using System.ComponentModel.Design;
 using WeifenLuo.WinFormsUI.Docking;
@@ -100,19 +101,36 @@ namespace ei8.Prototypes.HelloWorm
         {
             if (this.selectionService.PrimarySelection is Dish dish)
             {
+                string option = InputBox.ShowDialog(this, "1 - Logic Gates; 2 - Addition; 3 - Subtraction", string.Empty);
+
                 var sheet = this.serviceProvider.GetRequiredService<Worksheet>();
+                var suffix = string.Empty;
+                if (!string.IsNullOrWhiteSpace(option))
+                {
+                    switch (option)
+                    {
+                        case "1":
+                            frmToolbox.CreateLogicGates(sheet.Network);
+                            suffix = "Logic Gates";
+                            break;
+                        case "2":
+                            frmToolbox.CreateAdders(sheet.Network, 4);
+                            suffix = "Addition";
+                            break;
+                        case "3":
+                            frmToolbox.CreateSubtractors(sheet.Network, 4);
+                            suffix = "Subtraction";
+                            break;
+                    }
+                }
+                
                 sheet.Initialize(
                     ExtensionMethods.CreateUnusedName(
-                            (i) => $"{nameof(Worksheet)}{i.ToString()}",
-                            (s) => dish.Components.OfType<INamed>().Any(dcn => dcn.Name == s)
-                        ),
-                        dish
-                    );
-
-                // frmToolbox.CreateLogicGates(sheet.Network);
-                // frmToolbox.CreateAdders(sheet.Network, 4);
-                frmToolbox.CreateSubtractors(sheet.Network, 4);
-
+                        (i) => $"{nameof(Worksheet)}{i.ToString()} ({suffix})",
+                        (s) => dish.Components.OfType<INamed>().Any(dcn => dcn.Name == s)
+                    ),
+                    dish
+                );
                 sheet.Initialize(this.settingsService.Mirrors);
                 dish.Add(sheet);
             }
@@ -120,18 +138,13 @@ namespace ei8.Prototypes.HelloWorm
 
         private static void CreateLogicGates(Network net)
         {
+            BinaryNeuronInfo[] inputs = [
+                BinaryNeuronInfo.Create("Input1", Boolean.TrueString.ToUpper(), Boolean.FalseString.ToUpper()),
+                BinaryNeuronInfo.Create("Input2", Boolean.TrueString.ToUpper(), Boolean.FalseString.ToUpper())
+            ];
+
             if (
                 BinaryNeuronInfo.TryCreate(out var result, trueString: Boolean.TrueString.ToUpper(), falseString: Boolean.FalseString.ToUpper()) && // rotateConfig);
-                InverterInterneuronInfo.TryCreate(out var NOT___Input1, result) &&
-                InverterInterneuronInfo.TryCreate(out var NOT___Input2, result) &&
-                TruthTableInterneuronInfo.TryCreate(out var AND___Input1__Input2, TruthTableInterneuronInfo.LogicGateType.And, result) &&
-                TruthTableInterneuronInfo.TryCreate(out var OR___Input1__Input2, TruthTableInterneuronInfo.LogicGateType.Or, result) &&
-                TruthTableInterneuronInfo.TryCreate(out var NAND___Input1__Input2, TruthTableInterneuronInfo.LogicGateType.Nand, result) &&
-                TruthTableInterneuronInfo.TryCreate(out var NOR___Input1__Input2, TruthTableInterneuronInfo.LogicGateType.Nor, result) &&
-                TruthTableInterneuronInfo.TryCreate(out var XOR___Input1__Input2, TruthTableInterneuronInfo.LogicGateType.Xor, result) &&
-                TruthTableInterneuronInfo.TryCreate(out var XNOR___Input1__Input2, TruthTableInterneuronInfo.LogicGateType.Xnor, result) &&
-                TruthTableInterneuronInfo.TryCreate(out var IMPLY___Input1__Input2, TruthTableInterneuronInfo.LogicGateType.Imply, result) &&
-                TruthTableInterneuronInfo.TryCreate(out var NIMPLY___Input1__Input2, TruthTableInterneuronInfo.LogicGateType.Nimply, result) &&
                 NetworkHelper.TryCreateNeuron(out var NOT) &&
                 NetworkHelper.TryCreateNeuron(out var AND) &&
                 NetworkHelper.TryCreateNeuron(out var OR) &&
@@ -140,14 +153,19 @@ namespace ei8.Prototypes.HelloWorm
                 NetworkHelper.TryCreateNeuron(out var XOR) &&
                 NetworkHelper.TryCreateNeuron(out var XNOR) &&
                 NetworkHelper.TryCreateNeuron(out var IMPLY) &&
-                NetworkHelper.TryCreateNeuron(out var NIMPLY)
+                NetworkHelper.TryCreateNeuron(out var NIMPLY) &&
+                LogicGateBase.TryCreate(out NotGate? NOT___Input1, new ParameterInfo([inputs[0]], [result]), additionalInputs: NOT) &&
+                LogicGateBase.TryCreate(out NotGate? NOT___Input2, new ParameterInfo([inputs[1]], [result]), additionalInputs: NOT) &&
+                LogicGateBase.TryCreate(out AndGate? AND___Input1__Input2, new ParameterInfo(inputs, [result]), additionalInputs: AND) &&
+                LogicGateBase.TryCreate(out OrGate? OR___Input1__Input2, new ParameterInfo(inputs, [result]), additionalInputs: OR) &&
+                LogicGateBase.TryCreate(out NandGate? NAND___Input1__Input2, new ParameterInfo(inputs, [result]), additionalInputs: NAND) &&
+                LogicGateBase.TryCreate(out NorGate? NOR___Input1__Input2, new ParameterInfo(inputs, [result]), additionalInputs: NOR) &&
+                LogicGateBase.TryCreate(out XorGate? XOR___Input1__Input2, new ParameterInfo(inputs, [result]), additionalInputs: XOR) &&
+                LogicGateBase.TryCreate(out XnorGate? XNOR___Input1__Input2, new ParameterInfo(inputs, [result]), additionalInputs: XNOR) &&
+                LogicGateBase.TryCreate(out ImplyGate? IMPLY___Input1__Input2, new ParameterInfo(inputs, [result]), additionalInputs: IMPLY) &&
+                LogicGateBase.TryCreate(out NimplyGate? NIMPLY___Input1__Input2, new ParameterInfo(inputs, [result]), additionalInputs: NIMPLY)
             )
-            {                 
-                BinaryNeuronInfo[] inputs = [
-                    BinaryNeuronInfo.Create("Input1", Boolean.TrueString.ToUpper(), Boolean.FalseString.ToUpper()),
-                    BinaryNeuronInfo.Create("Input2", Boolean.TrueString.ToUpper(), Boolean.FalseString.ToUpper())
-                ];
-
+            {
                 // "Nothing is True, Everything is permitted"
                 net.AddReplaceItems(
                     [
@@ -177,49 +195,6 @@ namespace ei8.Prototypes.HelloWorm
                         IMPLY,
                         NIMPLY
                     ]
-                );
-                // Link Input Neurons to Interneurons
-                net.AddReplaceItems(
-                    NOT___Input1.LinkInputNeurons(
-                        inputs[0],
-                        NOT
-                    ),
-                    NOT___Input2.LinkInputNeurons(
-                        inputs[1],
-                        NOT
-                    ),
-                    AND___Input1__Input2.LinkInputNeurons(
-                        inputs,
-                        AND
-                    ),
-                    OR___Input1__Input2.LinkInputNeurons(
-                        inputs,
-                        OR
-                    ),
-                    NAND___Input1__Input2.LinkInputNeurons(
-                        inputs,
-                        NAND
-                    ),
-                    NOR___Input1__Input2.LinkInputNeurons(
-                        inputs,
-                        NOR
-                    ),
-                    XOR___Input1__Input2.LinkInputNeurons(
-                        inputs,
-                        XOR
-                    ),
-                    XNOR___Input1__Input2.LinkInputNeurons(
-                        inputs,
-                        XNOR
-                    ),
-                    IMPLY___Input1__Input2.LinkInputNeurons(
-                        inputs,
-                        IMPLY
-                    ),
-                    NIMPLY___Input1__Input2.LinkInputNeurons(
-                        inputs,
-                        NIMPLY
-                    )
                 );
             }
         }
