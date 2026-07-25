@@ -1,10 +1,12 @@
 ﻿using ei8.Cortex.Coding;
+using ei8.Cortex.Coding.Persistence;
 using ei8.Cortex.Coding.Spiker;
 using ei8.Cortex.Library.Client;
 using ei8.Cortex.Library.Client.Out;
+using ei8.Prototypes.HelloWorm.Math.Arithmetic;
+using ei8.Prototypes.HelloWorm.Math.Logic;
 using Microsoft.Extensions.DependencyInjection;
 using System.ComponentModel.Design;
-using System.Diagnostics.CodeAnalysis;
 using WeifenLuo.WinFormsUI.Docking;
 
 namespace ei8.Prototypes.HelloWorm
@@ -88,7 +90,9 @@ namespace ei8.Prototypes.HelloWorm
                         ),
                         dish
                     );
-                    newWorm.Initialize(queryResult.ToNetwork(), this.settingsService.Mirrors);
+
+                    newWorm.Network.AddReplaceItems(queryResult.ToNetwork());
+                    newWorm.Initialize(this.settingsService.Mirrors);
                     dish.Add(newWorm);
                 }
             }
@@ -98,123 +102,101 @@ namespace ei8.Prototypes.HelloWorm
         {
             if (this.selectionService.PrimarySelection is Dish dish)
             {
+                string option = InputBox.ShowDialog(this, "1 - Logic Gates; 2 - Addition; 3 - Subtraction", string.Empty);
+
                 var sheet = this.serviceProvider.GetRequiredService<Worksheet>();
+                var suffix = string.Empty;
+                if (!string.IsNullOrWhiteSpace(option))
+                {
+                    switch (option)
+                    {
+                        case "1":
+                            frmToolbox.CreateLogicGates(sheet.Network);
+                            suffix = "Logic Gates";
+                            break;
+                        case "2":
+                            frmToolbox.CreateAdders(sheet.Network, 4);
+                            suffix = "Addition";
+                            break;
+                        case "3":
+                            frmToolbox.CreateSubtractors(sheet.Network, 4);
+                            suffix = "Subtraction";
+                            break;
+                    }
+                }
+                
                 sheet.Initialize(
                     ExtensionMethods.CreateUnusedName(
-                            (i) => $"{nameof(Worksheet)}{i.ToString()}",
-                            (s) => dish.Components.OfType<INamed>().Any(dcn => dcn.Name == s)
-                        ),
-                        dish
-                    );
-
-                var net = new Network();
-
-                frmToolbox.CreateLogicGates(net);
-                // frmToolbox.CreateAdders(net, 4);
-                // frmToolbox.CreateSubtractors(net, 4);
-
-                sheet.Initialize(net, this.settingsService.Mirrors);
+                        (i) => $"{nameof(Worksheet)}{i.ToString()} ({suffix})",
+                        (s) => dish.Components.OfType<INamed>().Any(dcn => dcn.Name == s)
+                    ),
+                    dish
+                );
+                sheet.Initialize(this.settingsService.Mirrors);
                 dish.Add(sheet);
             }
         }
 
         private static void CreateLogicGates(Network net)
         {
+            BinaryNeuronInfo[] inputs = [
+                BinaryNeuronInfo.Create("Input1", Boolean.TrueString.ToUpper(), Boolean.FalseString.ToUpper()),
+                BinaryNeuronInfo.Create("Input2", Boolean.TrueString.ToUpper(), Boolean.FalseString.ToUpper())
+            ];
+
             if (
-                net.TryCreateBinaryNeurons(out var result, trueString: Boolean.TrueString.ToUpper(), falseString: Boolean.FalseString.ToUpper()) && // rotateConfig);
-                net.TryCreateInverterInterneurons(out var NOT___Input1, result) &&
-                net.TryCreateInverterInterneurons(out var NOT___Input2, result) &&
-                net.TryCreateTruthTableInterneurons(out var AND___Input1__Input2, ExtensionMethods.LogicGateType.And, result) &&
-                net.TryCreateTruthTableInterneurons(out var OR___Input1__Input2, ExtensionMethods.LogicGateType.Or, result) &&
-                net.TryCreateTruthTableInterneurons(out var NAND___Input1__Input2, ExtensionMethods.LogicGateType.Nand, result) &&
-                net.TryCreateTruthTableInterneurons(out var NOR___Input1__Input2, ExtensionMethods.LogicGateType.Nor, result) &&
-                net.TryCreateTruthTableInterneurons(out var XOR___Input1__Input2, ExtensionMethods.LogicGateType.Xor, result) &&
-                net.TryCreateTruthTableInterneurons(out var XNOR___Input1__Input2, ExtensionMethods.LogicGateType.Xnor, result) &&
-                net.TryCreateTruthTableInterneurons(out var IMPLY___Input1__Input2, ExtensionMethods.LogicGateType.Imply, result) &&
-                net.TryCreateTruthTableInterneurons(out var NIMPLY___Input1__Input2, ExtensionMethods.LogicGateType.Nimply, result) &&
-                net.TryCreateNeuron(out var NOT) &&
-                net.TryCreateNeuron(out var AND) &&
-                net.TryCreateNeuron(out var OR) &&
-                net.TryCreateNeuron(out var NAND) &&
-                net.TryCreateNeuron(out var NOR) &&
-                net.TryCreateNeuron(out var XOR) &&
-                net.TryCreateNeuron(out var XNOR) &&
-                net.TryCreateNeuron(out var IMPLY) &&
-                net.TryCreateNeuron(out var NIMPLY)
+                BinaryNeuronInfo.TryCreate(out var result, trueString: Boolean.TrueString.ToUpper(), falseString: Boolean.FalseString.ToUpper()) && // rotateConfig);
+                NetworkHelper.TryCreateNeuron(out var NOT) &&
+                NetworkHelper.TryCreateNeuron(out var AND) &&
+                NetworkHelper.TryCreateNeuron(out var OR) &&
+                NetworkHelper.TryCreateNeuron(out var NAND) &&
+                NetworkHelper.TryCreateNeuron(out var NOR) &&
+                NetworkHelper.TryCreateNeuron(out var XOR) &&
+                NetworkHelper.TryCreateNeuron(out var XNOR) &&
+                NetworkHelper.TryCreateNeuron(out var IMPLY) &&
+                NetworkHelper.TryCreateNeuron(out var NIMPLY) &&
+                LogicGateBase.TryCreate(out NotGate? NOT___Input1, new ParameterInfo([inputs[0]], [result]), additionalInputs: NOT) &&
+                LogicGateBase.TryCreate(out NotGate? NOT___Input2, new ParameterInfo([inputs[1]], [result]), additionalInputs: NOT) &&
+                LogicGateBase.TryCreate(out AndGate? AND___Input1__Input2, new ParameterInfo(inputs, [result]), additionalInputs: AND) &&
+                LogicGateBase.TryCreate(out OrGate? OR___Input1__Input2, new ParameterInfo(inputs, [result]), additionalInputs: OR) &&
+                LogicGateBase.TryCreate(out NandGate? NAND___Input1__Input2, new ParameterInfo(inputs, [result]), additionalInputs: NAND) &&
+                LogicGateBase.TryCreate(out NorGate? NOR___Input1__Input2, new ParameterInfo(inputs, [result]), additionalInputs: NOR) &&
+                LogicGateBase.TryCreate(out XorGate? XOR___Input1__Input2, new ParameterInfo(inputs, [result]), additionalInputs: XOR) &&
+                LogicGateBase.TryCreate(out XnorGate? XNOR___Input1__Input2, new ParameterInfo(inputs, [result]), additionalInputs: XNOR) &&
+                LogicGateBase.TryCreate(out ImplyGate? IMPLY___Input1__Input2, new ParameterInfo(inputs, [result]), additionalInputs: IMPLY) &&
+                LogicGateBase.TryCreate(out NimplyGate? NIMPLY___Input1__Input2, new ParameterInfo(inputs, [result]), additionalInputs: NIMPLY)
             )
-            { 
-                var inputs = net.CreateTruthTableInputNeurons(
-                    // input1TrueConfig,
-                    "Input1",
-                    // input2TrueConfig,
-                    "Input2",
-                    Boolean.TrueString.ToUpper(),
-                    Boolean.FalseString.ToUpper()
-                );
-                
-                #region Link Input Neurons to Interneurons
+            {
                 // "Nothing is True, Everything is permitted"
-                #region Not
-                net.LinkInverterInputNeuronsToInterneurons(
-                    inputs.Input1,
-                    NOT___Input1,
-                    NOT
+                net.AddReplaceItems(
+                    [
+                        result,
+                        NOT___Input1,
+                        NOT___Input2,
+                        AND___Input1__Input2,
+                        OR___Input1__Input2,
+                        NAND___Input1__Input2,
+                        NOR___Input1__Input2,
+                        XOR___Input1__Input2,
+                        XNOR___Input1__Input2,
+                        IMPLY___Input1__Input2,
+                        NIMPLY___Input1__Input2,
+                        ..inputs
+                    ]
                 );
-                net.LinkInverterInputNeuronsToInterneurons(
-                    inputs.Input2,
-                    NOT___Input2,
-                    NOT
+                net.AddReplaceItems(
+                    [
+                        NOT,
+                        AND,
+                        OR,
+                        NAND,
+                        NOR,
+                        XOR,
+                        XNOR,
+                        IMPLY,
+                        NIMPLY
+                    ]
                 );
-                #endregion
-
-                net.LinkTruthTableInputNeuronsToInterneurons(
-                    inputs,
-                    AND___Input1__Input2,
-                    AND
-                );
-
-                net.LinkTruthTableInputNeuronsToInterneurons(
-                    inputs,
-                    OR___Input1__Input2,
-                    OR
-                );
-
-                net.LinkTruthTableInputNeuronsToInterneurons(
-                    inputs,
-                    NAND___Input1__Input2,
-                    NAND
-                );
-
-                net.LinkTruthTableInputNeuronsToInterneurons(
-                    inputs,
-                    NOR___Input1__Input2,
-                    NOR
-                );
-
-                net.LinkTruthTableInputNeuronsToInterneurons(
-                    inputs,
-                    XOR___Input1__Input2,
-                    XOR
-                );
-
-                net.LinkTruthTableInputNeuronsToInterneurons(
-                    inputs,
-                    XNOR___Input1__Input2,
-                    XNOR
-                );
-
-                net.LinkTruthTableInputNeuronsToInterneurons(
-                    inputs,
-                    IMPLY___Input1__Input2,
-                    IMPLY
-                );
-
-                net.LinkTruthTableInputNeuronsToInterneurons(
-                    inputs,
-                    NIMPLY___Input1__Input2,
-                    NIMPLY
-                );
-                #endregion
             }
         }
 
@@ -223,151 +205,9 @@ namespace ei8.Prototypes.HelloWorm
             BinaryNeuronInfo? precedingCarryOver = null;
             for (int i = 0; i < count; i++)
             {
-                if (frmToolbox.TryCreateAdder(net, out var carryOver, i, precedingCarryOver))
-                    precedingCarryOver = carryOver;
-            }
-        }
-
-        private static bool TryCreateAdder(
-            Network net,
-            out BinaryNeuronInfo? carryOver,
-            int base2Exponent = 0,
-            BinaryNeuronInfo? precedingCarryOver = null
-        )
-        {
-            var boolResult = false;
-            carryOver = null;
-            string adderName = $"Adder{base2Exponent + 1}";
-
-            // Declare Inputs
-            var addends = net.CreateTruthTableInputNeurons($"{adderName}.Addend1", $"{adderName}.Addend2");
-
-            // Declare Outputs
-            if (
-                net.TryCreateBinaryNeurons(out var result, adderName) &&
-                net.TryCreateBinaryNeurons(out carryOver, adderName)
-            )
-            {
-                if (
-                    // is not least significant bit
-                    precedingCarryOver != null &&
-                    net.TryCreateBinaryNeurons(out var half1_XOR_Result, adderName) &&
-                    net.TryCreateBinaryNeurons(out var half1_CarryOver, adderName) &&
-                    net.TryCreateBinaryNeurons(out var half2_CarryOver, adderName)
-                )
-                {
-                    string precedingAdderName = $"Adder{base2Exponent}";
-
-                    CreateAdderHalf1Interneurons(
-                        net,
-                        addends,
-                        half1_XOR_Result,
-                        half1_CarryOver,
-                        adderName
-                    );
-
-                    // half2
-                    if (
-                        net.TryCreateTruthTableInterneurons(
-                            out var half2_XOR___CarryOver__Half1_XOR_Result,
-                            ExtensionMethods.LogicGateType.Xor,
-                            result,
-                            new (
-                                precedingAdderName,
-                                adderName,
-                                adderName
-                            )
-                        ) &&
-                        net.TryCreateTruthTableInterneurons(
-                            out var half2_AND___CarryOver__Half1_XOR_Result,
-                            ExtensionMethods.LogicGateType.And,
-                            half2_CarryOver,
-                            new (
-                                precedingAdderName,
-                                adderName,
-                                adderName
-                            )
-                        ) &&
-                        // OR carryOvers
-                        net.TryCreateTruthTableInterneurons(
-                            out var OR___Half1_CarryOver__Half2_CarryOver,
-                            ExtensionMethods.LogicGateType.Or,
-                            carryOver,
-                            new (adderName)
-                        )
-                    )
-                    {
-                        // Link Half1 interneurons and precedingCarryOver to Half2 interneurons
-                        net.LinkTruthTableInputNeuronsToInterneurons(
-                            new (
-                                precedingCarryOver,
-                                half1_XOR_Result
-                            ),
-                            half2_XOR___CarryOver__Half1_XOR_Result
-                        );
-
-                        net.LinkTruthTableInputNeuronsToInterneurons(
-                            new (
-                                precedingCarryOver,
-                                half1_XOR_Result
-                            ),
-                            half2_AND___CarryOver__Half1_XOR_Result
-                        );
-
-                        // OR carryOvers
-                        net.LinkTruthTableInputNeuronsToInterneurons(
-                            new (
-                                half1_CarryOver,
-                                half2_CarryOver
-                            ),
-                            OR___Half1_CarryOver__Half2_CarryOver
-                        );
-                    }
-                }
-                else
-                {
-                    CreateAdderHalf1Interneurons(
-                        net,
-                        addends,
-                        result,
-                        carryOver,
-                        adderName
-                    );
-                }
-
-                boolResult = true;
-            }
-
-            return boolResult;
-        }
-
-        private static void CreateAdderHalf1Interneurons(
-            Network net,
-            InputInfo addends,
-            BinaryNeuronInfo xorOutput,
-            BinaryNeuronInfo andOutput,
-            string prefix
-        )
-        {
-            // Link half1 interneurons
-            if (
-                net.TryCreateTruthTableInterneurons(
-                    out var half1_XOR___Addend1__Addend2,
-                    ExtensionMethods.LogicGateType.Xor,
-                    xorOutput,
-                    new (prefix)
-                ) &&
-                net.TryCreateTruthTableInterneurons(
-                    out var half1_AND___Addend1__Addend2,
-                    ExtensionMethods.LogicGateType.And,
-                    andOutput,
-                    new (prefix)
-                )
-            )
-            {
-                // Link Input Neurons to Half1 Interneuron
-                net.LinkTruthTableInputNeuronsToInterneurons(addends, half1_XOR___Addend1__Addend2);
-                net.LinkTruthTableInputNeuronsToInterneurons(addends, half1_AND___Addend1__Addend2);
+                Adder a;
+                net.AddReplaceItems(a = new Adder(i, precedingCarryOver));
+                precedingCarryOver = a.Parameters.Outputs[(int) Adder.Output.CarryOver];
             }
         }
 
@@ -376,184 +216,9 @@ namespace ei8.Prototypes.HelloWorm
             BinaryNeuronInfo? precedingBorrow = null;
             for (int i = 0; i < count; i++)
             {
-                if (frmToolbox.TryCreateSubtractor(net, out var borrow, i, precedingBorrow))
-                    precedingBorrow = borrow;
-            }
-        }
-
-        private static bool TryCreateSubtractor(
-            Network net,
-            [NotNullWhen(true)] out BinaryNeuronInfo? borrow,
-            int base2Exponent = 0,
-            BinaryNeuronInfo? precedingBorrow = null
-        )
-        {
-            var boolResult = false;
-            borrow = null;
-            string subtractorName = $"Subtractor{base2Exponent + 1}";
-
-            // Declare Inputs
-            var operands = net.CreateTruthTableInputNeurons($"{subtractorName}.Minuend", $"{subtractorName}.Subtrahend");
-
-            // Declare Outputs
-            if (
-                net.TryCreateBinaryNeurons(out var result, subtractorName) &&
-                net.TryCreateBinaryNeurons(out var half1_OUT___Half1_NOT___Minuend, subtractorName) && 
-                net.TryCreateBinaryNeurons(out borrow, subtractorName) 
-            )
-            {
-                if (
-                    // is not least significant bit
-                    precedingBorrow != null &&
-                    net.TryCreateBinaryNeurons(out var half1_XOR_Result, subtractorName) && 
-                    net.TryCreateBinaryNeurons(out var half2_OUT___Half2_NOT___Half1_XOR_Result, subtractorName) && 
-                    net.TryCreateBinaryNeurons(out var half1_Borrow, subtractorName) && 
-                    net.TryCreateBinaryNeurons(out var half2_Borrow, subtractorName) 
-                )
-                {
-                    string precedingSubtractorName = $"Subtractor{base2Exponent}";
-
-                    // half1 interneurons
-                    CreateSubtractorHalf1Interneurons(
-                        net,
-                        operands,
-                        half1_XOR_Result,
-                        half1_OUT___Half1_NOT___Minuend,
-                        half1_Borrow,
-                        subtractorName
-                    );
-
-                    // half2 interneurons
-                    if (
-                        net.TryCreateTruthTableInterneurons(
-                            out var half2_XOR___Borrow__Half1_XOR_Result,
-                            ExtensionMethods.LogicGateType.Xor,
-                            result,
-                            new (
-                                precedingSubtractorName,
-                                subtractorName,
-                                subtractorName
-                            )
-                        ) &&
-                        net.TryCreateInverterInterneurons(
-                            out var half2_NOT___Half1_XOR_Result,
-                            half2_OUT___Half2_NOT___Half1_XOR_Result,
-                            subtractorName,
-                            subtractorName
-                        ) &&
-                        net.TryCreateTruthTableInterneurons(
-                            out var half2_AND___Borrow__Half2_OUT___Half2_NOT___Half1_XOR_Result,
-                            ExtensionMethods.LogicGateType.And,
-                            half2_Borrow,
-                            new (
-                                precedingSubtractorName,
-                                subtractorName,
-                                subtractorName
-                            )
-                        ) &&
-                        // OR Borrows
-                        net.TryCreateTruthTableInterneurons(
-                            out var OR___Half1_Borrow__Half2_Borrow,
-                            ExtensionMethods.LogicGateType.Or,
-                            borrow,
-                            new (subtractorName)
-                        )
-                    )
-                    {
-                        // Link Half1 interneurons and precedingBorrow to Half2 interneurons
-                        net.LinkTruthTableInputNeuronsToInterneurons(
-                            new (
-                                precedingBorrow,
-                                half1_XOR_Result
-                            ),
-                            half2_XOR___Borrow__Half1_XOR_Result
-                        );
-
-                        net.LinkInverterInputNeuronsToInterneurons(
-                            half1_XOR_Result,
-                            half2_NOT___Half1_XOR_Result
-                        );
-
-                        net.LinkTruthTableInputNeuronsToInterneurons(
-                            new (
-                                precedingBorrow,
-                                half2_OUT___Half2_NOT___Half1_XOR_Result
-                            ),
-                            half2_AND___Borrow__Half2_OUT___Half2_NOT___Half1_XOR_Result
-                        );
-
-                        // OR Borrows
-                        net.LinkTruthTableInputNeuronsToInterneurons(
-                            new (
-                                half1_Borrow,
-                                half2_Borrow
-                            ),
-                            OR___Half1_Borrow__Half2_Borrow
-                        );
-                    }
-                }
-                else
-                {
-                    // half1
-                    CreateSubtractorHalf1Interneurons(
-                        net,
-                        operands,
-                        result,
-                        half1_OUT___Half1_NOT___Minuend,
-                        borrow,
-                        subtractorName
-                    );
-                }
-
-                boolResult = true;
-            }
-
-            return boolResult;
-        }
-
-        private static void CreateSubtractorHalf1Interneurons(
-            Network net,
-            InputInfo operands,
-            BinaryNeuronInfo xorOutput,
-            BinaryNeuronInfo notOutput,
-            BinaryNeuronInfo andOutput,
-            string prefix
-        )
-        {
-            // Link half1 interneurons
-            if (
-                net.TryCreateTruthTableInterneurons(
-                    out var half1_XOR___Minuend__Subtrahend,
-                    ExtensionMethods.LogicGateType.Xor,
-                    xorOutput,
-                    new (prefix)
-                ) &&
-                net.TryCreateInverterInterneurons(
-                    out var half1_NOT___Minuend,
-                    notOutput,
-                    prefix,
-                    prefix
-                ) &&
-                net.TryCreateTruthTableInterneurons(
-                    out var half1_AND___Subtrahend__Half1_OUT___Half1_NOT___Minuend,
-                    ExtensionMethods.LogicGateType.And,
-                    andOutput,
-                    new (prefix)
-                )
-            )
-            {
-                // Input Neurons to Interneurons
-                net.LinkTruthTableInputNeuronsToInterneurons(operands, half1_XOR___Minuend__Subtrahend);
-                net.LinkInverterInputNeuronsToInterneurons(operands.Input1, half1_NOT___Minuend);
-
-                // Intermediate Results to Interneurons
-                net.LinkTruthTableInputNeuronsToInterneurons(
-                    new InputInfo(
-                        notOutput,
-                        operands.Input2
-                    ),
-                    half1_AND___Subtrahend__Half1_OUT___Half1_NOT___Minuend
-                );
+                Subtractor s;
+                net.AddReplaceItems(s = new Subtractor(i, precedingBorrow));
+                precedingBorrow = s.Parameters.Outputs[(int) Subtractor.Output.Borrow];
             }
         }
     }

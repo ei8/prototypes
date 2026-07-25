@@ -14,7 +14,7 @@ namespace ei8.Prototypes.HelloWorm
         private readonly GraphSettings settings;
         private bool isPlaying;
 
-        public Graph(ISpikableReporting2 spikable)
+        public Graph(ISpikableReporting spikable)
         {
             this.Spikable = spikable;
             this.Spikable.Triggered += this.Spikable_Triggered;
@@ -42,7 +42,7 @@ namespace ei8.Prototypes.HelloWorm
             }
         }
 
-        public ISpikableReporting2 Spikable { get; }
+        public ISpikableReporting Spikable { get; }
 
         public GraphSettings Settings => this.settings;
 

@@ -1,4 +1,5 @@
 ﻿using ei8.Cortex.Coding;
+using ei8.Cortex.Coding.Spiker;
 using System.ComponentModel;
 
 namespace ei8.Prototypes.HelloWorm
@@ -10,7 +11,7 @@ namespace ei8.Prototypes.HelloWorm
 
         void Reload();
 
-        ISpikableReporting2 Spikable { get; }
+        ISpikableReporting Spikable { get; }
 
         GraphSettings Settings { get; }
     }

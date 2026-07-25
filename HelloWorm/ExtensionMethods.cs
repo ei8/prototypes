@@ -1,4 +1,5 @@
 ﻿using ei8.Cortex.Coding;
+using ei8.Cortex.Coding.Persistence;
 using ei8.Cortex.Coding.Spiker;
 using NLog;
 using System.Diagnostics.CodeAnalysis;
@@ -29,17 +30,16 @@ namespace ei8.Prototypes.HelloWorm
             return result;
         }
 
-        // TODO: promote to ei8.Cortex.Coding.Spiker.ExtensionMethods
         public static void SubscribeReporting<T>(
-            this T reporting, 
-            ISpikeService spikeService, 
+            this T reporting,
+            ISpikeService spikeService,
             Logger logger,
             EventHandler<TriggeredEventArgs> triggeredInvoker,
             EventHandler<FiredEventArgs> firedInvoker,
-            Action<TriggeredEventArgs>? triggeredHandler = null, 
+            Action<TriggeredEventArgs>? triggeredHandler = null,
             Action<FiredEventArgs>? firedHandler = null
         )
-            where T : ISpikableReporting2, IComponent
+            where T : ISpikableReporting, IComponent
         {
             spikeService.Triggered += (sender, e) =>
             {
@@ -47,7 +47,7 @@ namespace ei8.Prototypes.HelloWorm
                     new LogMessageGenerator(
                         () => {
                             var origin = e.ReflexArc.LastOrDefault();
-                            var result = $"{ reporting.GetFullName()} - " +
+                            var result = $"{reporting.GetFullName()} - " +
                             $"Triggered: {e.Target.ToReadableString()}; " +
                             $"By: {(origin != null ? origin.Target.ToReadableString() : "[Stimulus]")}; " +
                             $"Count: {e.Charge.Excitations.Count() + e.Charge.Inhibitions.Count()}; " +
@@ -74,362 +74,10 @@ namespace ei8.Prototypes.HelloWorm
                 firedInvoker(sender, e);
             };
         }
-
-        // TODO: promote to ei8.Cortex.Coding.Spiker.ExtensionMethods
-        public static bool TryCreateBinaryNeurons(
-            this Network network, 
-            [NotNullWhen(true)] out BinaryNeuronInfo? result,
-            string? tagPrefix = null,
-            [CallerArgumentExpression(nameof(result))] string parameterExpression = "",
-            string trueString = "1",
-            string falseString = "0"
-        )
-        {
-            bool bResult = false;
-            result = null;
-
-            if (VariableInfo.TryParse(parameterExpression, out var variableInfo))
-            {
-                result = network.CreateBinaryNeurons(
-                    $"{tagPrefix}" +
-                    (string.IsNullOrWhiteSpace(tagPrefix) ? string.Empty : ".") +
-                    variableInfo.ToString(),
-                    trueString,
-                    falseString
-                );
-                bResult = true;
-            }
-
-            return bResult;
-        }
-
-        private static BinaryNeuronInfo CreateBinaryNeurons(
-            this Network network,
-            string tagPrefix,
-            string trueString = "1",
-            string falseString = "0"
-        ) =>
-            new(
-                network.CreateNeuron($"{tagPrefix} = {trueString}"),
-                network.CreateNeuron($"{tagPrefix} = {falseString}")
-            );
-
-        public static InputInfo CreateTruthTableInputNeurons(
-            this Network network,
-            string input1TagPrefix,
-            string input2TagPrefix,
-            string trueString = "1",
-            string falseString = "0"
-        ) =>
-            new(
-                network.CreateBinaryNeurons(
-                    input1TagPrefix,
-                    trueString,
-                    falseString
-                ),
-                network.CreateBinaryNeurons(
-                    input2TagPrefix,
-                    trueString,
-                    falseString
-                )
-            );
-
-        public static bool TryCreateNeuron(
-            this Network network,
-            [NotNullWhen(true)] out Neuron? result,
-            [CallerArgumentExpression(nameof(result))] string parameterExpression = ""
-        )
-        {
-            bool bResult = false;
-            result = null;
-            if (VariableInfo.TryParse(parameterExpression, out var variable))
-            {
-                result = network.CreateNeuron(variable.Inputs.Single());
-                bResult = true;
-            }
-
-            return bResult;
-        }
-
-        public static bool TryGetVariableName(
-            this string parameterExpression,
-            [NotNullWhen(true)] out string? result
-        )
-        {
-            var bResult = false;
-            result = null;
-            if (!string.IsNullOrWhiteSpace(parameterExpression))
-            {
-                // if variableName contains type
-                if (parameterExpression.Contains(' '))
-                    // ... separate variable name from type 
-                    result = parameterExpression.Split(' ').ElementAt(1);
-                else
-                    result = parameterExpression;
-
-                bResult = true;
-            }
-
-            return bResult;
-        }
-        private static Neuron CreateNeuron(this Network network, string? tag = null)
-        {
-            Neuron neuron = Neuron.CreateTransient(Guid.NewGuid(), tag, null, null);
-            network.AddReplace(neuron);
-            return neuron;
-        }
-        // TODO: promote to ei8.Cortex.Coding.Spiker.ExtensionMethods
-        private static Neuron CreateInterneuron(this Network network, string? interneuronTag = null, params Neuron[] postsynapticNeurons)
-        {
-            Neuron neuron = network.CreateNeuron(interneuronTag);
-
-            foreach(var post in postsynapticNeurons)
-                network.CreateTerminal(neuron, post);
-
-            return neuron;
-        }
-        // TODO: promote to ei8.Cortex.Coding.Spiker.ExtensionMethods
-        private static void LinkInputNeuronsToInterneuron(this Network network, Neuron interneuron, params Neuron[] inputNeurons)
-        {
-            foreach (Neuron input in inputNeurons)
-                network.CreateTerminal(input, interneuron, NeurotransmitterEffect.Excite, 1f / inputNeurons.Length);
-        }
-
-        public enum LogicGateType
-        {
-            Not,
-            And,
-            Or,
-            Nand,
-            Nor,
-            Xor,
-            Xnor,
-            Imply,
-            Nimply
-        }
-
-        public static bool TryCreateInverterInterneurons(
-            this Network network,
-            [NotNullWhen(true)] out InverterInterneuronInfo? result,
-            BinaryNeuronInfo outputs,
-            string? operatorPrefix = null,
-            string? inputTagPrefix = null,
-            [CallerArgumentExpression(nameof(result))] string parameterExpression = ""
-        )
-        {
-            bool bResult = false;
-            result = null;
-            if (VariableInfo.TryParse(parameterExpression, out var variableInfo))
-            {
-                result = network.CreateInverterInterneurons(
-                    outputs,
-                    variableInfo,
-                    operatorPrefix,
-                    inputTagPrefix
-                );
-                bResult = true;
-            }
-
-            return bResult;
-        }
-
-        private static InverterInterneuronInfo CreateInverterInterneurons(
-            this Network network,
-            BinaryNeuronInfo outputs,
-            VariableInfo variableInfo,
-            string? operatorPrefix = null,
-            string? inputTagPrefix = null
-        )
-        {
-            string coreOperatorPrefix = string.Empty,
-                coreInputTagPrefix = string.Empty;
-
-            if (!string.IsNullOrEmpty(operatorPrefix))
-                coreOperatorPrefix = $"{operatorPrefix}.";
-            if (!string.IsNullOrEmpty(inputTagPrefix))
-                coreInputTagPrefix = $"{inputTagPrefix}.";
-
-            return new InverterInterneuronInfo(
-               network.CreateInterneuron($"{coreOperatorPrefix}{variableInfo.Function}({coreInputTagPrefix}{variableInfo.Inputs.Single()} = 0)", outputs.Neuron1),
-               network.CreateInterneuron($"{coreOperatorPrefix}{variableInfo.Function}({coreInputTagPrefix}{variableInfo.Inputs.Single()} = 1)", outputs.Neuron0)
-            );
-        }
-
-        public static bool TryCreateTruthTableInterneurons(
-            this Network network,
-            [NotNullWhen(true)] out TruthTableInterneuronInfo? result,
-            LogicGateType type,
-            BinaryNeuronInfo outputs,
-            TruthTableInterneuronTagInfo? interneuronTags = null,
-            [CallerArgumentExpression(nameof(result))] string parameterExpression = ""
-        )
-        {
-            bool bResult = false;
-            result = null;
-            if (VariableInfo.TryParse(parameterExpression, out var variableInfo))
-            {
-                result = network.CreateTruthTableInterneurons(
-                    type,
-                    outputs,
-                    variableInfo,
-                    interneuronTags
-                );
-                bResult = true;
-            }
-
-            return bResult;
-        }
-
-        private static TruthTableInterneuronInfo CreateTruthTableInterneurons(
-            this Network network,
-            LogicGateType type,
-            BinaryNeuronInfo outputs,
-            VariableInfo variableInfo,
-            TruthTableInterneuronTagInfo? interneuronTags = null
-        )
-        {
-            string typeTagPrefix = string.Empty,
-                input1TagPrefix = string.Empty,
-                input2TagPrefix = string.Empty;
-
-            if (interneuronTags != null)
-            {
-                typeTagPrefix = $"{interneuronTags.TypeTagPrefix}.";
-                input1TagPrefix = $"{interneuronTags.Input1TagPrefix}.";
-                input2TagPrefix = $"{interneuronTags.Input2TagPrefix}.";
-            }
-
-            string?[] outputInterneuronTags = [
-                $"{typeTagPrefix}{variableInfo.Function}({input1TagPrefix}{variableInfo.Inputs.First()} = 0," +
-                $"{input2TagPrefix}{variableInfo.Inputs.ElementAt(1)} = 0)",
-                $"{typeTagPrefix}{variableInfo.Function}({input1TagPrefix}{variableInfo.Inputs.First()} = 0," +
-                $"{input2TagPrefix}{variableInfo.Inputs.ElementAt(1)} = 1)",
-                $"{typeTagPrefix}{variableInfo.Function}({input1TagPrefix}{variableInfo.Inputs.First()} = 1," +
-                $"{input2TagPrefix}{variableInfo.Inputs.ElementAt(1)} = 0)",
-                $"{typeTagPrefix}{variableInfo.Function}({input1TagPrefix}{variableInfo.Inputs.First()} = 1," +
-                $"{input2TagPrefix}{variableInfo.Inputs.ElementAt(1)} = 1)",
-            ];
-
-            switch (type)
-            {
-                default:
-                case LogicGateType.And:
-                    return network.CreateTruthTableInterneurons(
-                        outputs.Neuron0, outputs.Neuron0, outputs.Neuron0, outputs.Neuron1, outputInterneuronTags
-                    );
-                case LogicGateType.Or:
-                    return network.CreateTruthTableInterneurons(
-                        outputs.Neuron0, outputs.Neuron1, outputs.Neuron1, outputs.Neuron1, outputInterneuronTags
-                    );
-                case LogicGateType.Nand:
-                    return network.CreateTruthTableInterneurons(
-                        outputs.Neuron1, outputs.Neuron1, outputs.Neuron1, outputs.Neuron0, outputInterneuronTags
-                    );
-                case LogicGateType.Nor:
-                    return network.CreateTruthTableInterneurons(
-                        outputs.Neuron1, outputs.Neuron0, outputs.Neuron0, outputs.Neuron0, outputInterneuronTags
-                    );
-                case LogicGateType.Xor:
-                    return network.CreateTruthTableInterneurons(
-                        outputs.Neuron0, outputs.Neuron1, outputs.Neuron1, outputs.Neuron0, outputInterneuronTags
-                    );
-                case LogicGateType.Xnor:
-                    return network.CreateTruthTableInterneurons(
-                        outputs.Neuron1, outputs.Neuron0, outputs.Neuron0, outputs.Neuron1, outputInterneuronTags
-                    );
-                case LogicGateType.Imply:
-                    return network.CreateTruthTableInterneurons(
-                        outputs.Neuron1, outputs.Neuron1, outputs.Neuron0, outputs.Neuron1, outputInterneuronTags
-                    );
-                case LogicGateType.Nimply:
-                    return network.CreateTruthTableInterneurons(
-                        outputs.Neuron0, outputs.Neuron0, outputs.Neuron1, outputs.Neuron0, outputInterneuronTags
-                    );
-            }
-        }
-
-        // TODO: remove CreateRotationInterneuron from ei8.Cortex.Coding.Spiker.ExtensionMethods
-        private static TruthTableInterneuronInfo CreateTruthTableInterneurons(
-            this Network network, 
-            Neuron output1, 
-            Neuron output2, 
-            Neuron output3,
-            Neuron output4,
-            string?[] outputInterneuronTags
-        ) => new TruthTableInterneuronInfo(
-            network.CreateInterneuron(outputInterneuronTags[0], output1),
-            network.CreateInterneuron(outputInterneuronTags[1], output2),
-            network.CreateInterneuron(outputInterneuronTags[2], output3),
-            network.CreateInterneuron(outputInterneuronTags[3], output4)
-        );
-
-        public static void LinkTruthTableInputNeuronsToInterneurons(
-            this Network network,
-            InputInfo inputs,
-            TruthTableInterneuronInfo interneurons,
-            params Neuron[] additionalInputs
-        )
-        {
-            network.LinkInputNeuronsToInterneuron(
-                interneurons.Interneuron1,
-                [
-                    inputs.Input1.Neuron0,
-                    inputs.Input2.Neuron0,
-                    .. additionalInputs
-                ]
-            );
-            network.LinkInputNeuronsToInterneuron(
-                interneurons.Interneuron2,
-                [
-                    inputs.Input1.Neuron0,
-                    inputs.Input2.Neuron1,
-                    .. additionalInputs
-                ]
-            );
-            network.LinkInputNeuronsToInterneuron(
-                interneurons.Interneuron3,
-                [
-                    inputs.Input1.Neuron1,
-                    inputs.Input2.Neuron0,
-                    .. additionalInputs
-                ]
-            );
-            network.LinkInputNeuronsToInterneuron(
-                interneurons.Interneuron4,
-                [
-                    inputs.Input1.Neuron1,
-                    inputs.Input2.Neuron1,
-                    .. additionalInputs
-                ]
-            );
-        }
-
-        public static void LinkInverterInputNeuronsToInterneurons(
-            this Network network,
-            BinaryNeuronInfo input,
-            InverterInterneuronInfo interneurons,
-            params Neuron[] additionalInputs
-        )
-        {
-            network.LinkInputNeuronsToInterneuron(
-                interneurons.Interneuron1,
-                [
-                    input.Neuron0,
-                    .. additionalInputs
-                ]
-            );
-            network.LinkInputNeuronsToInterneuron(
-                interneurons.Interneuron2,
-                [
-                    input.Neuron1,
-                    .. additionalInputs
-                ]
-            );
-        }
         #endregion
 
         #region Forms
-        public static string GetName(this ISpikableReporting2 spikable, string formDescription)
+        public static string GetName(this ISpikableReporting spikable, string formDescription)
         {
             var fullName = string.Empty;
             var lifeText = string.Empty;
@@ -549,7 +197,7 @@ namespace ei8.Prototypes.HelloWorm
         {
             bool result = false;
 
-                float directionRemainder = Math.Abs(movable.Direction % 360f) / 360f;
+                float directionRemainder = System.Math.Abs(movable.Direction % 360f) / 360f;
                 result =
                     (movable.Direction > 0 && positiveRemainderEvaluator(directionRemainder)) ||
                     (movable.Direction < 0 && negativeRemainderEvaluator(directionRemainder)); ;
@@ -725,11 +373,11 @@ namespace ei8.Prototypes.HelloWorm
         internal static Point GetLocationByHypotenuseAndAngle(this Point original, float angle, double hypotenuse)
         {
             // 0 degrees is East
-            var rad = angle * (Math.PI / 180d);
+            var rad = angle * (System.Math.PI / 180d);
 
             var newLocation = new Point(
-                original.X + Convert.ToInt32(Math.Cos(rad) * hypotenuse),
-                original.Y + Convert.ToInt32(Math.Sin(rad) * hypotenuse)
+                original.X + Convert.ToInt32(System.Math.Cos(rad) * hypotenuse),
+                original.Y + Convert.ToInt32(System.Math.Sin(rad) * hypotenuse)
             );
 
             return newLocation;

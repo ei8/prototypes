@@ -1,4 +1,5 @@
 ﻿using ei8.Cortex.Coding;
+using ei8.Cortex.Coding.Spiker;
 using System.ComponentModel.Design;
 using WeifenLuo.WinFormsUI.Docking;
 
@@ -7,7 +8,7 @@ namespace ei8.Prototypes.HelloWorm
     public partial class frmTree : DockContent
     {
         private const string FormDescription = "Tree";
-        private readonly ISpikableReporting2 spikable;
+        private readonly ISpikableReporting spikable;
         private readonly ISelectionService selectionService;
 
         public frmTree(ISelectionService selectionService)
@@ -17,7 +18,7 @@ namespace ei8.Prototypes.HelloWorm
 
             this.selectionService.SelectionChanged += this.SelectionService_SelectionChanged;
 
-            if (this.selectionService.PrimarySelection is ISpikableReporting2 spikable)
+            if (this.selectionService.PrimarySelection is ISpikableReporting spikable)
             {
                 this.spikable = spikable;
 
@@ -165,11 +166,11 @@ namespace ei8.Prototypes.HelloWorm
 
         private void tsbSpike_Click(object sender, EventArgs e)
         {
-            if (this.spikable.Network != null && this.spikable is ISpikableTemp spikableTemp)
+            if (this.spikable.Network != null && this.spikable is ISpikable spikable)
             {
                 IEnumerable<Neuron> checkedNeurons = this.GetCheckedNeurons();
 
-                spikableTemp.Spike(checkedNeurons.ToArray());
+                spikable.Spike(checkedNeurons.ToArray());
             }
         }
 

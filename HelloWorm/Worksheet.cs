@@ -8,13 +8,12 @@ using System.ComponentModel;
 
 namespace ei8.Prototypes.HelloWorm
 {
-    public class Worksheet : ICreatable, ILocated, ISpikableReporting2, ISpikableTemp
+    public class Worksheet : ICreatable, ILocated, ISpikableReporting, ISpikable
     {
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
         private readonly ConcurrentDictionary<DateTime, FireInfo> fireHistory;
         private readonly ISpikeService spikeService;
-        private Network? network;
         private string name;
 
         public float ProcessingRatio => 1f;
@@ -24,7 +23,7 @@ namespace ei8.Prototypes.HelloWorm
         public TimeSpan RefractoryPeriod { get; set; }
         public TimeSpan RelatedSpikesPeriod { get; set; }
 
-        public Network? Network => this.network;
+        public Network Network { get; }
 
         public Point Location { get; set; }
         public required IComposite Parent { get; set; }
@@ -49,7 +48,7 @@ namespace ei8.Prototypes.HelloWorm
         {
             this.RefractoryPeriod = Constants.Worm.InitialRefractoryPeriod;
             this.RelatedSpikesPeriod = Constants.Worm.InitialRelatedSpikesPeriod;
-            this.network = null;
+            this.Network = new();
             this.Location = new Point(0, 0);
             this.spikeService = spikeService;
             this.SubscribeReporting(
@@ -60,20 +59,9 @@ namespace ei8.Prototypes.HelloWorm
             );
         }
 
-        public void Initialize(Network? network, IEnumerable<MirrorConfig>? mirrorConfigs)
+        public void Initialize(IEnumerable<MirrorConfig>? mirrorConfigs)
         {
             AssertionConcern.AssertArgumentNotNull(mirrorConfigs, nameof(mirrorConfigs));
-            this.Initialize(network);
-        }
-
-        public void Initialize(Network? network)
-        {
-            if (this.network != network)
-            {
-                AssertionConcern.AssertArgumentNotNull(network, nameof(network));
-
-                this.network = network;
-            }
         }
 
         public void Initialize(string name, IRectangularComposite parent)
@@ -84,14 +72,11 @@ namespace ei8.Prototypes.HelloWorm
 
         public void Spike(params Neuron[] neurons)
         {
-            if (this.network != null)
-            {
-                this.spikeService.Spike(
-                    neurons,
-                    this.network,
-                    this.RefractoryPeriod
-                );
-            }
+            this.spikeService.Spike(
+                neurons,
+                this.Network,
+                this.RefractoryPeriod
+            );
         }
     }
 }
