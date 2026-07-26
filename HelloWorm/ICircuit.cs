@@ -1,9 +1,9 @@
-﻿using ei8.Cortex.Coding.Spiker;
+﻿using ei8.Cortex.Coding.d23;
 
 namespace ei8.Prototypes.HelloWorm
 {
     public interface ICircuit : IneurUL
     {
-        ParameterInfo Parameters { get; }
+        FunctionParameterInfo Parameters { get; }
     }
 }

@@ -1,10 +1,7 @@
-﻿using ei8.Cortex.Coding;
-using ei8.Cortex.Coding.Persistence;
+﻿using ei8.Cortex.Coding.d23;
 using ei8.Cortex.Coding.Spiker;
 using NLog;
-using System.Diagnostics.CodeAnalysis;
 using System.Drawing.Drawing2D;
-using System.Runtime.CompilerServices;
 
 namespace ei8.Prototypes.HelloWorm
 {

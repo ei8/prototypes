@@ -1,6 +1,6 @@
 ﻿using ei8.Cortex.Coding;
+using ei8.Cortex.Coding.d23;
 using ei8.Cortex.Coding.Persistence;
-using ei8.Cortex.Coding.Spiker;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 
@@ -17,7 +17,7 @@ namespace ei8.Prototypes.HelloWorm.Math.Logic
 
         public static bool TryCreate<T>(
             [NotNullWhen(true)] out T? result,
-            ParameterInfo parameters,
+            FunctionParameterInfo parameters,
             LogicGateInterneuronTagInfo? interneuronTagInfo = null,
             [CallerArgumentExpression(nameof(result))] string parameterExpression = "",
             params Neuron[] additionalInputs
@@ -63,7 +63,7 @@ namespace ei8.Prototypes.HelloWorm.Math.Logic
         );
 
         protected void Initialize(
-            ParameterInfo parameters, 
+            FunctionParameterInfo parameters, 
             VariableInfo variableInfo,
             LogicGateInterneuronTagInfo? interneuronTagInfo = null,
             params Neuron[] additionalInputs
@@ -90,6 +90,6 @@ namespace ei8.Prototypes.HelloWorm.Math.Logic
 
         public Network Network { get; }
 
-        public ParameterInfo Parameters { get; private set; }
+        public FunctionParameterInfo Parameters { get; private set; }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using ei8.Cortex.Coding;
+using ei8.Cortex.Coding.d23;
 using ei8.Cortex.Coding.Persistence;
 using ei8.Cortex.Coding.Spiker;
 using ei8.Cortex.Library.Client;
@@ -155,16 +156,16 @@ namespace ei8.Prototypes.HelloWorm
                 NetworkHelper.TryCreateNeuron(out var XNOR) &&
                 NetworkHelper.TryCreateNeuron(out var IMPLY) &&
                 NetworkHelper.TryCreateNeuron(out var NIMPLY) &&
-                LogicGateBase.TryCreate(out NotGate? NOT___Input1, new ParameterInfo([inputs[0]], [result]), additionalInputs: NOT) &&
-                LogicGateBase.TryCreate(out NotGate? NOT___Input2, new ParameterInfo([inputs[1]], [result]), additionalInputs: NOT) &&
-                LogicGateBase.TryCreate(out AndGate? AND___Input1__Input2, new ParameterInfo(inputs, [result]), additionalInputs: AND) &&
-                LogicGateBase.TryCreate(out OrGate? OR___Input1__Input2, new ParameterInfo(inputs, [result]), additionalInputs: OR) &&
-                LogicGateBase.TryCreate(out NandGate? NAND___Input1__Input2, new ParameterInfo(inputs, [result]), additionalInputs: NAND) &&
-                LogicGateBase.TryCreate(out NorGate? NOR___Input1__Input2, new ParameterInfo(inputs, [result]), additionalInputs: NOR) &&
-                LogicGateBase.TryCreate(out XorGate? XOR___Input1__Input2, new ParameterInfo(inputs, [result]), additionalInputs: XOR) &&
-                LogicGateBase.TryCreate(out XnorGate? XNOR___Input1__Input2, new ParameterInfo(inputs, [result]), additionalInputs: XNOR) &&
-                LogicGateBase.TryCreate(out ImplyGate? IMPLY___Input1__Input2, new ParameterInfo(inputs, [result]), additionalInputs: IMPLY) &&
-                LogicGateBase.TryCreate(out NimplyGate? NIMPLY___Input1__Input2, new ParameterInfo(inputs, [result]), additionalInputs: NIMPLY)
+                LogicGateBase.TryCreate(out NotGate? NOT___Input1, new FunctionParameterInfo([inputs[0]], [result]), additionalInputs: NOT) &&
+                LogicGateBase.TryCreate(out NotGate? NOT___Input2, new FunctionParameterInfo([inputs[1]], [result]), additionalInputs: NOT) &&
+                LogicGateBase.TryCreate(out AndGate? AND___Input1__Input2, new FunctionParameterInfo(inputs, [result]), additionalInputs: AND) &&
+                LogicGateBase.TryCreate(out OrGate? OR___Input1__Input2, new FunctionParameterInfo(inputs, [result]), additionalInputs: OR) &&
+                LogicGateBase.TryCreate(out NandGate? NAND___Input1__Input2, new FunctionParameterInfo(inputs, [result]), additionalInputs: NAND) &&
+                LogicGateBase.TryCreate(out NorGate? NOR___Input1__Input2, new FunctionParameterInfo(inputs, [result]), additionalInputs: NOR) &&
+                LogicGateBase.TryCreate(out XorGate? XOR___Input1__Input2, new FunctionParameterInfo(inputs, [result]), additionalInputs: XOR) &&
+                LogicGateBase.TryCreate(out XnorGate? XNOR___Input1__Input2, new FunctionParameterInfo(inputs, [result]), additionalInputs: XNOR) &&
+                LogicGateBase.TryCreate(out ImplyGate? IMPLY___Input1__Input2, new FunctionParameterInfo(inputs, [result]), additionalInputs: IMPLY) &&
+                LogicGateBase.TryCreate(out NimplyGate? NIMPLY___Input1__Input2, new FunctionParameterInfo(inputs, [result]), additionalInputs: NIMPLY)
             )
             {
                 // "Nothing is True, Everything is permitted"

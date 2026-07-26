@@ -1,5 +1,4 @@
-﻿using ei8.Cortex.Coding;
-using ei8.Cortex.Coding.Spiker;
+﻿using ei8.Cortex.Coding.d23;
 using System.ComponentModel;
 
 namespace ei8.Prototypes.HelloWorm

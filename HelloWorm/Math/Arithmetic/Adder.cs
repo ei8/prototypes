@@ -1,6 +1,6 @@
 ﻿using ei8.Cortex.Coding;
+using ei8.Cortex.Coding.d23;
 using ei8.Cortex.Coding.Persistence;
-using ei8.Cortex.Coding.Spiker;
 using ei8.Prototypes.HelloWorm.Math.Logic;
 
 namespace ei8.Prototypes.HelloWorm.Math.Arithmetic
@@ -41,7 +41,7 @@ namespace ei8.Prototypes.HelloWorm.Math.Arithmetic
         }
 
         public Adder(
-            ParameterInfo parameters,
+            FunctionParameterInfo parameters,
             int exponent = 0,
             BinaryNeuronInfo? precedingCarryOver = null
         )
@@ -189,6 +189,6 @@ namespace ei8.Prototypes.HelloWorm.Math.Arithmetic
 
         public Network Network { get; }
 
-        public ParameterInfo Parameters { get; }
+        public FunctionParameterInfo Parameters { get; }
     }
 }

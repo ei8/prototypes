@@ -1,5 +1,5 @@
 ﻿using ei8.Cortex.Coding;
-using ei8.Cortex.Coding.Spiker;
+using ei8.Cortex.Coding.d23;
 using Microsoft.Msagl.Drawing;
 using Microsoft.Msagl.GraphViewerGdi;
 using System.ComponentModel.Design;
