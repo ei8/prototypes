@@ -1,11 +1,9 @@
 ﻿using ei8.Cortex.Coding;
 using ei8.Cortex.Coding.d23;
-using ei8.Cortex.Coding.Persistence;
-using ei8.Cortex.Coding.Spiker;
+using ei8.Cortex.Coding.d23.Math.Arithmetic;
+using ei8.Cortex.Coding.d23.Math.Logic;
 using ei8.Cortex.Library.Client;
 using ei8.Cortex.Library.Client.Out;
-using ei8.Prototypes.HelloWorm.Math.Arithmetic;
-using ei8.Prototypes.HelloWorm.Math.Logic;
 using Microsoft.Extensions.DependencyInjection;
 using System.ComponentModel.Design;
 using WeifenLuo.WinFormsUI.Docking;

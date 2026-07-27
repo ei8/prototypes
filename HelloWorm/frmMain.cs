@@ -2,8 +2,6 @@
 using ei8.Cortex.Coding.d23;
 using ei8.Cortex.Coding.Mirrors;
 using ei8.Cortex.Coding.Model.Reflection;
-using ei8.Cortex.Coding.Persistence;
-using ei8.Cortex.Coding.Spiker;
 using Microsoft.Extensions.DependencyInjection;
 using neurUL.Common.Domain.Model;
 using NLog;
