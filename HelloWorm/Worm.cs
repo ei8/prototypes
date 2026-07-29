@@ -11,7 +11,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace ei8.Prototypes.HelloWorm
 {
-    public class Worm : IMovable, IRectangularComposite, IElliptical, IPerishable, IRegenerative, ISpikableReporting, INamed, ISpikable
+    public class Worm : IMovable, IRectangularComposite, IElliptical, IPerishable, IRegenerative, ISpikableReporting, INamed, ISpikable, INetworkLoadable
     {
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
@@ -207,7 +207,7 @@ namespace ei8.Prototypes.HelloWorm
 
         public IEnumerable<IComponent> Components => this.components;
 
-        public Network Network => this.network;
+        public ReadOnlyNetwork Network => this.network;
 
         public IDictionary<DateTime, FireInfo> FireHistory => this.fireHistory;
 
@@ -470,6 +470,11 @@ namespace ei8.Prototypes.HelloWorm
                     this.refractoryPeriod
                 );
             }
+        }
+
+        public void Load(ReadOnlyNetwork network)
+        {
+            this.network.AddReplaceItems(network);
         }
     }
 }

@@ -209,7 +209,7 @@ namespace ei8.Prototypes.HelloWorm
         {
             if (this.spikable.Network != null)
             {
-                IEnumerable<Neuron> checkedNeurons = this.GetCheckedNeurons().ToArray();
+                IEnumerable<Neuron> checkedNeurons = [..this.GetCheckedNeurons()];
 
                 this.listView1.Items.Clear();
 
@@ -222,7 +222,7 @@ namespace ei8.Prototypes.HelloWorm
         {
             if (this.spikable.Network != null)
             {
-                IEnumerable<Neuron> checkedNeurons = [.. this.GetCheckedNeurons()];
+                IEnumerable<Neuron> checkedNeurons = [..this.GetCheckedNeurons()];
 
                 if (this.selectionService.PrimarySelection is IGraph fg)
                 {

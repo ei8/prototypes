@@ -9,13 +9,14 @@ using System.ComponentModel;
 
 namespace ei8.Prototypes.HelloWorm
 {
-    public class Worksheet : ICreatable, ILocated, ISpikableReporting, ISpikable
+    public class Worksheet : ICreatable, ILocated, ISpikableReporting, ISpikable, INetworkLoadable
     {
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
         private readonly ConcurrentDictionary<DateTime, FireInfo> fireHistory;
         private readonly ISpikeService spikeService;
         private string name;
+        private Network network;
 
         public float ProcessingRatio => 1f;
 
@@ -24,7 +25,7 @@ namespace ei8.Prototypes.HelloWorm
         public TimeSpan RefractoryPeriod { get; set; }
         public TimeSpan RelatedSpikesPeriod { get; set; }
 
-        public Network Network { get; }
+        public ReadOnlyNetwork Network => this.network;
 
         public Point Location { get; set; }
         public required IComposite Parent { get; set; }
@@ -49,7 +50,7 @@ namespace ei8.Prototypes.HelloWorm
         {
             this.RefractoryPeriod = Constants.Worm.InitialRefractoryPeriod;
             this.RelatedSpikesPeriod = Constants.Worm.InitialRelatedSpikesPeriod;
-            this.Network = new();
+            this.network = new();
             this.Location = new Point(0, 0);
             this.spikeService = spikeService;
             this.SubscribeReporting(
@@ -58,6 +59,7 @@ namespace ei8.Prototypes.HelloWorm
                 (s, e) => this.Triggered?.Invoke(this, e),
                 (s, e) => this.Fired?.Invoke(this, e)
             );
+            this.network = new();
         }
 
         public void Initialize(IEnumerable<MirrorConfig>? mirrorConfigs)
@@ -78,6 +80,11 @@ namespace ei8.Prototypes.HelloWorm
                 this.Network,
                 this.RefractoryPeriod
             );
+        }
+
+        public void Load(ReadOnlyNetwork network)
+        {
+            this.network.AddReplaceItems(network);
         }
     }
 }

@@ -211,7 +211,7 @@ namespace ei8.Prototypes.HelloWorm
                 var odorSector8Neuron = NetworkHelper.CreateInterneuronNetwork(rotateNeuron, counterClockwiseNeuron, smallNeuron);
 
                 // ... Input Neurons
-                IEnumerable<Network> inputNeuronNetworks = [
+                IEnumerable<ReadOnlyNetwork> inputNeuronNetworks = [
                     NetworkHelper.CreateInputNeuronNetwork(
                         odorConfig,
                         0.5f,
@@ -320,7 +320,7 @@ namespace ei8.Prototypes.HelloWorm
                         ),
                         fd.Dish
                     );
-                    newWorm.Network.AddReplaceItems(ns);
+                    newWorm.Load(ns);
                     newWorm.Initialize(this.settingsService.Mirrors);
                     fd.Dish.Add(newWorm);
                 }
