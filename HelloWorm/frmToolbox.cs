@@ -155,16 +155,16 @@ namespace ei8.Prototypes.HelloWorm
                 NetworkHelper.TryCreateNeuron(out var XNOR) &&
                 NetworkHelper.TryCreateNeuron(out var IMPLY) &&
                 NetworkHelper.TryCreateNeuron(out var NIMPLY) &&
-                LogicGateBase.TryCreate(out NotGate? NOT___Input1, new FunctionalParameterInfo<BinaryNeuronInfo>([inputs[0]], [result]), additionalInputs: NOT) &&
-                LogicGateBase.TryCreate(out NotGate? NOT___Input2, new FunctionalParameterInfo<BinaryNeuronInfo>([inputs[1]], [result]), additionalInputs: NOT) &&
-                LogicGateBase.TryCreate(out AndGate? AND___Input1__Input2, new FunctionalParameterInfo<BinaryNeuronInfo>(inputs, [result]), additionalInputs: AND) &&
-                LogicGateBase.TryCreate(out OrGate? OR___Input1__Input2, new FunctionalParameterInfo<BinaryNeuronInfo>(inputs, [result]), additionalInputs: OR) &&
-                LogicGateBase.TryCreate(out NandGate? NAND___Input1__Input2, new FunctionalParameterInfo<BinaryNeuronInfo>(inputs, [result]), additionalInputs: NAND) &&
-                LogicGateBase.TryCreate(out NorGate? NOR___Input1__Input2, new FunctionalParameterInfo<BinaryNeuronInfo>(inputs, [result]), additionalInputs: NOR) &&
-                LogicGateBase.TryCreate(out XorGate? XOR___Input1__Input2, new FunctionalParameterInfo<BinaryNeuronInfo>(inputs, [result]), additionalInputs: XOR) &&
-                LogicGateBase.TryCreate(out XnorGate? XNOR___Input1__Input2, new FunctionalParameterInfo<BinaryNeuronInfo>(inputs, [result]), additionalInputs: XNOR) &&
-                LogicGateBase.TryCreate(out ImplyGate? IMPLY___Input1__Input2, new FunctionalParameterInfo<BinaryNeuronInfo>(inputs, [result]), additionalInputs: IMPLY) &&
-                LogicGateBase.TryCreate(out NimplyGate? NIMPLY___Input1__Input2, new FunctionalParameterInfo<BinaryNeuronInfo>(inputs, [result]), additionalInputs: NIMPLY)
+                LogicGateBase.TryCreate(out NotGate? NOT___Input1, new FunctionalParameter<BinaryNeuronInfo>([inputs[0]], [result]), additionalInputs: NOT) &&
+                LogicGateBase.TryCreate(out NotGate? NOT___Input2, new FunctionalParameter<BinaryNeuronInfo>([inputs[1]], [result]), additionalInputs: NOT) &&
+                LogicGateBase.TryCreate(out AndGate? AND___Input1__Input2, new FunctionalParameter<BinaryNeuronInfo>(inputs, [result]), additionalInputs: AND) &&
+                LogicGateBase.TryCreate(out OrGate? OR___Input1__Input2, new FunctionalParameter<BinaryNeuronInfo>(inputs, [result]), additionalInputs: OR) &&
+                LogicGateBase.TryCreate(out NandGate? NAND___Input1__Input2, new FunctionalParameter<BinaryNeuronInfo>(inputs, [result]), additionalInputs: NAND) &&
+                LogicGateBase.TryCreate(out NorGate? NOR___Input1__Input2, new FunctionalParameter<BinaryNeuronInfo>(inputs, [result]), additionalInputs: NOR) &&
+                LogicGateBase.TryCreate(out XorGate? XOR___Input1__Input2, new FunctionalParameter<BinaryNeuronInfo>(inputs, [result]), additionalInputs: XOR) &&
+                LogicGateBase.TryCreate(out XnorGate? XNOR___Input1__Input2, new FunctionalParameter<BinaryNeuronInfo>(inputs, [result]), additionalInputs: XNOR) &&
+                LogicGateBase.TryCreate(out ImplyGate? IMPLY___Input1__Input2, new FunctionalParameter<BinaryNeuronInfo>(inputs, [result]), additionalInputs: IMPLY) &&
+                LogicGateBase.TryCreate(out NimplyGate? NIMPLY___Input1__Input2, new FunctionalParameter<BinaryNeuronInfo>(inputs, [result]), additionalInputs: NIMPLY)
             )
             {
                 // "Nothing is True, Everything is permitted"
