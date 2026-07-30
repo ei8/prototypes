@@ -205,11 +205,15 @@ namespace ei8.Prototypes.HelloWorm
         {
             Network net = new();
             BinaryNeuronInfo? precedingCarryOver = null;
+            VariableInfo? precedingVariableInfo = null;
             for (int i = 0; i < count; i++)
             {
-                Adder a;
-                net.AddReplaceItems(a = new Adder(i, precedingCarryOver));
-                precedingCarryOver = a.Parameters.Outputs.ElementAt((int)Adder.Output.CarryOver);
+                if (Adder.TryCreate(out Adder? a, i, precedingCarryOver, precedingVariableInfo, nameof(Adder) + (i +1)))
+                {
+                    net.AddReplaceItems(a);
+                    precedingCarryOver = a.Parameters.Outputs.ElementAt((int)Adder.Output.CarryOver);
+                    precedingVariableInfo = a.VariableInfo;
+                }
             }
             return net;
         }
@@ -218,11 +222,15 @@ namespace ei8.Prototypes.HelloWorm
         {
             Network net = new();
             BinaryNeuronInfo? precedingBorrow = null;
+            VariableInfo? precedingVariableInfo = null;
             for (int i = 0; i < count; i++)
             {
-                Subtractor s;
-                net.AddReplaceItems(s = new Subtractor(i, precedingBorrow));
-                precedingBorrow = s.Parameters.Outputs.ElementAt((int)Subtractor.Output.Borrow);
+                if (Subtractor.TryCreate(out Subtractor? s, i, precedingBorrow, precedingVariableInfo, nameof(Subtractor) + (i + 1)))
+                {
+                    net.AddReplaceItems(s);
+                    precedingBorrow = s.Parameters.Outputs.ElementAt((int)Subtractor.Output.Borrow);
+                    precedingVariableInfo = s.VariableInfo;
+                }
             }
             return net;
         }
