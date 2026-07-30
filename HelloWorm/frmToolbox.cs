@@ -1,5 +1,6 @@
 ﻿using ei8.Cortex.Coding;
 using ei8.Cortex.Coding.d23;
+using ei8.Cortex.Coding.d23.Collections;
 using ei8.Cortex.Coding.d23.Math.Arithmetic;
 using ei8.Cortex.Coding.d23.Math.Logic;
 using ei8.Cortex.Library.Client;
@@ -101,7 +102,7 @@ namespace ei8.Prototypes.HelloWorm
         {
             if (this.selectionService.PrimarySelection is Dish dish)
             {
-                string option = InputBox.ShowDialog(this, "1 - Logic Gates; 2 - Addition; 3 - Subtraction", string.Empty);
+                string option = InputBox.ShowDialog(this, "1 - Logic Gates; 2 - Addition; 3 - Subtraction; 4 - Next", string.Empty);
 
                 var sheet = this.serviceProvider.GetRequiredService<Worksheet>();
                 var suffix = string.Empty;
@@ -121,6 +122,10 @@ namespace ei8.Prototypes.HelloWorm
                             sheet.Load(frmToolbox.CreateSubtractors(4));
                             suffix = "Subtraction";
                             break;
+                        case "4":
+                            sheet.Load(frmToolbox.CreateNexts(10));
+                            suffix = "Next";
+                            break;
                     }
                 }
                 
@@ -134,6 +139,38 @@ namespace ei8.Prototypes.HelloWorm
                 sheet.Initialize(this.settingsService.Mirrors);
                 dish.Add(sheet);
             }
+        }
+
+        private static ReadOnlyNetwork CreateNexts(int last)
+        {
+            Network net = new();
+
+            if (
+                UnaryNeuronInfo.TryCreate(out var currentStep, parameterExpression: "step0") &&
+                NetworkHelper.TryCreateNeuron(out var NEXT)
+            )
+            {
+                net.AddReplace(NEXT);
+                for(int i = 1; i <= last; i++)
+                {
+                    if (
+                        UnaryNeuronInfo.TryCreate(out var nextStep, parameterExpression: "step" + i) &&
+                        currentStep.VariableInfo != null &&
+                        Next.TryCreate(
+                            out Next? n,
+                            new([currentStep], [nextStep]),
+                            $"{nameof(NEXT)}___{currentStep.VariableInfo.Inputs.Single()}",
+                            additionalInputs: NEXT
+                        )
+                    )
+                    {
+                        net.AddReplaceItems(n);
+                        currentStep = nextStep;
+                    }
+                }
+            }
+
+            return net;
         }
 
         private static ReadOnlyNetwork CreateLogicGates()
