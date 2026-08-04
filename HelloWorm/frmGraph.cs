@@ -25,7 +25,7 @@ namespace ei8.Prototypes.HelloWorm
         public frmGraph(ISelectionService selectionService)
         {
             InitializeComponent();
-            this.gViewer1.CurrentLayoutMethod = LayoutMethod.MDS;
+            this.gViewer1.CurrentLayoutMethod = LayoutMethod.SugiyamaScheme;
 
             this.selectionService = selectionService;
 

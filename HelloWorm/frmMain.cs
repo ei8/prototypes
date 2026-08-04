@@ -196,19 +196,19 @@ namespace ei8.Prototypes.HelloWorm
                 var extraLargeNeuron = NetworkHelper.CreateNeuron(extraLargeConfig);
 
                 // ... Interneurons
-                var dishSector1Neuron = NetworkHelper.CreateInterneuronNetwork(rotateNeuron, counterClockwiseNeuron, mediumNeuron);
-                var dishSector2Neuron = NetworkHelper.CreateInterneuronNetwork(rotateNeuron, counterClockwiseNeuron, smallNeuron);
-                var dishSector7Neuron = NetworkHelper.CreateInterneuronNetwork(rotateNeuron, clockwiseNeuron, smallNeuron);
-                var dishSector8Neuron = NetworkHelper.CreateInterneuronNetwork(rotateNeuron, clockwiseNeuron, mediumNeuron);
+                var dishSector1Neuron = NetworkHelper.CreateInterneuronNetworkByOutputNeurons(rotateNeuron, counterClockwiseNeuron, mediumNeuron);
+                var dishSector2Neuron = NetworkHelper.CreateInterneuronNetworkByOutputNeurons(rotateNeuron, counterClockwiseNeuron, smallNeuron);
+                var dishSector7Neuron = NetworkHelper.CreateInterneuronNetworkByOutputNeurons(rotateNeuron, clockwiseNeuron, smallNeuron);
+                var dishSector8Neuron = NetworkHelper.CreateInterneuronNetworkByOutputNeurons(rotateNeuron, clockwiseNeuron, mediumNeuron);
 
-                var odorSector1Neuron = NetworkHelper.CreateInterneuronNetwork(rotateNeuron, clockwiseNeuron, smallNeuron);
-                var odorSector2Neuron = NetworkHelper.CreateInterneuronNetwork(rotateNeuron, clockwiseNeuron, mediumNeuron);
-                var odorSector3Neuron = NetworkHelper.CreateInterneuronNetwork(rotateNeuron, clockwiseNeuron, largeNeuron);
-                var odorSector4Neuron = NetworkHelper.CreateInterneuronNetwork(rotateNeuron, clockwiseNeuron, extraLargeNeuron);
-                var odorSector5Neuron = NetworkHelper.CreateInterneuronNetwork(rotateNeuron, counterClockwiseNeuron, extraLargeNeuron);
-                var odorSector6Neuron = NetworkHelper.CreateInterneuronNetwork(rotateNeuron, counterClockwiseNeuron, largeNeuron);
-                var odorSector7Neuron = NetworkHelper.CreateInterneuronNetwork(rotateNeuron, counterClockwiseNeuron, mediumNeuron);
-                var odorSector8Neuron = NetworkHelper.CreateInterneuronNetwork(rotateNeuron, counterClockwiseNeuron, smallNeuron);
+                var odorSector1Neuron = NetworkHelper.CreateInterneuronNetworkByOutputNeurons(rotateNeuron, clockwiseNeuron, smallNeuron);
+                var odorSector2Neuron = NetworkHelper.CreateInterneuronNetworkByOutputNeurons(rotateNeuron, clockwiseNeuron, mediumNeuron);
+                var odorSector3Neuron = NetworkHelper.CreateInterneuronNetworkByOutputNeurons(rotateNeuron, clockwiseNeuron, largeNeuron);
+                var odorSector4Neuron = NetworkHelper.CreateInterneuronNetworkByOutputNeurons(rotateNeuron, clockwiseNeuron, extraLargeNeuron);
+                var odorSector5Neuron = NetworkHelper.CreateInterneuronNetworkByOutputNeurons(rotateNeuron, counterClockwiseNeuron, extraLargeNeuron);
+                var odorSector6Neuron = NetworkHelper.CreateInterneuronNetworkByOutputNeurons(rotateNeuron, counterClockwiseNeuron, largeNeuron);
+                var odorSector7Neuron = NetworkHelper.CreateInterneuronNetworkByOutputNeurons(rotateNeuron, counterClockwiseNeuron, mediumNeuron);
+                var odorSector8Neuron = NetworkHelper.CreateInterneuronNetworkByOutputNeurons(rotateNeuron, counterClockwiseNeuron, smallNeuron);
 
                 // ... Input Neurons
                 IEnumerable<ReadOnlyNetwork> inputNeuronNetworks = [

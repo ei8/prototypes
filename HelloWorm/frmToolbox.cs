@@ -146,7 +146,7 @@ namespace ei8.Prototypes.HelloWorm
             Network net = new();
 
             if (
-                UnaryNeuronInfo.TryCreate(out var currentStep, parameterExpression: "step0") &&
+                UnaryNeuronParameter.TryCreate(out var currentStep, parameterExpression: "step0") &&
                 NetworkHelper.TryCreateNeuron(out var NEXT)
             )
             {
@@ -154,7 +154,7 @@ namespace ei8.Prototypes.HelloWorm
                 for(int i = 1; i <= last; i++)
                 {
                     if (
-                        UnaryNeuronInfo.TryCreate(out var nextStep, parameterExpression: "step" + i) &&
+                        UnaryNeuronParameter.TryCreate(out var nextStep, parameterExpression: "step" + i) &&
                         currentStep.VariableInfo != null &&
                         Next.TryCreate(
                             out Next? n,
@@ -176,13 +176,13 @@ namespace ei8.Prototypes.HelloWorm
         private static ReadOnlyNetwork CreateLogicGates()
         {
             Network net = new();
-            BinaryNeuronInfo[] inputs = [
-                BinaryNeuronInfo.Create("Input1", Boolean.TrueString.ToUpper(), Boolean.FalseString.ToUpper()),
-                BinaryNeuronInfo.Create("Input2", Boolean.TrueString.ToUpper(), Boolean.FalseString.ToUpper())
+            BinaryNeuronParameter[] inputs = [
+                BinaryNeuronParameter.Create("Input1", Boolean.TrueString.ToUpper(), Boolean.FalseString.ToUpper()),
+                BinaryNeuronParameter.Create("Input2", Boolean.TrueString.ToUpper(), Boolean.FalseString.ToUpper())
             ];
 
             if (
-                BinaryNeuronInfo.TryCreate(out var result, trueString: Boolean.TrueString.ToUpper(), falseString: Boolean.FalseString.ToUpper()) && // rotateConfig);
+                BinaryNeuronParameter.TryCreate(out var result, trueString: Boolean.TrueString.ToUpper(), falseString: Boolean.FalseString.ToUpper()) && // rotateConfig);
                 NetworkHelper.TryCreateNeuron(out var NOT) &&
                 NetworkHelper.TryCreateNeuron(out var AND) &&
                 NetworkHelper.TryCreateNeuron(out var OR) &&
@@ -192,16 +192,16 @@ namespace ei8.Prototypes.HelloWorm
                 NetworkHelper.TryCreateNeuron(out var XNOR) &&
                 NetworkHelper.TryCreateNeuron(out var IMPLY) &&
                 NetworkHelper.TryCreateNeuron(out var NIMPLY) &&
-                LogicGateBase.TryCreate(out NotGate? NOT___Input1, new FunctionalParameter<BinaryNeuronInfo>([inputs[0]], [result]), additionalInputs: NOT) &&
-                LogicGateBase.TryCreate(out NotGate? NOT___Input2, new FunctionalParameter<BinaryNeuronInfo>([inputs[1]], [result]), additionalInputs: NOT) &&
-                LogicGateBase.TryCreate(out AndGate? AND___Input1__Input2, new FunctionalParameter<BinaryNeuronInfo>(inputs, [result]), additionalInputs: AND) &&
-                LogicGateBase.TryCreate(out OrGate? OR___Input1__Input2, new FunctionalParameter<BinaryNeuronInfo>(inputs, [result]), additionalInputs: OR) &&
-                LogicGateBase.TryCreate(out NandGate? NAND___Input1__Input2, new FunctionalParameter<BinaryNeuronInfo>(inputs, [result]), additionalInputs: NAND) &&
-                LogicGateBase.TryCreate(out NorGate? NOR___Input1__Input2, new FunctionalParameter<BinaryNeuronInfo>(inputs, [result]), additionalInputs: NOR) &&
-                LogicGateBase.TryCreate(out XorGate? XOR___Input1__Input2, new FunctionalParameter<BinaryNeuronInfo>(inputs, [result]), additionalInputs: XOR) &&
-                LogicGateBase.TryCreate(out XnorGate? XNOR___Input1__Input2, new FunctionalParameter<BinaryNeuronInfo>(inputs, [result]), additionalInputs: XNOR) &&
-                LogicGateBase.TryCreate(out ImplyGate? IMPLY___Input1__Input2, new FunctionalParameter<BinaryNeuronInfo>(inputs, [result]), additionalInputs: IMPLY) &&
-                LogicGateBase.TryCreate(out NimplyGate? NIMPLY___Input1__Input2, new FunctionalParameter<BinaryNeuronInfo>(inputs, [result]), additionalInputs: NIMPLY)
+                LogicGateBase.TryCreate(out NotGate? NOT___Input1, new FunctionalParameter<BinaryNeuronParameter>([inputs[0]], [result]), additionalInputs: NOT) &&
+                LogicGateBase.TryCreate(out NotGate? NOT___Input2, new FunctionalParameter<BinaryNeuronParameter>([inputs[1]], [result]), additionalInputs: NOT) &&
+                LogicGateBase.TryCreate(out AndGate? AND___Input1__Input2, new FunctionalParameter<BinaryNeuronParameter>(inputs, [result]), additionalInputs: AND) &&
+                LogicGateBase.TryCreate(out OrGate? OR___Input1__Input2, new FunctionalParameter<BinaryNeuronParameter>(inputs, [result]), additionalInputs: OR) &&
+                LogicGateBase.TryCreate(out NandGate? NAND___Input1__Input2, new FunctionalParameter<BinaryNeuronParameter>(inputs, [result]), additionalInputs: NAND) &&
+                LogicGateBase.TryCreate(out NorGate? NOR___Input1__Input2, new FunctionalParameter<BinaryNeuronParameter>(inputs, [result]), additionalInputs: NOR) &&
+                LogicGateBase.TryCreate(out XorGate? XOR___Input1__Input2, new FunctionalParameter<BinaryNeuronParameter>(inputs, [result]), additionalInputs: XOR) &&
+                LogicGateBase.TryCreate(out XnorGate? XNOR___Input1__Input2, new FunctionalParameter<BinaryNeuronParameter>(inputs, [result]), additionalInputs: XNOR) &&
+                LogicGateBase.TryCreate(out ImplyGate? IMPLY___Input1__Input2, new FunctionalParameter<BinaryNeuronParameter>(inputs, [result]), additionalInputs: IMPLY) &&
+                LogicGateBase.TryCreate(out NimplyGate? NIMPLY___Input1__Input2, new FunctionalParameter<BinaryNeuronParameter>(inputs, [result]), additionalInputs: NIMPLY)
             )
             {
                 // "Nothing is True, Everything is permitted"
@@ -241,7 +241,7 @@ namespace ei8.Prototypes.HelloWorm
         private static ReadOnlyNetwork CreateAdders(int count)
         {
             Network net = new();
-            BinaryNeuronInfo? precedingCarryOver = null;
+            BinaryNeuronParameter? precedingCarryOver = null;
             VariableInfo? precedingVariableInfo = null;
             for (int i = 0; i < count; i++)
             {
@@ -258,7 +258,7 @@ namespace ei8.Prototypes.HelloWorm
         private static ReadOnlyNetwork CreateSubtractors(int count)
         {
             Network net = new();
-            BinaryNeuronInfo? precedingBorrow = null;
+            BinaryNeuronParameter? precedingBorrow = null;
             VariableInfo? precedingVariableInfo = null;
             for (int i = 0; i < count; i++)
             {
