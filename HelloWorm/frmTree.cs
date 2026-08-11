@@ -1,6 +1,7 @@
 ﻿using ei8.Cortex.Coding;
 using ei8.Cortex.Coding.d23;
-using ei8.Cortex.Coding.d23.Loops;
+using ei8.Cortex.Coding.d23.Process;
+using ei8.Cortex.Coding.d23.Process.Iteration;
 using System.ComponentModel.Design;
 using WeifenLuo.WinFormsUI.Docking;
 
@@ -11,7 +12,7 @@ namespace ei8.Prototypes.HelloWorm
         private const string FormDescription = "Tree";
         private readonly ISpikableReporting? spikable;
         private readonly ISelectionService selectionService;
-        private DoUntil? process;
+        private IProcess? process;
 
         public frmTree(ISelectionService selectionService)
         {
@@ -258,13 +259,15 @@ namespace ei8.Prototypes.HelloWorm
                 if (this.process != null)
                     this.process.Stop();
 
-                this.process = new DoUntil(
+                this.process = new DoUntil();
+                this.process.Start(
                     this.spikable,
-                    [checkedNeurons[0]],
-                    checkedNeurons[1],
-                    checkedNeurons[2]
+                    new WorkingMemory<DoUntil.WorkingMemoryKeys>(
+                        new ReadableKeyedChunk<DoUntil.WorkingMemoryKeys>(DoUntil.WorkingMemoryKeys.Actions, [checkedNeurons[0]]),
+                        new WriteableKeyedChunk<DoUntil.WorkingMemoryKeys>(DoUntil.WorkingMemoryKeys.Variable, [checkedNeurons[1]]),
+                        new ReadableKeyedChunk<DoUntil.WorkingMemoryKeys>(DoUntil.WorkingMemoryKeys.Condition, [checkedNeurons[2]])
+                    )
                 );
-                this.process.Start();
             }
         }
 
