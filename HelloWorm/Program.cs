@@ -19,7 +19,37 @@ namespace ei8.Prototypes.HelloWorm
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
             var host = CreateHostBuilder().Build();
+            
+            Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
+            // https://www.experts-exchange.com/questions/27527568/Add-Error-Handler-to-Windows-Form-App.html
+            // Add handler to handle the exception raised by main threads
+            Application.ThreadException += new ThreadExceptionEventHandler(Application_ThreadException);
+
+            // Add handler to handle the exception raised by additional threads
+            AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
+
             Application.Run(host.Services.GetRequiredService<frmMain>());
+        }
+
+        static void Application_ThreadException(object sender, ThreadExceptionEventArgs e) =>
+            ShowExceptionDetails(e.Exception);
+
+        static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        {
+            ShowExceptionDetails((Exception)e.ExceptionObject);
+        }
+
+        static void ShowExceptionDetails(Exception ex)
+        {
+            // Do logging of exception details
+            MessageBox.Show(
+                $"An error occurred while executing '{ex.TargetSite?.ToString()}': " +
+                $"{string.Concat(Enumerable.Repeat(Environment.NewLine, 2))}" +
+                $"{ex.Message}", 
+                "Error",
+                MessageBoxButtons.OK, 
+                MessageBoxIcon.Error
+            );
         }
 
         private static IHostBuilder CreateHostBuilder()

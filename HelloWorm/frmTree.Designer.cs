@@ -36,6 +36,10 @@
             tsbReload = new ToolStripButton();
             toolStripSeparator1 = new ToolStripSeparator();
             tsbSpike = new ToolStripButton();
+            toolStripSeparator4 = new ToolStripSeparator();
+            tsbStartProcess = new ToolStripDropDownButton();
+            mnuStartProcessDoUntil = new ToolStripMenuItem();
+            tsbStopProcess = new ToolStripButton();
             toolStripSeparator3 = new ToolStripSeparator();
             tsbCheckAll = new ToolStripButton();
             tsbCheckSelected = new ToolStripButton();
@@ -44,6 +48,7 @@
             tsbFocusChecked = new ToolStripButton();
             tsbFocusReflexArc = new ToolStripButton();
             tsbHideSelectedTags = new ToolStripButton();
+            tsbCopyIds = new ToolStripButton();
             toolStrip1.SuspendLayout();
             SuspendLayout();
             // 
@@ -75,7 +80,7 @@
             // toolStrip1
             // 
             toolStrip1.GripStyle = ToolStripGripStyle.Hidden;
-            toolStrip1.Items.AddRange(new ToolStripItem[] { tsbReload, toolStripSeparator1, tsbSpike, toolStripSeparator3, tsbCheckAll, tsbCheckSelected, tstbFilter, toolStripSeparator2, tsbFocusChecked, tsbFocusReflexArc, tsbHideSelectedTags });
+            toolStrip1.Items.AddRange(new ToolStripItem[] { tsbReload, toolStripSeparator1, tsbSpike, toolStripSeparator4, tsbStartProcess, tsbStopProcess, toolStripSeparator3, tsbCheckAll, tsbCheckSelected, tstbFilter, toolStripSeparator2, tsbFocusChecked, tsbFocusReflexArc, tsbHideSelectedTags, tsbCopyIds });
             toolStrip1.Location = new Point(0, 0);
             toolStrip1.Name = "toolStrip1";
             toolStrip1.Size = new Size(800, 25);
@@ -107,6 +112,40 @@
             tsbSpike.Size = new Size(23, 22);
             tsbSpike.Text = "Spike";
             tsbSpike.Click += tsbSpike_Click;
+            // 
+            // toolStripSeparator4
+            // 
+            toolStripSeparator4.Name = "toolStripSeparator4";
+            toolStripSeparator4.Size = new Size(6, 25);
+            // 
+            // tsbStartProcess
+            // 
+            tsbStartProcess.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            tsbStartProcess.DropDownItems.AddRange(new ToolStripItem[] { mnuStartProcessDoUntil });
+            tsbStartProcess.Image = (Image)resources.GetObject("tsbStartProcess.Image");
+            tsbStartProcess.ImageTransparentColor = Color.Magenta;
+            tsbStartProcess.Name = "tsbStartProcess";
+            tsbStartProcess.Size = new Size(29, 22);
+            tsbStartProcess.Text = "Start Process";
+            tsbStartProcess.ToolTipText = "Start Process";
+            // 
+            // mnuStartProcessDoUntil
+            // 
+            mnuStartProcessDoUntil.Name = "mnuStartProcessDoUntil";
+            mnuStartProcessDoUntil.Size = new Size(126, 22);
+            mnuStartProcessDoUntil.Text = "Do Until...";
+            mnuStartProcessDoUntil.Click += mnuStartProcessDoUntil_Click;
+            // 
+            // tsbStopProcess
+            // 
+            tsbStopProcess.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            tsbStopProcess.Image = (Image)resources.GetObject("tsbStopProcess.Image");
+            tsbStopProcess.ImageTransparentColor = Color.Magenta;
+            tsbStopProcess.Name = "tsbStopProcess";
+            tsbStopProcess.Size = new Size(23, 22);
+            tsbStopProcess.Text = "Stop Process";
+            tsbStopProcess.ToolTipText = "Stop Process";
+            tsbStopProcess.Click += tsbStopProcess_Click;
             // 
             // toolStripSeparator3
             // 
@@ -178,6 +217,16 @@
             tsbHideSelectedTags.ToolTipText = "Hide Selected Tags in Graph";
             tsbHideSelectedTags.Click += tsbHideSelectedTags_Click;
             // 
+            // tsbCopyIds
+            // 
+            tsbCopyIds.DisplayStyle = ToolStripItemDisplayStyle.Text;
+            tsbCopyIds.Image = (Image)resources.GetObject("tsbCopyIds.Image");
+            tsbCopyIds.ImageTransparentColor = Color.Magenta;
+            tsbCopyIds.Name = "tsbCopyIds";
+            tsbCopyIds.Size = new Size(58, 22);
+            tsbCopyIds.Text = "Copy IDs";
+            tsbCopyIds.Click += tsbCopyIds_Click;
+            // 
             // frmTree
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -211,5 +260,10 @@
         private ToolStripTextBox tstbFilter;
         private ToolStripButton tsbFocusChecked;
         private ToolStripButton tsbHideSelectedTags;
+        private ToolStripButton tsbCopyIds;
+        private ToolStripDropDownButton tsbStartProcess;
+        private ToolStripMenuItem mnuStartProcessDoUntil;
+        private ToolStripButton tsbStopProcess;
+        private ToolStripSeparator toolStripSeparator4;
     }
 }

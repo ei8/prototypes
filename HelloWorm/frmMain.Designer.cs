@@ -358,7 +358,7 @@
             // aboutHelloWormToolStripMenuItem
             // 
             aboutHelloWormToolStripMenuItem.Name = "aboutHelloWormToolStripMenuItem";
-            aboutHelloWormToolStripMenuItem.Size = new Size(180, 22);
+            aboutHelloWormToolStripMenuItem.Size = new Size(174, 22);
             aboutHelloWormToolStripMenuItem.Text = "&About Hello Worm";
             aboutHelloWormToolStripMenuItem.Click += aboutHelloWormToolStripMenuItem_Click;
             // 
@@ -403,6 +403,7 @@
             IsMdiContainer = true;
             Name = "frmMain";
             Text = "Hello Worm - ei8.io";
+            WindowState = FormWindowState.Maximized;
             Load += frmMain_Load;
             statusStrip1.ResumeLayout(false);
             statusStrip1.PerformLayout();

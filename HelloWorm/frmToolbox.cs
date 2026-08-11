@@ -151,7 +151,8 @@ namespace ei8.Prototypes.HelloWorm
             )
             {
                 net.AddReplace(NEXT);
-                for(int i = 1; i <= last; i++)
+                ReadOnlyNetwork? previousInterneuronNetwork = null;
+                for (int i = 1; i <= last; i++)
                 {
                     if (
                         UnaryNeuronParameter.TryCreate(out var nextStep, parameterExpression: "step" + i) &&
@@ -159,6 +160,7 @@ namespace ei8.Prototypes.HelloWorm
                         Next.TryCreate(
                             out Next? n,
                             new([currentStep], [nextStep]),
+                            previousInterneuronNetwork,
                             $"{nameof(NEXT)}___{currentStep.VariableInfo.Inputs.Single()}",
                             additionalInputs: NEXT
                         )
@@ -166,6 +168,7 @@ namespace ei8.Prototypes.HelloWorm
                     {
                         net.AddReplaceItems(n);
                         currentStep = nextStep;
+                        previousInterneuronNetwork = n.InterneuronNetwork;
                     }
                 }
             }

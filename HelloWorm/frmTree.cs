@@ -1,5 +1,6 @@
 ﻿using ei8.Cortex.Coding;
 using ei8.Cortex.Coding.d23;
+using ei8.Cortex.Coding.d23.Loops;
 using System.ComponentModel.Design;
 using WeifenLuo.WinFormsUI.Docking;
 
@@ -8,8 +9,9 @@ namespace ei8.Prototypes.HelloWorm
     public partial class frmTree : DockContent
     {
         private const string FormDescription = "Tree";
-        private readonly ISpikableReporting spikable;
+        private readonly ISpikableReporting? spikable;
         private readonly ISelectionService selectionService;
+        private DoUntil? process;
 
         public frmTree(ISelectionService selectionService)
         {
@@ -25,6 +27,8 @@ namespace ei8.Prototypes.HelloWorm
                 if (this.spikable is INamed n)
                     n.PropertyChanged += this.N_PropertyChanged;
             }
+
+            this.process = null;
         }
 
         private void N_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -41,7 +45,7 @@ namespace ei8.Prototypes.HelloWorm
                     )
                         process = false;
 
-                    if (process)
+                    if (process && this.spikable != null)
                         this.Text = this.spikable.GetName(frmTree.FormDescription);
 
                     break;
@@ -51,7 +55,7 @@ namespace ei8.Prototypes.HelloWorm
         private void SelectionService_SelectionChanged(object? sender, EventArgs e)
         {
             this.tsbHideSelectedTags.Enabled =
-            this.tsbFocusReflexArc.Enabled = 
+            this.tsbFocusReflexArc.Enabled =
             this.selectionService.PrimarySelection is IGraph;
         }
 
@@ -62,7 +66,7 @@ namespace ei8.Prototypes.HelloWorm
 
         private void tsbReload_Click(object sender, EventArgs e)
         {
-            if (this.spikable.Network != null)
+            if (this.spikable?.Network != null)
             {
                 this.listView1.Items.Clear();
 
@@ -109,7 +113,7 @@ namespace ei8.Prototypes.HelloWorm
 
         private void tsbFocusReflexArc_Click(object sender, EventArgs e)
         {
-            if (this.spikable.Network != null)
+            if (this.spikable?.Network != null)
             {
                 IEnumerable<Neuron> checkedNeurons = this.GetCheckedNeurons();
 
@@ -166,7 +170,7 @@ namespace ei8.Prototypes.HelloWorm
 
         private void tsbSpike_Click(object sender, EventArgs e)
         {
-            if (this.spikable.Network != null && this.spikable is ISpikable spikable)
+            if (this.spikable?.Network != null && this.spikable is ISpikable spikable)
             {
                 IEnumerable<Neuron> checkedNeurons = this.GetCheckedNeurons();
 
@@ -196,7 +200,7 @@ namespace ei8.Prototypes.HelloWorm
 
         private void tstbFilter_TextChanged(object sender, EventArgs e)
         {
-            if (this.spikable.Network != null)
+            if (this.spikable?.Network != null)
             {
                 this.listView1.Items.Clear();
 
@@ -204,12 +208,12 @@ namespace ei8.Prototypes.HelloWorm
                     this.AddItem(n);
             }
         }
-        
+
         private void tsbFocusChecked_Click(object sender, EventArgs e)
         {
-            if (this.spikable.Network != null)
+            if (this.spikable?.Network != null)
             {
-                IEnumerable<Neuron> checkedNeurons = [..this.GetCheckedNeurons()];
+                IEnumerable<Neuron> checkedNeurons = [.. this.GetCheckedNeurons()];
 
                 this.listView1.Items.Clear();
 
@@ -220,9 +224,9 @@ namespace ei8.Prototypes.HelloWorm
 
         private void tsbHideSelectedTags_Click(object sender, EventArgs e)
         {
-            if (this.spikable.Network != null)
+            if (this.spikable?.Network != null)
             {
-                IEnumerable<Neuron> checkedNeurons = [..this.GetCheckedNeurons()];
+                IEnumerable<Neuron> checkedNeurons = [.. this.GetCheckedNeurons()];
 
                 if (this.selectionService.PrimarySelection is IGraph fg)
                 {
@@ -231,6 +235,44 @@ namespace ei8.Prototypes.HelloWorm
                     fg.Settings.HideTagsNeurons = fg.Settings.HideTagsNeurons.Concat(newHideTagsNeurons);
                     fg.Reload();
                 }
+            }
+        }
+
+        private void tsbCopyIds_Click(object sender, EventArgs e)
+        {
+            if (this.spikable?.Network != null)
+            {
+                IEnumerable<Neuron> checkedNeurons = [.. this.GetCheckedNeurons()];
+                Clipboard.SetText(string.Join(',', checkedNeurons.Select(cn => cn.Id.ToString())));
+            }
+        }
+
+        private void mnuStartProcessDoUntil_Click(object sender, EventArgs e)
+        {
+            if (this.spikable != null)
+            {
+                var checkedNeurons = this.GetCheckedNeurons().ToArray();
+
+                ArgumentOutOfRangeException.ThrowIfNotEqual(checkedNeurons.Count(), 3);
+
+                if (this.process != null)
+                    this.process.Stop();
+
+                this.process = new DoUntil(
+                    this.spikable,
+                    [checkedNeurons[0]],
+                    checkedNeurons[1],
+                    checkedNeurons[2]
+                );
+                this.process.Start();
+            }
+        }
+
+        private void tsbStopProcess_Click(object sender, EventArgs e)
+        {
+            if (this.process != null)
+            {
+                this.process.Stop();
             }
         }
     }
