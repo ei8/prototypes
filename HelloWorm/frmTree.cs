@@ -27,9 +27,19 @@ namespace ei8.Prototypes.HelloWorm
 
                 if (this.spikable is INamed n)
                     n.PropertyChanged += this.N_PropertyChanged;
+
+                this.spikable.Fired += this.Spikable_Fired;
             }
 
             this.process = null;
+        }
+
+        private void Spikable_Fired(object? sender, Cortex.Coding.Spiker.FiredEventArgs e)
+        {
+            if (this.spikable != null && this.process != null)
+            {
+                this.process.HandleFire(e.FireInfo.Target, this.spikable.Network);
+            }
         }
 
         private void N_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -256,18 +266,20 @@ namespace ei8.Prototypes.HelloWorm
 
                 ArgumentOutOfRangeException.ThrowIfNotEqual(checkedNeurons.Count(), 3);
 
-                if (this.process != null)
-                    this.process.Stop();
+                this.timer1.Stop();
 
                 this.process = new DoUntil();
-                this.process.Start(
-                    this.spikable,
-                    new WorkingMemory<DoUntil.WorkingMemoryKeys>(
-                        new ReadableKeyedChunk<DoUntil.WorkingMemoryKeys>(DoUntil.WorkingMemoryKeys.Actions, [checkedNeurons[0]]),
-                        new WriteableKeyedChunk<DoUntil.WorkingMemoryKeys>(DoUntil.WorkingMemoryKeys.Variable, [checkedNeurons[1]]),
-                        new ReadableKeyedChunk<DoUntil.WorkingMemoryKeys>(DoUntil.WorkingMemoryKeys.Condition, [checkedNeurons[2]])
-                    )
+
+                this.process.Initialize(
+                    new DoUntil.WorkingMemory(
+                        new([checkedNeurons[0]]),
+                        new([checkedNeurons[1]]),
+                        new([checkedNeurons[2]])
+                    ),
+                    this.timer1.Stop
                 );
+
+                this.timer1.Start();
             }
         }
 
@@ -275,8 +287,16 @@ namespace ei8.Prototypes.HelloWorm
         {
             if (this.process != null)
             {
-                this.process.Stop();
+                this.timer1.Stop();
             }
+        }
+
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            if (this.spikable != null && this.process != null)
+                this.spikable.Spike(
+                    [..this.process.GetCurrent()]
+                );
         }
     }
 }

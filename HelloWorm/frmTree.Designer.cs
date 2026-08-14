@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmTree));
             listView1 = new ListView();
             columnHeader2 = new ColumnHeader();
@@ -49,6 +50,7 @@
             tsbFocusReflexArc = new ToolStripButton();
             tsbHideSelectedTags = new ToolStripButton();
             tsbCopyIds = new ToolStripButton();
+            timer1 = new System.Windows.Forms.Timer(components);
             toolStrip1.SuspendLayout();
             SuspendLayout();
             // 
@@ -227,6 +229,11 @@
             tsbCopyIds.Text = "Copy IDs";
             tsbCopyIds.Click += tsbCopyIds_Click;
             // 
+            // timer1
+            // 
+            timer1.Interval = 1000;
+            timer1.Tick += timer1_Tick;
+            // 
             // frmTree
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -265,5 +272,6 @@
         private ToolStripMenuItem mnuStartProcessDoUntil;
         private ToolStripButton tsbStopProcess;
         private ToolStripSeparator toolStripSeparator4;
+        private System.Windows.Forms.Timer timer1;
     }
 }

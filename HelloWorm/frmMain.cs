@@ -163,7 +163,7 @@ namespace ei8.Prototypes.HelloWorm
 
         private async void mnuToolsInitializeAvatar_Click(object sender, EventArgs e)
         {
-            string avatarUrl = InputBox.ShowDialog(this, "Avatar URL", "http://fibona.cc/worm1/av8r/");
+            string avatarUrl = InputBox.ShowDialog(this, "Avatar URL", "Enter Avatar URL", "http://fibona.cc/worm1/av8r/");
 
             if (
                 this.settingsService.Mirrors != null &&

@@ -53,7 +53,7 @@ namespace ei8.Prototypes.HelloWorm
                 var newFood = this.serviceProvider.GetRequiredService<Food>();
                 newFood.Initialize(
                     ExtensionMethods.CreateUnusedName(
-                        (i) => $"{nameof(Food)}{i.ToString()}",
+                        (i) => $"{nameof(Food)}{i}",
                         (s) => d.Components.OfType<INamed>().Any(dcn => dcn.Name == s)
                     ),
                     d
@@ -69,7 +69,12 @@ namespace ei8.Prototypes.HelloWorm
                 this.settingsService.Mirrors != null
             )
             {
-                string neuronQuery = InputBox.ShowDialog(this, "neurUL Query", "http://fibona.cc/worm1/av8r/cortex/neurons?sortorder=1&sortby=1&pagesize=29&depth=5&direction=1");
+                string neuronQuery = InputBox.ShowDialog(
+                    this, 
+                    "neurUL Query", 
+                    "Enter neurUL Query",
+                    "http://fibona.cc/worm1/av8r/cortex/neurons?sortorder=1&sortby=1&pagesize=29&depth=5&direction=1"
+                );
                 if (!string.IsNullOrEmpty(neuronQuery) &&
                     neuronQuery.Contains('?') &&
                     QueryUrl.TryParse(neuronQuery, out QueryUrl queryUrl) &&
@@ -85,7 +90,7 @@ namespace ei8.Prototypes.HelloWorm
                     var newWorm = this.serviceProvider.GetRequiredService<Worm>();
                     newWorm.Initialize(
                         ExtensionMethods.CreateUnusedName(
-                            (i) => $"{nameof(Worm)}{i.ToString()}",
+                            (i) => $"{nameof(Worm)}{i}",
                             (s) => dish.Components.OfType<INamed>().Any(dcn => dcn.Name == s)
                         ),
                         dish
@@ -102,7 +107,21 @@ namespace ei8.Prototypes.HelloWorm
         {
             if (this.selectionService.PrimarySelection is Dish dish)
             {
-                string option = InputBox.ShowDialog(this, "1 - Logic Gates; 2 - Addition; 3 - Subtraction; 4 - Next", string.Empty);
+                string option = InputBox.ShowDialog(
+                    this,
+                    "Select Worksheet Type",
+                    string.Join(
+                        Environment.NewLine,
+                        [
+                            "1 - Logic Gates",
+                            "2 - Addition",
+                            "3 - Subtraction",
+                            "4 - Next",
+                            "5 - Sequential Adders"
+                        ]
+                    ), 
+                    string.Empty
+                );
 
                 var sheet = this.serviceProvider.GetRequiredService<Worksheet>();
                 var suffix = string.Empty;
@@ -126,12 +145,16 @@ namespace ei8.Prototypes.HelloWorm
                             sheet.Load(frmToolbox.CreateNexts(10));
                             suffix = "Next";
                             break;
+                        case "5":
+                            sheet.Load(frmToolbox.CreateSequentialAdders(4));
+                            suffix = "Sequential Adders";
+                            break;
                     }
                 }
                 
                 sheet.Initialize(
                     ExtensionMethods.CreateUnusedName(
-                        (i) => $"{nameof(Worksheet)}{i.ToString()} ({suffix})",
+                        (i) => $"{nameof(Worksheet)}{i} ({suffix})",
                         (s) => dish.Components.OfType<INamed>().Any(dcn => dcn.Name == s)
                     ),
                     dish
@@ -139,6 +162,66 @@ namespace ei8.Prototypes.HelloWorm
                 sheet.Initialize(this.settingsService.Mirrors);
                 dish.Add(sheet);
             }
+        }
+
+        private static ReadOnlyNetwork CreateSequentialAdders(int last)
+        {
+            Network net = new();
+
+            BinaryNeuronParameter? precedingCarryOver = null;
+            VariableInfo? precedingVariableInfo = null;
+            if (
+                UnaryNeuronParameter.TryCreate(out var currentDigit, parameterExpression: "digit1") &&
+                BinaryNeuronParameter.TryCreate(out var addend1) &&
+                BinaryNeuronParameter.TryCreate(out var addend2) &&
+                BinaryNeuronParameter.TryCreate(out var sum) &&
+                BinaryNeuronParameter.TryCreate(out var carryOver)
+            )
+            {
+                FunctionalCircuitParameter<SequentialAdder.Input, SequentialAdder.Output>? parameters = null;
+                IEnumerable<ReadOnlyNetwork>? interneuronNetworks = null;
+                for (int i = 1; i <= last; i++)
+                {
+                    if (
+                        UnaryNeuronParameter.TryCreate(out var nextDigit, parameterExpression: "digit" + (i + 1)) &&
+                        currentDigit.VariableInfo != null &&
+                        (
+                            parameters = SequentialAdder.GetDefaultParameters(
+                                currentDigit,
+                                addend1,
+                                addend2,
+                                precedingCarryOver,
+                                nextDigit,
+                                sum,
+                                carryOver
+                            )
+                        ) != null &&
+                        // TODO: how to use interneuronNetworks across digits
+                        VariableInfo.TryParse(nameof(SequentialAdder) + i, out var variableInfo) &&
+                        (
+                            interneuronNetworks = SequentialAdder.CreateInterneuronNetworks(
+                            parameters,
+                            variableInfo,
+                            precedingVariableInfo
+                        )
+                        ) != null &&
+                        SequentialAdder.TryCreate(
+                            out SequentialAdder? s,
+                            parameters,
+                            interneuronNetworks,
+                            variableInfo,
+                            precedingVariableInfo
+                        )
+                    )
+                    {
+                        net.AddReplaceItems(s);
+                        currentDigit = nextDigit;
+                        precedingCarryOver = s.Parameters.Outputs.CarryOver;
+                        precedingVariableInfo = s.VariableInfo;
+                    }
+                }
+            }
+            return net;
         }
 
         private static ReadOnlyNetwork CreateNexts(int last)
@@ -159,7 +242,7 @@ namespace ei8.Prototypes.HelloWorm
                         currentStep.VariableInfo != null &&
                         Next.TryCreate(
                             out Next? n,
-                            new([currentStep], [nextStep]),
+                            new(new(currentStep), new(nextStep)),
                             previousInterneuronNetwork,
                             $"{nameof(NEXT)}___{currentStep.VariableInfo.Inputs.Single()}",
                             additionalInputs: NEXT
@@ -179,10 +262,9 @@ namespace ei8.Prototypes.HelloWorm
         private static ReadOnlyNetwork CreateLogicGates()
         {
             Network net = new();
-            BinaryNeuronParameter[] inputs = [
-                BinaryNeuronParameter.Create("Input1", Boolean.TrueString.ToUpper(), Boolean.FalseString.ToUpper()),
-                BinaryNeuronParameter.Create("Input2", Boolean.TrueString.ToUpper(), Boolean.FalseString.ToUpper())
-            ];
+
+            var input1 = BinaryNeuronParameter.Create("Input1", Boolean.TrueString.ToUpper(), Boolean.FalseString.ToUpper());
+            var input2 = BinaryNeuronParameter.Create("Input2", Boolean.TrueString.ToUpper(), Boolean.FalseString.ToUpper());
 
             if (
                 BinaryNeuronParameter.TryCreate(out var result, trueString: Boolean.TrueString.ToUpper(), falseString: Boolean.FalseString.ToUpper()) && // rotateConfig);
@@ -195,16 +277,56 @@ namespace ei8.Prototypes.HelloWorm
                 NetworkHelper.TryCreateNeuron(out var XNOR) &&
                 NetworkHelper.TryCreateNeuron(out var IMPLY) &&
                 NetworkHelper.TryCreateNeuron(out var NIMPLY) &&
-                LogicGateBase.TryCreate(out NotGate? NOT___Input1, new FunctionalParameter<BinaryNeuronParameter>([inputs[0]], [result]), additionalInputs: NOT) &&
-                LogicGateBase.TryCreate(out NotGate? NOT___Input2, new FunctionalParameter<BinaryNeuronParameter>([inputs[1]], [result]), additionalInputs: NOT) &&
-                LogicGateBase.TryCreate(out AndGate? AND___Input1__Input2, new FunctionalParameter<BinaryNeuronParameter>(inputs, [result]), additionalInputs: AND) &&
-                LogicGateBase.TryCreate(out OrGate? OR___Input1__Input2, new FunctionalParameter<BinaryNeuronParameter>(inputs, [result]), additionalInputs: OR) &&
-                LogicGateBase.TryCreate(out NandGate? NAND___Input1__Input2, new FunctionalParameter<BinaryNeuronParameter>(inputs, [result]), additionalInputs: NAND) &&
-                LogicGateBase.TryCreate(out NorGate? NOR___Input1__Input2, new FunctionalParameter<BinaryNeuronParameter>(inputs, [result]), additionalInputs: NOR) &&
-                LogicGateBase.TryCreate(out XorGate? XOR___Input1__Input2, new FunctionalParameter<BinaryNeuronParameter>(inputs, [result]), additionalInputs: XOR) &&
-                LogicGateBase.TryCreate(out XnorGate? XNOR___Input1__Input2, new FunctionalParameter<BinaryNeuronParameter>(inputs, [result]), additionalInputs: XNOR) &&
-                LogicGateBase.TryCreate(out ImplyGate? IMPLY___Input1__Input2, new FunctionalParameter<BinaryNeuronParameter>(inputs, [result]), additionalInputs: IMPLY) &&
-                LogicGateBase.TryCreate(out NimplyGate? NIMPLY___Input1__Input2, new FunctionalParameter<BinaryNeuronParameter>(inputs, [result]), additionalInputs: NIMPLY)
+                NotGate.TryCreate(
+                    out NotGate? NOT___Input1,
+                    new(new(input1), new(result)),
+                    additionalInputs: NOT
+                ) &&
+                NotGate.TryCreate(
+                    out NotGate? NOT___Input2,
+                    new(new(input2), new(result)),
+                    additionalInputs: NOT
+                ) &&
+                DualInputLogicGateBase.TryCreate(
+                    out AndGate? AND___Input1__Input2,
+                    new(new(input1, input2), new(result)),
+                    additionalInputs: AND
+                ) &&
+                DualInputLogicGateBase.TryCreate(
+                    out OrGate? OR___Input1__Input2,
+                    new(new(input1, input2), new(result)),
+                    additionalInputs: OR
+                    ) &&
+                DualInputLogicGateBase.TryCreate(
+                    out NandGate? NAND___Input1__Input2,
+                    new(new(input1, input2), new(result)),
+                    additionalInputs: NAND
+                ) &&
+                DualInputLogicGateBase.TryCreate(
+                    out NorGate? NOR___Input1__Input2,
+                    new(new(input1, input2), new(result)),
+                    additionalInputs: NOR
+                ) &&
+                DualInputLogicGateBase.TryCreate(
+                    out XorGate? XOR___Input1__Input2,
+                    new(new(input1, input2), new(result)),
+                    additionalInputs: XOR
+                ) &&
+                DualInputLogicGateBase.TryCreate(
+                    out XnorGate? XNOR___Input1__Input2,
+                    new(new(input1, input2), new(result)),
+                    additionalInputs: XNOR
+                ) &&
+                DualInputLogicGateBase.TryCreate(
+                    out ImplyGate? IMPLY___Input1__Input2,
+                    new(new(input1, input2), new(result)),
+                    additionalInputs: IMPLY
+                ) &&
+                DualInputLogicGateBase.TryCreate(
+                    out NimplyGate? NIMPLY___Input1__Input2,
+                    new(new(input1, input2), new(result)),
+                    additionalInputs: NIMPLY
+                )
             )
             {
                 // "Nothing is True, Everything is permitted"
@@ -221,7 +343,8 @@ namespace ei8.Prototypes.HelloWorm
                         XNOR___Input1__Input2,
                         IMPLY___Input1__Input2,
                         NIMPLY___Input1__Input2,
-                        ..inputs
+                        input1,
+                        input2
                     ]
                 );
                 net.AddReplaceItems(
@@ -251,7 +374,7 @@ namespace ei8.Prototypes.HelloWorm
                 if (Adder.TryCreate(out Adder? a, i, precedingCarryOver, precedingVariableInfo, nameof(Adder) + (i +1)))
                 {
                     net.AddReplaceItems(a);
-                    precedingCarryOver = a.Parameters.Outputs.ElementAt((int)Adder.Output.CarryOver);
+                    precedingCarryOver = a.Parameters.Outputs.CarryOver;
                     precedingVariableInfo = a.VariableInfo;
                 }
             }
@@ -268,7 +391,7 @@ namespace ei8.Prototypes.HelloWorm
                 if (Subtractor.TryCreate(out Subtractor? s, i, precedingBorrow, precedingVariableInfo, nameof(Subtractor) + (i + 1)))
                 {
                     net.AddReplaceItems(s);
-                    precedingBorrow = s.Parameters.Outputs.ElementAt((int)Subtractor.Output.Borrow);
+                    precedingBorrow = s.Parameters.Outputs.Borrow;
                     precedingVariableInfo = s.VariableInfo;
                 }
             }

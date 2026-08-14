@@ -31,11 +31,17 @@
             txtInput = new TextBox();
             btnOK = new Button();
             btnCancel = new Button();
+            flowLayoutPanel1 = new FlowLayoutPanel();
+            label1 = new Label();
+            panel1 = new Panel();
+            flowLayoutPanel1.SuspendLayout();
+            panel1.SuspendLayout();
             SuspendLayout();
             // 
             // txtInput
             // 
-            txtInput.Location = new Point(12, 12);
+            txtInput.Location = new Point(10, 38);
+            txtInput.Margin = new Padding(10, 3, 3, 3);
             txtInput.Name = "txtInput";
             txtInput.Size = new Size(491, 23);
             txtInput.TabIndex = 0;
@@ -43,7 +49,7 @@
             // btnOK
             // 
             btnOK.DialogResult = DialogResult.OK;
-            btnOK.Location = new Point(343, 44);
+            btnOK.Location = new Point(318, 3);
             btnOK.Name = "btnOK";
             btnOK.Size = new Size(75, 23);
             btnOK.TabIndex = 1;
@@ -52,30 +58,69 @@
             // 
             // btnCancel
             // 
+            btnCancel.Anchor = AnchorStyles.Right;
             btnCancel.DialogResult = DialogResult.Cancel;
-            btnCancel.Location = new Point(428, 44);
+            btnCancel.Location = new Point(403, 3);
             btnCancel.Name = "btnCancel";
             btnCancel.Size = new Size(75, 23);
             btnCancel.TabIndex = 2;
             btnCancel.Text = "Cancel";
             btnCancel.UseVisualStyleBackColor = true;
             // 
+            // flowLayoutPanel1
+            // 
+            flowLayoutPanel1.AutoSize = true;
+            flowLayoutPanel1.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            flowLayoutPanel1.Controls.Add(label1);
+            flowLayoutPanel1.Controls.Add(txtInput);
+            flowLayoutPanel1.Controls.Add(panel1);
+            flowLayoutPanel1.Dock = DockStyle.Fill;
+            flowLayoutPanel1.FlowDirection = FlowDirection.TopDown;
+            flowLayoutPanel1.Location = new Point(0, 0);
+            flowLayoutPanel1.Name = "flowLayoutPanel1";
+            flowLayoutPanel1.Size = new Size(530, 121);
+            flowLayoutPanel1.TabIndex = 3;
+            // 
+            // label1
+            // 
+            label1.AutoSize = true;
+            label1.Location = new Point(3, 0);
+            label1.Name = "label1";
+            label1.Padding = new Padding(5, 15, 0, 5);
+            label1.Size = new Size(43, 35);
+            label1.TabIndex = 4;
+            label1.Text = "label1";
+            // 
+            // panel1
+            // 
+            panel1.Controls.Add(btnCancel);
+            panel1.Controls.Add(btnOK);
+            panel1.Dock = DockStyle.Bottom;
+            panel1.Location = new Point(10, 67);
+            panel1.Margin = new Padding(10, 3, 3, 3);
+            panel1.Name = "panel1";
+            panel1.Size = new Size(491, 34);
+            panel1.TabIndex = 3;
+            // 
             // InputBox
             // 
             AcceptButton = btnOK;
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
+            AutoSize = true;
+            AutoSizeMode = AutoSizeMode.GrowAndShrink;
             CancelButton = btnCancel;
-            ClientSize = new Size(515, 79);
-            Controls.Add(btnCancel);
-            Controls.Add(btnOK);
-            Controls.Add(txtInput);
+            ClientSize = new Size(530, 121);
+            Controls.Add(flowLayoutPanel1);
             FormBorderStyle = FormBorderStyle.FixedDialog;
             MaximizeBox = false;
             MinimizeBox = false;
             Name = "InputBox";
             StartPosition = FormStartPosition.CenterParent;
             Text = "Form2";
+            flowLayoutPanel1.ResumeLayout(false);
+            flowLayoutPanel1.PerformLayout();
+            panel1.ResumeLayout(false);
             ResumeLayout(false);
             PerformLayout();
         }
@@ -84,5 +129,8 @@
         private Button btnOK;
         private Button btnCancel;
         public TextBox txtInput;
+        private FlowLayoutPanel flowLayoutPanel1;
+        private Panel panel1;
+        private Label label1;
     }
 }

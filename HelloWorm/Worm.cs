@@ -45,7 +45,7 @@ namespace ei8.Prototypes.HelloWorm
         private int rotationCount;
         private int collisionCount;
         private Size size;
-        private Network network;
+        private readonly Network network;
         private readonly ConcurrentDictionary<DateTime, FireInfo> fireHistory;
         private Neuron? rotationNeuron;
         private IDictionary<Guid, RotationDirection>? directionValueDictionary;
@@ -68,7 +68,7 @@ namespace ei8.Prototypes.HelloWorm
             this.Location = new Point(0, 0);
             this.refractoryPeriod = Constants.Worm.InitialRefractoryPeriod;
             this.relatedSpikesPeriod = Constants.Worm.InitialRelatedSpikesPeriod;
-            this.components = new List<IComponent>();
+            this.components = [];
 
             var nose = new Nose()
             {
@@ -167,7 +167,7 @@ namespace ei8.Prototypes.HelloWorm
                         SweepAngle = Constants.Worm.SectorSweepAngle,
                         Parent = nose,
                         Name = ExtensionMethods.CreateUnusedName(
-                            (i) => $"{typeof(Sector).Name}{i.ToString()}",
+                            (i) => $"{typeof(Sector).Name}{i}",
                             (s) => sects.Any(fd => fd.Name == s)
                         )
                     }
