@@ -18,7 +18,8 @@ namespace ei8.Prototypes.HelloWorm
         private readonly ISettingsService settingsService;
         private readonly INeuronQueryClient neuronQueryClient;
 
-        public frmToolbox(
+        public frmToolbox
+        (
             IServiceProvider serviceProvider,
             ISelectionService selectionService,
             ISettingsService settingsService,
@@ -183,7 +184,7 @@ namespace ei8.Prototypes.HelloWorm
             )
             {
                 FunctionalCircuitParameter<SequentialAdder.Input, SequentialAdder.Output>? parameters = null;
-                IEnumerable<ReadOnlyNetwork>? interneuronNetworks = null;
+                ei8.Cortex.Coding.d23.Math.Arithmetic.InterneuronSet? interneurons = null;
 
                 if 
                 (
@@ -207,15 +208,17 @@ namespace ei8.Prototypes.HelloWorm
                     // TODO: create inhibition terminal between each digit and its subsequent digit
                     VariableInfo.TryParse(nameof(SequentialAdder), out var variableInfo) &&
                     (
-                        interneuronNetworks = SequentialAdder.CreateInterneuronNetworks(
+                        interneurons = SequentialAdder.CreateInterneurons
+                        (
                             parameters,
                             variableInfo
                         )
                     ) != null &&
-                    SequentialAdder.TryCreate(
+                    SequentialAdder.TryCreate
+                    (
                         out SequentialAdder? s,
                         parameters,
-                        interneuronNetworks,
+                        interneurons,
                         variableInfo
                     )
                 )
@@ -235,7 +238,7 @@ namespace ei8.Prototypes.HelloWorm
             )
             {
                 net.AddReplace(NEXT);
-                ReadOnlyNetwork? previousInterneuronNetwork = null;
+                ei8.Cortex.Coding.d23.Collections.InterneuronSet? previousInterneurons = null;
                 for (int i = 1; i <= last; i++)
                 {
                     if (
@@ -244,7 +247,7 @@ namespace ei8.Prototypes.HelloWorm
                         Next.TryCreate(
                             out Next? n,
                             new(new(currentStep), new(nextStep)),
-                            previousInterneuronNetwork,
+                            previousInterneurons,
                             $"{nameof(NEXT)}___{currentStep.VariableInfo.Inputs.Single()}",
                             additionalInputs: NEXT
                         )
@@ -252,7 +255,7 @@ namespace ei8.Prototypes.HelloWorm
                     {
                         net.AddReplaceItems(n);
                         currentStep = nextStep;
-                        previousInterneuronNetwork = n.InterneuronNetwork;
+                        previousInterneurons = n.Interneurons;
                     }
                 }
             }
