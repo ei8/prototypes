@@ -168,10 +168,14 @@ namespace ei8.Prototypes.HelloWorm
         {
             Network net = new();
 
-            BinaryNeuronParameter? precedingCarryOver = null;
-            VariableInfo? precedingVariableInfo = null;
+            var digits = new List<UnaryNeuronParameter>();
+            for (int i = 1; i <= last; i++)
+            {
+                if (UnaryNeuronParameter.TryCreate(out var digit, parameterExpression: "digit" + i))
+                    digits.Add(digit);
+            }
+
             if (
-                UnaryNeuronParameter.TryCreate(out var currentDigit, parameterExpression: "digit1") &&
                 BinaryNeuronParameter.TryCreate(out var addend1) &&
                 BinaryNeuronParameter.TryCreate(out var addend2) &&
                 BinaryNeuronParameter.TryCreate(out var sum) &&
@@ -180,47 +184,44 @@ namespace ei8.Prototypes.HelloWorm
             {
                 FunctionalCircuitParameter<SequentialAdder.Input, SequentialAdder.Output>? parameters = null;
                 IEnumerable<ReadOnlyNetwork>? interneuronNetworks = null;
-                for (int i = 1; i <= last; i++)
-                {
-                    if (
-                        UnaryNeuronParameter.TryCreate(out var nextDigit, parameterExpression: "digit" + (i + 1)) &&
-                        currentDigit.VariableInfo != null &&
+
+                if 
+                (
+                    (
+                        parameters = new
                         (
-                            parameters = SequentialAdder.GetDefaultParameters(
-                                currentDigit,
+                            new
+                            (
+                                digits,
                                 addend1,
-                                addend2,
-                                precedingCarryOver,
-                                nextDigit,
+                                addend2
+                            ),
+                            new
+                            (
+                                digits.Skip(1),
                                 sum,
                                 carryOver
                             )
-                        ) != null &&
-                        // TODO: how to use interneuronNetworks across digits
-                        VariableInfo.TryParse(nameof(SequentialAdder) + i, out var variableInfo) &&
-                        (
-                            interneuronNetworks = SequentialAdder.CreateInterneuronNetworks(
-                            parameters,
-                            variableInfo,
-                            precedingVariableInfo
                         )
-                        ) != null &&
-                        SequentialAdder.TryCreate(
-                            out SequentialAdder? s,
+                    ) != null &&
+                    // TODO: create inhibition terminal between each digit and its subsequent digit
+                    VariableInfo.TryParse(nameof(SequentialAdder), out var variableInfo) &&
+                    (
+                        interneuronNetworks = SequentialAdder.CreateInterneuronNetworks(
                             parameters,
-                            interneuronNetworks,
-                            variableInfo,
-                            precedingVariableInfo
+                            variableInfo
                         )
+                    ) != null &&
+                    SequentialAdder.TryCreate(
+                        out SequentialAdder? s,
+                        parameters,
+                        interneuronNetworks,
+                        variableInfo
                     )
-                    {
-                        net.AddReplaceItems(s);
-                        currentDigit = nextDigit;
-                        precedingCarryOver = s.Parameters.Outputs.CarryOver;
-                        precedingVariableInfo = s.VariableInfo;
-                    }
-                }
+                )
+                { net.AddReplaceItems(s); }
             }
+
             return net;
         }
 
