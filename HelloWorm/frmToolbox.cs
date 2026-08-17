@@ -118,7 +118,8 @@ namespace ei8.Prototypes.HelloWorm
                             "2 - Addition",
                             "3 - Subtraction",
                             "4 - Next",
-                            "5 - Sequential Adders"
+                            "5 - Biphasic Nexts",
+                            "6 - Sequential Adders"
                         ]
                     ), 
                     string.Empty
@@ -147,6 +148,10 @@ namespace ei8.Prototypes.HelloWorm
                             suffix = "Next";
                             break;
                         case "5":
+                            sheet.Load(frmToolbox.CreateBiphasicNexts(4));
+                            suffix = "Biphasic Next";
+                            break;
+                        case "6":
                             sheet.Load(frmToolbox.CreateSequentialAdders(4));
                             suffix = "Sequential Adders";
                             break;
@@ -169,60 +174,93 @@ namespace ei8.Prototypes.HelloWorm
         {
             Network net = new();
 
-            var digits = new List<UnaryNeuronParameter>();
-            for (int i = 1; i <= last; i++)
-            {
-                if (UnaryNeuronParameter.TryCreate(out var digit, parameterExpression: "digit" + i))
-                    digits.Add(digit);
-            }
+            //var digits = new List<UnaryNeuronParameter>();
+            //for (int i = 1; i <= last; i++)
+            //{
+            //    if (UnaryNeuronParameter.TryCreate(out var digit, parameterExpression: "digit" + i))
+            //        digits.Add(digit);
+            //}
+
+            //if (
+            //    BinaryNeuronParameter.TryCreate(out var addend1) &&
+            //    BinaryNeuronParameter.TryCreate(out var addend2) &&
+            //    BinaryNeuronParameter.TryCreate(out var sum) &&
+            //    BinaryNeuronParameter.TryCreate(out var carryOver)
+            //)
+            //{
+            //    FunctionalCircuitParameter<SequentialAdder.Input, SequentialAdder.Output>? parameters = null;
+            //    ei8.Cortex.Coding.d23.Math.Arithmetic.InterneuronSet? interneurons = null;
+
+            //    if 
+            //    (
+            //        (
+            //            parameters = new
+            //            (
+            //                new
+            //                (
+            //                    digits,
+            //                    addend1,
+            //                    addend2
+            //                ),
+            //                new
+            //                (
+            //                    digits.Skip(1),
+            //                    sum,
+            //                    carryOver
+            //                )
+            //            )
+            //        ) != null &&
+            //        // TODO: create inhibition terminal between each digit and its subsequent digit
+            //        VariableInfo.TryParse(nameof(SequentialAdder), out var variableInfo) &&
+            //        (
+            //            interneurons = SequentialAdder.CreateInterneurons
+            //            (
+            //                parameters,
+            //                variableInfo
+            //            )
+            //        ) != null &&
+            //        SequentialAdder.TryCreate
+            //        (
+            //            out SequentialAdder? s,
+            //            parameters,
+            //            interneurons,
+            //            variableInfo
+            //        )
+            //    )
+            //    { net.AddReplaceItems(s); }
+            //}
+
+            return net;
+        }
+
+        private static ReadOnlyNetwork CreateBiphasicNexts(int last)
+        {
+            Network net = new();
 
             if (
-                BinaryNeuronParameter.TryCreate(out var addend1) &&
-                BinaryNeuronParameter.TryCreate(out var addend2) &&
-                BinaryNeuronParameter.TryCreate(out var sum) &&
-                BinaryNeuronParameter.TryCreate(out var carryOver)
+                UnaryNeuronParameter.TryCreate(out var NEXT) &&
+                UnaryNeuronParameter.TryCreate(out var currentStep, parameterExpression: "step0")
             )
             {
-                FunctionalCircuitParameter<SequentialAdder.Input, SequentialAdder.Output>? parameters = null;
-                ei8.Cortex.Coding.d23.Math.Arithmetic.InterneuronSet? interneurons = null;
-
-                if 
-                (
-                    (
-                        parameters = new
-                        (
-                            new
-                            (
-                                digits,
-                                addend1,
-                                addend2
-                            ),
-                            new
-                            (
-                                digits.Skip(1),
-                                sum,
-                                carryOver
-                            )
+                ei8.Cortex.Coding.d23.Collections.BiphasicNext.InterneuronSet? previousInterneurons = null;
+                for (int i = 1; i <= last; i++)
+                {
+                    if (
+                        UnaryNeuronParameter.TryCreate(out var nextStep, parameterExpression: "step" + i) &&
+                        currentStep.VariableInfo != null &&
+                        BiphasicNext.TryCreate(
+                            out BiphasicNext? n,
+                            new(new(NEXT, currentStep), new(nextStep)),
+                            previousInterneurons,
+                            $"{nameof(NEXT)}___{currentStep.VariableInfo.Inputs.Single()}"
                         )
-                    ) != null &&
-                    // TODO: create inhibition terminal between each digit and its subsequent digit
-                    VariableInfo.TryParse(nameof(SequentialAdder), out var variableInfo) &&
-                    (
-                        interneurons = SequentialAdder.CreateInterneurons
-                        (
-                            parameters,
-                            variableInfo
-                        )
-                    ) != null &&
-                    SequentialAdder.TryCreate
-                    (
-                        out SequentialAdder? s,
-                        parameters,
-                        interneurons,
-                        variableInfo
                     )
-                )
-                { net.AddReplaceItems(s); }
+                    {
+                        net.AddReplaceItems(n);
+                        currentStep = nextStep;
+                        previousInterneurons = n.Interneurons;
+                    }
+                }
             }
 
             return net;
@@ -233,11 +271,10 @@ namespace ei8.Prototypes.HelloWorm
             Network net = new();
 
             if (
-                UnaryNeuronParameter.TryCreate(out var currentStep, parameterExpression: "step0") &&
-                NetworkHelper.TryCreateNeuron(out var NEXT)
+                UnaryNeuronParameter.TryCreate(out var NEXT) &&
+                UnaryNeuronParameter.TryCreate(out var currentStep, parameterExpression: "step0")
             )
             {
-                net.AddReplace(NEXT);
                 ei8.Cortex.Coding.d23.Collections.InterneuronSet? previousInterneurons = null;
                 for (int i = 1; i <= last; i++)
                 {
@@ -246,10 +283,9 @@ namespace ei8.Prototypes.HelloWorm
                         currentStep.VariableInfo != null &&
                         Next.TryCreate(
                             out Next? n,
-                            new(new(currentStep), new(nextStep)),
+                            new(new(NEXT, currentStep), new(nextStep)),
                             previousInterneurons,
-                            $"{nameof(NEXT)}___{currentStep.VariableInfo.Inputs.Single()}",
-                            additionalInputs: NEXT
+                            $"{nameof(NEXT)}___{currentStep.VariableInfo.Inputs.Single()}"
                         )
                     )
                     {
