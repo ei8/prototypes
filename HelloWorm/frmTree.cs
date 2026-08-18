@@ -1,8 +1,10 @@
 ﻿using ei8.Cortex.Coding;
 using ei8.Cortex.Coding.d23;
+using ei8.Cortex.Coding.d23.Math.Logic;
 using ei8.Cortex.Coding.d23.Process;
 using ei8.Cortex.Coding.d23.Process.Iteration;
 using System.ComponentModel.Design;
+using System.Reflection;
 using WeifenLuo.WinFormsUI.Docking;
 
 namespace ei8.Prototypes.HelloWorm
@@ -66,6 +68,8 @@ namespace ei8.Prototypes.HelloWorm
         private void SelectionService_SelectionChanged(object? sender, EventArgs e)
         {
             this.tsbHideSelectedTags.Enabled =
+            this.hideSelectedTagsToolStripMenuItem.Enabled = 
+            this.mnuHideLogicGatesInterneuronsTags.Enabled = 
             this.tsbFocusReflexArc.Enabled =
             this.selectionService.PrimarySelection is IGraph;
         }
@@ -235,17 +239,17 @@ namespace ei8.Prototypes.HelloWorm
 
         private void tsbHideSelectedTags_Click(object sender, EventArgs e)
         {
-            if (this.spikable?.Network != null)
+            if 
+            (
+                this.spikable?.Network != null &&
+                this.selectionService.PrimarySelection is IGraph fg
+            )
             {
                 IEnumerable<Neuron> checkedNeurons = [.. this.GetCheckedNeurons()];
-
-                if (this.selectionService.PrimarySelection is IGraph fg)
-                {
-                    var currentHideTagsNeurons = fg.Settings.HideTagsNeurons.ToArray();
-                    var newHideTagsNeurons = checkedNeurons.Except(currentHideTagsNeurons);
-                    fg.Settings.HideTagsNeurons = fg.Settings.HideTagsNeurons.Concat(newHideTagsNeurons);
-                    fg.Reload();
-                }
+                var currentHideTagsNeurons = fg.Settings.HideTagsNeurons.ToArray();
+                var newHideTagsNeurons = checkedNeurons.Except(currentHideTagsNeurons);
+                fg.Settings.HideTagsNeurons = fg.Settings.HideTagsNeurons.Concat(newHideTagsNeurons);
+                fg.Reload();
             }
         }
 
@@ -295,8 +299,41 @@ namespace ei8.Prototypes.HelloWorm
         {
             if (this.spikable != null && this.process != null)
                 this.spikable.Spike(
-                    [..this.process.GetCurrent()]
+                    [.. this.process.GetCurrent()]
                 );
+        }
+
+        private void mnuHideLogicGatesInterneuronsTags_Click(object sender, EventArgs e)
+        {
+            if 
+            (
+                this.spikable?.Network != null &&
+                this.selectionService.PrimarySelection is IGraph fg
+            )
+            {
+                var gateNames = AppDomain.CurrentDomain.GetAssemblies().SelectMany(x => x.GetTypes())
+                    .Where
+                    (
+                        x => 
+                            typeof(ILogicGate)
+                                .IsAssignableFrom(x) && 
+                            !x.IsInterface && 
+                            !x.IsAbstract
+                    )
+                    .Select(x => x.Name.ToUpper().Replace("GATE", "")).ToList();
+
+                var gateNeurons = this.spikable.Network
+                    .GetItems<Neuron>()
+                    .Where
+                    (
+                        n => gateNames.Any(gn => n.Tag.Contains(gn))
+                    );
+
+                var currentHideTagsNeurons = fg.Settings.HideTagsNeurons.ToArray();
+                var newHideTagsNeurons = gateNeurons.Except(currentHideTagsNeurons);
+                fg.Settings.HideTagsNeurons = fg.Settings.HideTagsNeurons.Concat(newHideTagsNeurons);
+                fg.Reload();
+            }
         }
     }
 }

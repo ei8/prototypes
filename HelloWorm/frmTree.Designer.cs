@@ -48,7 +48,9 @@
             toolStripSeparator2 = new ToolStripSeparator();
             tsbFocusChecked = new ToolStripButton();
             tsbFocusReflexArc = new ToolStripButton();
-            tsbHideSelectedTags = new ToolStripButton();
+            tsbHideSelectedTags = new ToolStripDropDownButton();
+            hideSelectedTagsToolStripMenuItem = new ToolStripMenuItem();
+            mnuHideLogicGatesInterneuronsTags = new ToolStripMenuItem();
             tsbCopyIds = new ToolStripButton();
             timer1 = new System.Windows.Forms.Timer(components);
             toolStrip1.SuspendLayout();
@@ -211,13 +213,27 @@
             // tsbHideSelectedTags
             // 
             tsbHideSelectedTags.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            tsbHideSelectedTags.DropDownItems.AddRange(new ToolStripItem[] { hideSelectedTagsToolStripMenuItem, mnuHideLogicGatesInterneuronsTags });
             tsbHideSelectedTags.Image = (Image)resources.GetObject("tsbHideSelectedTags.Image");
             tsbHideSelectedTags.ImageTransparentColor = Color.Magenta;
             tsbHideSelectedTags.Name = "tsbHideSelectedTags";
-            tsbHideSelectedTags.Size = new Size(23, 22);
+            tsbHideSelectedTags.Size = new Size(29, 22);
             tsbHideSelectedTags.Text = "toolStripButton1";
             tsbHideSelectedTags.ToolTipText = "Hide Selected Tags in Graph";
-            tsbHideSelectedTags.Click += tsbHideSelectedTags_Click;
+            // 
+            // hideSelectedTagsToolStripMenuItem
+            // 
+            hideSelectedTagsToolStripMenuItem.Name = "hideSelectedTagsToolStripMenuItem";
+            hideSelectedTagsToolStripMenuItem.Size = new Size(259, 22);
+            hideSelectedTagsToolStripMenuItem.Text = "Hide Selected Tags";
+            hideSelectedTagsToolStripMenuItem.Click += tsbHideSelectedTags_Click;
+            // 
+            // mnuHideLogicGatesInterneuronsTags
+            // 
+            mnuHideLogicGatesInterneuronsTags.Name = "mnuHideLogicGatesInterneuronsTags";
+            mnuHideLogicGatesInterneuronsTags.Size = new Size(259, 22);
+            mnuHideLogicGatesInterneuronsTags.Text = "Hide Logic Gates Interneurons Tags";
+            mnuHideLogicGatesInterneuronsTags.Click += mnuHideLogicGatesInterneuronsTags_Click;
             // 
             // tsbCopyIds
             // 
@@ -266,12 +282,14 @@
         private ToolStripSeparator toolStripSeparator3;
         private ToolStripTextBox tstbFilter;
         private ToolStripButton tsbFocusChecked;
-        private ToolStripButton tsbHideSelectedTags;
         private ToolStripButton tsbCopyIds;
         private ToolStripDropDownButton tsbStartProcess;
         private ToolStripMenuItem mnuStartProcessDoUntil;
         private ToolStripButton tsbStopProcess;
         private ToolStripSeparator toolStripSeparator4;
         private System.Windows.Forms.Timer timer1;
+        private ToolStripDropDownButton tsbHideSelectedTags;
+        private ToolStripMenuItem hideSelectedTagsToolStripMenuItem;
+        private ToolStripMenuItem mnuHideLogicGatesInterneuronsTags;
     }
 }

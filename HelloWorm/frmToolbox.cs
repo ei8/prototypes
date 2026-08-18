@@ -252,6 +252,7 @@ namespace ei8.Prototypes.HelloWorm
                             out BiphasicNext? n,
                             new(new(NEXT, currentStep), new(nextStep)),
                             previousInterneurons,
+                            true,
                             $"{nameof(NEXT)}___{currentStep.VariableInfo.Inputs.Single()}"
                         )
                     )
