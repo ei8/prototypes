@@ -1,5 +1,4 @@
 ﻿using ei8.Cortex.Coding.Mirrors;
-using neurUL.Common.Domain.Model;
 using System.Text.Json;
 
 namespace ei8.Prototypes.HelloWorm
@@ -14,9 +13,9 @@ namespace ei8.Prototypes.HelloWorm
                 JsonElement jsonElement = rootElement.GetProperty("Mirrors");
                 string mirrorsString = jsonElement.ToString();
                 var mirrors = System.Text.Json.JsonSerializer.Deserialize<IEnumerable<MirrorConfig>>(mirrorsString);
-                AssertionConcern.AssertStateTrue(mirrors != null, "Mirror Configs required.");
+                ArgumentNullException.ThrowIfNull(mirrors);
 
-                this.Mirrors = mirrors!;
+                this.Mirrors = mirrors;
             }
         }
 

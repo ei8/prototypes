@@ -68,6 +68,7 @@
             listView1.TabIndex = 2;
             listView1.UseCompatibleStateImageBehavior = false;
             listView1.View = View.Details;
+            listView1.SelectedIndexChanged += listView1_SelectedIndexChanged;
             listView1.KeyDown += listView1_KeyDown;
             listView1.KeyPress += listView1_KeyPress;
             // 

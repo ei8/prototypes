@@ -39,7 +39,8 @@ namespace ei8.Prototypes.HelloWorm
                 MessageBox.Show("Min log level cannot be greater than Max.", "Invalid Log Level", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 e.Cancel = true;
 
-                ToolStripComboBox tscb = (ToolStripComboBox)sender!;
+                ArgumentNullException.ThrowIfNull(sender);
+                ToolStripComboBox tscb = (ToolStripComboBox)sender;
                 if (tscb.Tag != null)
                     tscb.SelectedIndex = (int) tscb.Tag;
             }
@@ -73,7 +74,8 @@ namespace ei8.Prototypes.HelloWorm
 
         private void tscbMinMax_Validated(object? sender, EventArgs e)
         {
-            ToolStripComboBox tscb = (ToolStripComboBox)sender!;
+            ArgumentNullException.ThrowIfNull(sender);
+            ToolStripComboBox tscb = (ToolStripComboBox)sender;
 
             if (tscb.Tag != null && (int)tscb.Tag != tscb.SelectedIndex)
             {

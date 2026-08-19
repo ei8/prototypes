@@ -366,8 +366,8 @@ namespace ei8.Prototypes.HelloWorm
             this.ShowDish(newDish);
 
             var project = this.projectService.GetProject();
-            AssertionConcern.AssertArgumentNotNull(project, nameof(project));
-            project!.Add(newDish);
+            ArgumentNullException.ThrowIfNull(project);
+            project.Add(newDish);
         }
 
         private void ShowDish(Dish dish)

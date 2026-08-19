@@ -4,7 +4,6 @@ using ei8.Cortex.Coding.d23.Math.Logic;
 using ei8.Cortex.Coding.d23.Process;
 using ei8.Cortex.Coding.d23.Process.Iteration;
 using System.ComponentModel.Design;
-using System.Reflection;
 using WeifenLuo.WinFormsUI.Docking;
 
 namespace ei8.Prototypes.HelloWorm
@@ -68,8 +67,8 @@ namespace ei8.Prototypes.HelloWorm
         private void SelectionService_SelectionChanged(object? sender, EventArgs e)
         {
             this.tsbHideSelectedTags.Enabled =
-            this.hideSelectedTagsToolStripMenuItem.Enabled = 
-            this.mnuHideLogicGatesInterneuronsTags.Enabled = 
+            this.hideSelectedTagsToolStripMenuItem.Enabled =
+            this.mnuHideLogicGatesInterneuronsTags.Enabled =
             this.tsbFocusReflexArc.Enabled =
             this.selectionService.PrimarySelection is IGraph;
         }
@@ -86,9 +85,7 @@ namespace ei8.Prototypes.HelloWorm
                 this.listView1.Items.Clear();
 
                 foreach (var n in this.spikable.Network.GetItems<Neuron>())
-                {
                     this.AddItem(n);
-                }
 
                 this.Text = this.spikable.GetName(frmTree.FormDescription);
             }
@@ -180,7 +177,7 @@ namespace ei8.Prototypes.HelloWorm
             return this.listView1.Items
                 .Cast<ListViewItem>()
                 .Where(lvi => lvi.Checked)
-                .Select(lvi => (Neuron)lvi.Tag!);
+                .Select(lvi => ((NeuronInfo)lvi.Tag!).Neuron);
         }
 
         private void tsbSpike_Click(object sender, EventArgs e)
@@ -239,7 +236,7 @@ namespace ei8.Prototypes.HelloWorm
 
         private void tsbHideSelectedTags_Click(object sender, EventArgs e)
         {
-            if 
+            if
             (
                 this.spikable?.Network != null &&
                 this.selectionService.PrimarySelection is IGraph fg
@@ -305,7 +302,7 @@ namespace ei8.Prototypes.HelloWorm
 
         private void mnuHideLogicGatesInterneuronsTags_Click(object sender, EventArgs e)
         {
-            if 
+            if
             (
                 this.spikable?.Network != null &&
                 this.selectionService.PrimarySelection is IGraph fg
@@ -314,10 +311,10 @@ namespace ei8.Prototypes.HelloWorm
                 var gateNames = AppDomain.CurrentDomain.GetAssemblies().SelectMany(x => x.GetTypes())
                     .Where
                     (
-                        x => 
+                        x =>
                             typeof(ILogicGate)
-                                .IsAssignableFrom(x) && 
-                            !x.IsInterface && 
+                                .IsAssignableFrom(x) &&
+                            !x.IsInterface &&
                             !x.IsAbstract
                     )
                     .Select(x => x.Name.ToUpper().Replace("GATE", "")).ToList();
@@ -334,6 +331,12 @@ namespace ei8.Prototypes.HelloWorm
                 fg.Settings.HideTagsNeurons = fg.Settings.HideTagsNeurons.Concat(newHideTagsNeurons);
                 fg.Reload();
             }
+        }
+
+        private void listView1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (this.listView1.SelectedItems.Count > 0)
+                this.selectionService.SetSelectedComponents(new[] { this.listView1.SelectedItems.Cast<ListViewItem>().First().Tag });
         }
     }
 }
