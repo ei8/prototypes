@@ -177,7 +177,7 @@ namespace ei8.Prototypes.HelloWorm
             return this.listView1.Items
                 .Cast<ListViewItem>()
                 .Where(lvi => lvi.Checked)
-                .Select(lvi => ((NeuronInfo)lvi.Tag!).Neuron);
+                .Select(lvi => (Neuron)lvi.Tag!);
         }
 
         private void tsbSpike_Click(object sender, EventArgs e)

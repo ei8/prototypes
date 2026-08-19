@@ -197,7 +197,7 @@ namespace ei8.Prototypes.HelloWorm
             )
             {
                 FunctionalCircuitParameter<Next.Input, Next.Output>? biphasicNextParameters = null;
-                ei8.Cortex.Coding.d23.Collections.BiphasicNext.InterneuronSet? previousInterneurons = null;
+                ei8.Cortex.Coding.d23.Collections.InterneuronSet? previousInterneurons = null;
 
                 for (int i = 2; i <= last; i++)
                 {
@@ -237,17 +237,18 @@ namespace ei8.Prototypes.HelloWorm
                                 )
                         ) != null &&
                         currentDigit.VariableInfo != null &&
-                        BiphasicNext.TryCreate
+                        Next.TryCreate
                         (
-                            out BiphasicNext? biphasicNext,
+                            out Next? next,
                             biphasicNextParameters,
+                            0.25f,
                             previousInterneurons,
-                            1f
+                            $"{nameof(NEXT)}___{currentDigit.VariableInfo.Inputs.Single()}"
                         ) &&
                         SequentialAdder.TryCreate
                         (
                             out SequentialAdder? sequentialAdder,
-                            biphasicNext,
+                            next,
                             adder,
                             precedingVariableInfo
                         )
@@ -281,6 +282,7 @@ namespace ei8.Prototypes.HelloWorm
                         BiphasicNext.TryCreate(
                             out BiphasicNext? n,
                             new(new(NEXT, currentStep), new(nextStep)),
+                            0.5f,
                             previousInterneurons,
                             parameterExpression: 
                                 $"{nameof(NEXT)}___{currentStep.VariableInfo.Inputs.Single()}"
@@ -315,6 +317,7 @@ namespace ei8.Prototypes.HelloWorm
                         Next.TryCreate(
                             out Next? n,
                             new(new(NEXT, currentStep), new(nextStep)),
+                            0.5f,
                             previousInterneurons,
                             $"{nameof(NEXT)}___{currentStep.VariableInfo.Inputs.Single()}"
                         )
