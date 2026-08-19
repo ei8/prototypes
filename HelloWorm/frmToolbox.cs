@@ -198,6 +198,7 @@ namespace ei8.Prototypes.HelloWorm
             {
                 FunctionalCircuitParameter<Next.Input, Next.Output>? biphasicNextParameters = null;
                 ei8.Cortex.Coding.d23.Collections.InterneuronSet? previousInterneurons = null;
+                var inputStrength = 0.25f;
 
                 for (int i = 2; i <= last; i++)
                 {
@@ -241,7 +242,7 @@ namespace ei8.Prototypes.HelloWorm
                         (
                             out Next? next,
                             biphasicNextParameters,
-                            0.25f,
+                            inputStrength,
                             previousInterneurons,
                             $"{nameof(NEXT)}___{currentDigit.VariableInfo.Inputs.Single()}"
                         ) &&
@@ -250,6 +251,7 @@ namespace ei8.Prototypes.HelloWorm
                             out SequentialAdder? sequentialAdder,
                             next,
                             adder,
+                            inputStrength,
                             precedingVariableInfo
                         )
                     )
