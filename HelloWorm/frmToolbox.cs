@@ -1,6 +1,6 @@
 ﻿using ei8.Cortex.Coding;
 using ei8.Cortex.Coding.d23;
-using ei8.Cortex.Coding.d23.Collections;
+using ei8.Cortex.Coding.d23.Sequences;
 using ei8.Cortex.Coding.d23.Math.Arithmetic;
 using ei8.Cortex.Coding.d23.Math.Logic;
 using ei8.Cortex.Library.Client;
@@ -197,7 +197,7 @@ namespace ei8.Prototypes.HelloWorm
             )
             {
                 FunctionalCircuitParameter<Next.Input, Next.Output>? biphasicNextParameters = null;
-                ei8.Cortex.Coding.d23.Collections.InterneuronSet? previousInterneurons = null;
+                Next.InterneuronSet? previousInterneurons = null;
                 var inputStrength = 0.25f;
 
                 for (int i = 2; i <= last; i++)
@@ -258,7 +258,7 @@ namespace ei8.Prototypes.HelloWorm
                     { 
                         net.AddReplaceItems(sequentialAdder);
                         currentDigit = nextDigit;
-                        previousInterneurons = sequentialAdder.Circuit1.Interneurons;
+                        previousInterneurons = sequentialAdder.Next.Interneurons;
                     }
                 }
             }
@@ -275,7 +275,7 @@ namespace ei8.Prototypes.HelloWorm
                 UnaryNeuronParameter.TryCreate(out var currentStep, parameterExpression: "step0")
             )
             {
-                ei8.Cortex.Coding.d23.Collections.BiphasicNext.InterneuronSet? previousInterneurons = null;
+                ei8.Cortex.Coding.d23.Sequences.BiphasicNext.InterneuronSet? previousInterneurons = null;
                 for (int i = 1; i <= last; i++)
                 {
                     if (
@@ -310,7 +310,7 @@ namespace ei8.Prototypes.HelloWorm
                 UnaryNeuronParameter.TryCreate(out var currentStep, parameterExpression: "step0")
             )
             {
-                ei8.Cortex.Coding.d23.Collections.InterneuronSet? previousInterneurons = null;
+                Next.InterneuronSet? previousInterneurons = null;
                 for (int i = 1; i <= last; i++)
                 {
                     if (

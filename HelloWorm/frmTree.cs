@@ -40,6 +40,13 @@ namespace ei8.Prototypes.HelloWorm
             if (this.spikable != null && this.process != null)
             {
                 this.process.HandleFire(e.FireInfo.Target, this.spikable.Network);
+
+                if
+                (
+                    this.process is IFinite finite &&
+                    finite.IsCompleted
+                )
+                    this.timer1.Stop();
             }
         }
 
@@ -269,15 +276,14 @@ namespace ei8.Prototypes.HelloWorm
 
                 this.timer1.Stop();
 
-                this.process = new DoUntil();
-
-                this.process.Initialize(
-                    new DoUntil.WorkingMemory(
-                        new([checkedNeurons[0]]),
-                        new([checkedNeurons[1]]),
-                        new([checkedNeurons[2]])
-                    ),
-                    this.timer1.Stop
+                this.process = new DoUntil
+                (
+                    new
+                    (
+                        new(checkedNeurons[0]),
+                        new(checkedNeurons[1]),
+                        new(checkedNeurons[2])
+                    )
                 );
 
                 this.timer1.Start();
