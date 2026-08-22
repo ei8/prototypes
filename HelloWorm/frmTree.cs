@@ -1,8 +1,10 @@
 ﻿using ei8.Cortex.Coding;
 using ei8.Cortex.Coding.d23;
+using ei8.Cortex.Coding.d23.Math.Arithmetic;
 using ei8.Cortex.Coding.d23.Math.Logic;
 using ei8.Cortex.Coding.d23.Process;
 using ei8.Cortex.Coding.d23.Process.Iteration;
+using ei8.Cortex.Coding.d23.Process.Operation;
 using System.ComponentModel.Design;
 using WeifenLuo.WinFormsUI.Docking;
 
@@ -284,6 +286,84 @@ namespace ei8.Prototypes.HelloWorm
                         new(checkedNeurons[1]),
                         new(checkedNeurons[2])
                     )
+                );
+
+                this.timer1.Start();
+            }
+        }
+
+        private void mnuStartProcessAddition_Click(object sender, EventArgs e)
+        {
+            if (this.spikable != null)
+            {
+                var checkedNeurons = this.GetCheckedNeurons().ToArray();
+                ArgumentOutOfRangeException.ThrowIfNotEqual(checkedNeurons.Count(), 3);
+
+                this.timer1.Stop();
+
+                this.spikable.Network.TryGetByTag("Adder1.Addend1 = 1", out var addend1_1);
+                this.spikable.Network.TryGetByTag("Adder1.Addend1 = 0", out var addend1_0);
+                this.spikable.Network.TryGetByTag("Adder1.Addend2 = 1", out var addend2_1);
+                this.spikable.Network.TryGetByTag("Adder1.Addend2 = 0", out var addend2_0);
+                this.spikable.Network.TryGetByTag("Adder1.Sum = 1", out var sum_1);
+                this.spikable.Network.TryGetByTag("Adder1.Sum = 0", out var sum_0);
+                this.spikable.Network.TryGetByTag("Adder1.CarryOver = 1", out var carryOver_1);
+                this.spikable.Network.TryGetByTag("Adder1.CarryOver = 0", out var carryOver_0);
+
+                this.process = new Addition
+                (
+                    new
+                    (
+                        new
+                        (
+                            [
+                                addend1_1.Single(),
+                                addend1_0.Single(),
+                                addend1_0.Single(),
+                                addend1_1.Single(),
+                                addend1_0.Single(),
+                                addend1_1.Single(),
+                                addend1_1.Single()
+                            ]
+                        ),
+                        new
+                        (
+                            [
+                                addend2_1.Single(),
+                                addend2_1.Single(),
+                                addend2_0.Single(),
+                                addend2_0.Single(),
+                                addend2_1.Single(),
+                                addend2_1.Single(),
+                                addend2_1.Single(),
+                                addend2_1.Single()
+                            ]
+                        ),
+                        new
+                        (
+                            [
+                                sum_1.Single(),
+                                sum_0.Single()
+                            ]
+                        ),
+                        new
+                        (
+                            [
+                                carryOver_1.Single(),
+                                carryOver_0.Single()
+                            ]
+                        )
+                    ),
+                    new
+                    (
+                        new
+                        (
+                            new(checkedNeurons[0]),
+                            new(checkedNeurons[1]),
+                            new(checkedNeurons[2])
+                        )
+                    ),
+                    "Digit"
                 );
 
                 this.timer1.Start();

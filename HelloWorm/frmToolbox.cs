@@ -152,7 +152,7 @@ namespace ei8.Prototypes.HelloWorm
                             suffix = "Biphasic Next";
                             break;
                         case "6":
-                            sheet.Load(frmToolbox.CreateSequentialAdders(4));
+                            sheet.Load(frmToolbox.CreateSequentialAdders(10));
                             suffix = "Sequential Adders";
                             break;
                     }
@@ -275,7 +275,7 @@ namespace ei8.Prototypes.HelloWorm
                 UnaryNeuronParameter.TryCreate(out var currentStep, parameterExpression: "step0")
             )
             {
-                ei8.Cortex.Coding.d23.Sequences.BiphasicNext.InterneuronSet? previousInterneurons = null;
+                BiphasicNext.InterneuronSet? previousInterneurons = null;
                 for (int i = 1; i <= last; i++)
                 {
                     if (

@@ -53,6 +53,7 @@
             mnuHideLogicGatesInterneuronsTags = new ToolStripMenuItem();
             tsbCopyIds = new ToolStripButton();
             timer1 = new System.Windows.Forms.Timer(components);
+            mnuStartProcessAddition = new ToolStripMenuItem();
             toolStrip1.SuspendLayout();
             SuspendLayout();
             // 
@@ -126,7 +127,7 @@
             // tsbStartProcess
             // 
             tsbStartProcess.DisplayStyle = ToolStripItemDisplayStyle.Image;
-            tsbStartProcess.DropDownItems.AddRange(new ToolStripItem[] { mnuStartProcessDoUntil });
+            tsbStartProcess.DropDownItems.AddRange(new ToolStripItem[] { mnuStartProcessDoUntil, mnuStartProcessAddition });
             tsbStartProcess.Image = (Image)resources.GetObject("tsbStartProcess.Image");
             tsbStartProcess.ImageTransparentColor = Color.Magenta;
             tsbStartProcess.Name = "tsbStartProcess";
@@ -137,7 +138,7 @@
             // mnuStartProcessDoUntil
             // 
             mnuStartProcessDoUntil.Name = "mnuStartProcessDoUntil";
-            mnuStartProcessDoUntil.Size = new Size(126, 22);
+            mnuStartProcessDoUntil.Size = new Size(180, 22);
             mnuStartProcessDoUntil.Text = "Do Until...";
             mnuStartProcessDoUntil.Click += mnuStartProcessDoUntil_Click;
             // 
@@ -251,6 +252,13 @@
             timer1.Interval = 1000;
             timer1.Tick += timer1_Tick;
             // 
+            // mnuStartProcessAddition
+            // 
+            mnuStartProcessAddition.Name = "mnuStartProcessAddition";
+            mnuStartProcessAddition.Size = new Size(180, 22);
+            mnuStartProcessAddition.Text = "Addition...";
+            mnuStartProcessAddition.Click += mnuStartProcessAddition_Click;
+            // 
             // frmTree
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -292,5 +300,6 @@
         private ToolStripDropDownButton tsbHideSelectedTags;
         private ToolStripMenuItem hideSelectedTagsToolStripMenuItem;
         private ToolStripMenuItem mnuHideLogicGatesInterneuronsTags;
+        private ToolStripMenuItem mnuStartProcessAddition;
     }
 }
