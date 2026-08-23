@@ -176,11 +176,8 @@ namespace ei8.Prototypes.HelloWorm
 
             FunctionalCircuitParameter<Adder.Input, Adder.Output>? adderParameters = null;
 
-            // TODO: no longer needed, right? will be part of working memory
-            BinaryNeuronParameter? precedingCarryOver = null;
-            VariableInfo? precedingVariableInfo = null;
-
             if (
+                BinaryNeuronParameter.TryCreate(out var precedingCarryOver) &&
                 BinaryNeuronParameter.TryCreate(out var addend1) &&
                 BinaryNeuronParameter.TryCreate(out var addend2) &&
                 BinaryNeuronParameter.TryCreate(out var sum) &&
@@ -192,7 +189,7 @@ namespace ei8.Prototypes.HelloWorm
                     out Adder? adder,
                     0,
                     precedingCarryOver,
-                    precedingVariableInfo
+                    null
                 )
             )
             {
@@ -251,8 +248,7 @@ namespace ei8.Prototypes.HelloWorm
                             out SequentialAdder? sequentialAdder,
                             next,
                             adder,
-                            inputStrength,
-                            precedingVariableInfo
+                            inputStrength
                         )
                     )
                     { 

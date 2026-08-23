@@ -1,10 +1,10 @@
 ﻿using ei8.Cortex.Coding;
 using ei8.Cortex.Coding.d23;
-using ei8.Cortex.Coding.d23.Math.Arithmetic;
 using ei8.Cortex.Coding.d23.Math.Logic;
 using ei8.Cortex.Coding.d23.Process;
 using ei8.Cortex.Coding.d23.Process.Iteration;
 using ei8.Cortex.Coding.d23.Process.Operation;
+using NLog;
 using System.ComponentModel.Design;
 using WeifenLuo.WinFormsUI.Docking;
 
@@ -12,6 +12,8 @@ namespace ei8.Prototypes.HelloWorm
 {
     public partial class frmTree : DockContent
     {
+        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
+
         private const string FormDescription = "Tree";
         private readonly ISpikableReporting? spikable;
         private readonly ISelectionService selectionService;
@@ -41,14 +43,17 @@ namespace ei8.Prototypes.HelloWorm
         {
             if (this.spikable != null && this.process != null)
             {
-                this.process.HandleFire(e.FireInfo.Target, this.spikable.Network);
-
-                if
+                this.process.Log
                 (
-                    this.process is IFinite finite &&
-                    finite.IsCompleted
-                )
-                    this.timer1.Stop();
+                    frmTree.logger,
+                    LogLevel.Info,
+                    new LogMessageGenerator
+                    (
+                        () => Cortex.Coding.d23.ExtensionMethods.LogFire(e.FireInfo.Target)
+                    )
+                );
+
+                this.process.HandleFire(e.FireInfo.Target, this.spikable.Network);
             }
         }
 
@@ -283,9 +288,12 @@ namespace ei8.Prototypes.HelloWorm
                     new
                     (
                         new(checkedNeurons[0]),
+                        new(this.spikable.Network.GetItems<Neuron>().Where(n => n.Tag.ToUpper().StartsWith("STEP"))),
                         new(checkedNeurons[1]),
                         new(checkedNeurons[2])
-                    )
+                    ),
+                    null,
+                    (du) => this.timer1.Stop()
                 );
 
                 this.timer1.Start();
@@ -297,7 +305,7 @@ namespace ei8.Prototypes.HelloWorm
             if (this.spikable != null)
             {
                 var checkedNeurons = this.GetCheckedNeurons().ToArray();
-                ArgumentOutOfRangeException.ThrowIfNotEqual(checkedNeurons.Count(), 3);
+                ArgumentOutOfRangeException.ThrowIfNotEqual(checkedNeurons.Count(), 2);
 
                 this.timer1.Stop();
 
@@ -309,11 +317,34 @@ namespace ei8.Prototypes.HelloWorm
                 this.spikable.Network.TryGetByTag("Adder1.Sum = 0", out var sum_0);
                 this.spikable.Network.TryGetByTag("Adder1.CarryOver = 1", out var carryOver_1);
                 this.spikable.Network.TryGetByTag("Adder1.CarryOver = 0", out var carryOver_0);
+                this.spikable.Network.TryGetByTag("PrecedingCarryOver = 1", out var precedingCarryOver_1);
+                this.spikable.Network.TryGetByTag("PrecedingCarryOver = 0", out var precedingCarryOver_0);
 
                 this.process = new Addition
                 (
                     new
                     (
+                        new
+                        (
+                            [
+                                precedingCarryOver_1.Single(),
+                                precedingCarryOver_0.Single()
+                            ]
+                        ),
+                        new
+                        (
+                            [
+                                addend1_1.Single(),
+                                addend1_0.Single()
+                            ]
+                        ),
+                        new
+                        (
+                            [
+                                addend2_1.Single(),
+                                addend2_0.Single()
+                            ]
+                        ),
                         new
                         (
                             [
@@ -323,7 +354,8 @@ namespace ei8.Prototypes.HelloWorm
                                 addend1_1.Single(),
                                 addend1_0.Single(),
                                 addend1_1.Single(),
-                                addend1_1.Single()
+                                addend1_1.Single(),
+                                addend1_0.Single(),
                             ]
                         ),
                         new
@@ -354,16 +386,11 @@ namespace ei8.Prototypes.HelloWorm
                             ]
                         )
                     ),
-                    new
-                    (
-                        new
-                        (
-                            new(checkedNeurons[0]),
-                            new(checkedNeurons[1]),
-                            new(checkedNeurons[2])
-                        )
-                    ),
-                    "Digit"
+                    new(checkedNeurons[0]),
+                    new(this.spikable.Network.GetItems<Neuron>().Where(n => n.Tag.ToUpper().StartsWith("DIGIT"))),
+                    new(checkedNeurons[1]),
+                    "Digit",
+                    (a, d) => this.timer1.Stop()
                 );
 
                 this.timer1.Start();
@@ -423,6 +450,12 @@ namespace ei8.Prototypes.HelloWorm
         {
             if (this.listView1.SelectedItems.Count > 0)
                 this.selectionService.SetSelectedComponents(new[] { this.listView1.SelectedItems.Cast<ListViewItem>().First().Tag });
+        }
+
+        private void setTimerIntervalToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var interval = InputBox.ShowDialog(this, "Set timer interval", "Enter an integer value (milliseconds):", "1000");
+            this.timer1.Interval = int.Parse(interval);
         }
     }
 }

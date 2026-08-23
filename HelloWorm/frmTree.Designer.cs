@@ -40,6 +40,9 @@
             toolStripSeparator4 = new ToolStripSeparator();
             tsbStartProcess = new ToolStripDropDownButton();
             mnuStartProcessDoUntil = new ToolStripMenuItem();
+            mnuStartProcessAddition = new ToolStripMenuItem();
+            toolStripMenuItem1 = new ToolStripSeparator();
+            setTimerIntervalToolStripMenuItem = new ToolStripMenuItem();
             tsbStopProcess = new ToolStripButton();
             toolStripSeparator3 = new ToolStripSeparator();
             tsbCheckAll = new ToolStripButton();
@@ -53,7 +56,6 @@
             mnuHideLogicGatesInterneuronsTags = new ToolStripMenuItem();
             tsbCopyIds = new ToolStripButton();
             timer1 = new System.Windows.Forms.Timer(components);
-            mnuStartProcessAddition = new ToolStripMenuItem();
             toolStrip1.SuspendLayout();
             SuspendLayout();
             // 
@@ -127,7 +129,7 @@
             // tsbStartProcess
             // 
             tsbStartProcess.DisplayStyle = ToolStripItemDisplayStyle.Image;
-            tsbStartProcess.DropDownItems.AddRange(new ToolStripItem[] { mnuStartProcessDoUntil, mnuStartProcessAddition });
+            tsbStartProcess.DropDownItems.AddRange(new ToolStripItem[] { mnuStartProcessDoUntil, mnuStartProcessAddition, toolStripMenuItem1, setTimerIntervalToolStripMenuItem });
             tsbStartProcess.Image = (Image)resources.GetObject("tsbStartProcess.Image");
             tsbStartProcess.ImageTransparentColor = Color.Magenta;
             tsbStartProcess.Name = "tsbStartProcess";
@@ -141,6 +143,25 @@
             mnuStartProcessDoUntil.Size = new Size(180, 22);
             mnuStartProcessDoUntil.Text = "Do Until...";
             mnuStartProcessDoUntil.Click += mnuStartProcessDoUntil_Click;
+            // 
+            // mnuStartProcessAddition
+            // 
+            mnuStartProcessAddition.Name = "mnuStartProcessAddition";
+            mnuStartProcessAddition.Size = new Size(180, 22);
+            mnuStartProcessAddition.Text = "Addition...";
+            mnuStartProcessAddition.Click += mnuStartProcessAddition_Click;
+            // 
+            // toolStripMenuItem1
+            // 
+            toolStripMenuItem1.Name = "toolStripMenuItem1";
+            toolStripMenuItem1.Size = new Size(177, 6);
+            // 
+            // setTimerIntervalToolStripMenuItem
+            // 
+            setTimerIntervalToolStripMenuItem.Name = "setTimerIntervalToolStripMenuItem";
+            setTimerIntervalToolStripMenuItem.Size = new Size(180, 22);
+            setTimerIntervalToolStripMenuItem.Text = "Set timer interval...";
+            setTimerIntervalToolStripMenuItem.Click += setTimerIntervalToolStripMenuItem_Click;
             // 
             // tsbStopProcess
             // 
@@ -252,13 +273,6 @@
             timer1.Interval = 1000;
             timer1.Tick += timer1_Tick;
             // 
-            // mnuStartProcessAddition
-            // 
-            mnuStartProcessAddition.Name = "mnuStartProcessAddition";
-            mnuStartProcessAddition.Size = new Size(180, 22);
-            mnuStartProcessAddition.Text = "Addition...";
-            mnuStartProcessAddition.Click += mnuStartProcessAddition_Click;
-            // 
             // frmTree
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -301,5 +315,7 @@
         private ToolStripMenuItem hideSelectedTagsToolStripMenuItem;
         private ToolStripMenuItem mnuHideLogicGatesInterneuronsTags;
         private ToolStripMenuItem mnuStartProcessAddition;
+        private ToolStripSeparator toolStripMenuItem1;
+        private ToolStripMenuItem setTimerIntervalToolStripMenuItem;
     }
 }
