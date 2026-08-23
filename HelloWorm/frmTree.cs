@@ -320,6 +320,21 @@ namespace ei8.Prototypes.HelloWorm
                 this.spikable.Network.TryGetByTag("PrecedingCarryOver = 1", out var precedingCarryOver_1);
                 this.spikable.Network.TryGetByTag("PrecedingCarryOver = 0", out var precedingCarryOver_0);
 
+                var addendString = InputBox.ShowDialog
+                (
+                    this,
+                    "Addends",
+                    "Enter two binary addends separated by a comma (,):",
+                    string.Empty
+                );
+
+                ArgumentOutOfRangeException.ThrowIfNotEqual(addendString.Count(c => c == ','), 1);
+                var addends = addendString.Split(',');
+                ArgumentOutOfRangeException.ThrowIfNotEqual(addends.Length, 2);
+                ArgumentOutOfRangeException.ThrowIfNotEqual(addends[0].Length, addends[1].Length);
+                foreach (var addend in addends)
+                    int.Parse(addend, System.Globalization.NumberStyles.BinaryNumber);
+                
                 this.process = new Addition
                 (
                     new
@@ -348,32 +363,6 @@ namespace ei8.Prototypes.HelloWorm
                         new
                         (
                             [
-                                addend1_1.Single(),
-                                addend1_0.Single(),
-                                addend1_0.Single(),
-                                addend1_1.Single(),
-                                addend1_0.Single(),
-                                addend1_1.Single(),
-                                addend1_1.Single(),
-                                addend1_0.Single(),
-                            ]
-                        ),
-                        new
-                        (
-                            [
-                                addend2_1.Single(),
-                                addend2_1.Single(),
-                                addend2_0.Single(),
-                                addend2_0.Single(),
-                                addend2_1.Single(),
-                                addend2_1.Single(),
-                                addend2_1.Single(),
-                                addend2_1.Single()
-                            ]
-                        ),
-                        new
-                        (
-                            [
                                 sum_1.Single(),
                                 sum_0.Single()
                             ]
@@ -389,8 +378,38 @@ namespace ei8.Prototypes.HelloWorm
                     new(checkedNeurons[0]),
                     new(this.spikable.Network.GetItems<Neuron>().Where(n => n.Tag.ToUpper().StartsWith("DIGIT"))),
                     new(checkedNeurons[1]),
-                    "Digit",
-                    (a, d) => this.timer1.Stop()
+                    (n) => int.Parse(n.Tag.ToUpper().Replace("DIGIT", string.Empty)) - 1,
+                    (i, wm) =>
+                    {
+                        IEnumerable<Neuron> result = [];
+                        if (i < addends[0].Length)
+                        {
+                            result = 
+                                [
+                                    wm.Addend1Values.Content.Single(ad => ad.Tag.EndsWith(addends[0][addends[0].Length - i - 1])),
+                                    wm.Addend2Values.Content.Single(ad => ad.Tag.EndsWith(addends[1][addends[1].Length - i - 1]))
+                                ];
+                        }
+                        else if (i == addends[0].Length)
+                        {
+                            result =
+                                [
+                                    wm.Addend1Values.Content.Single(ad => ad.Tag.EndsWith('0')),
+                                    wm.Addend2Values.Content.Single(ad => ad.Tag.EndsWith('0'))
+                                ];
+                        }
+
+                        return result;
+                    },
+                    (a, d, s) =>
+                    {
+                        this.timer1.Stop();
+
+                        frmTree.logger.Info
+                        (
+                            new LogMessageGenerator(() => $"Sum: {string.Join(string.Empty, s.Reverse().Select(s => s.Tag.Last()))}")
+                        );
+                    }
                 );
 
                 this.timer1.Start();
