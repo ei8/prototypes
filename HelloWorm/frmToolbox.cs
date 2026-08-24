@@ -115,11 +115,12 @@ namespace ei8.Prototypes.HelloWorm
                         Environment.NewLine,
                         [
                             "1 - Logic Gates",
-                            "2 - Addition",
+                            "2 - Addition - Fast",
                             "3 - Subtraction",
                             "4 - Next",
                             "5 - Biphasic Nexts",
-                            "6 - Sequential Adders"
+                            "6 - Addition - Sequential",
+                            "7 - Addition - Dynamic"
                         ]
                     ), 
                     string.Empty
@@ -129,6 +130,7 @@ namespace ei8.Prototypes.HelloWorm
                 var suffix = string.Empty;
                 if (!string.IsNullOrWhiteSpace(option))
                 {
+                    int numberOfDigits = 1;
                     switch (option)
                     {
                         case "1":
@@ -136,8 +138,10 @@ namespace ei8.Prototypes.HelloWorm
                             suffix = "Logic Gates";
                             break;
                         case "2":
-                            sheet.Load(frmToolbox.CreateAdders(4));
-                            suffix = "Addition";
+                            numberOfDigits = int.Parse(InputBox.ShowDialog(this, "Number of digits", "Enter number of digits:", "1"));
+                            ArgumentOutOfRangeException.ThrowIfLessThan(numberOfDigits, 1);
+                            sheet.Load(frmToolbox.CreateAdders(numberOfDigits));
+                            suffix = "Addition - Fast";
                             break;
                         case "3":
                             sheet.Load(frmToolbox.CreateSubtractors(4));
@@ -152,8 +156,14 @@ namespace ei8.Prototypes.HelloWorm
                             suffix = "Biphasic Next";
                             break;
                         case "6":
-                            sheet.Load(frmToolbox.CreateSequentialAdders(10));
-                            suffix = "Sequential Adders";
+                            numberOfDigits = int.Parse(InputBox.ShowDialog(this, "Number of digits", "Enter number of digits:", "1"));
+                            ArgumentOutOfRangeException.ThrowIfLessThan(numberOfDigits, 1);
+                            sheet.Load(frmToolbox.CreateSequentialAdders(numberOfDigits));
+                            suffix = "Addition - Sequential";
+                            break;
+                        case "7":
+                            sheet.Load(frmToolbox.CreateDynamicAdder());
+                            suffix = "Addition - Dynamic";
                             break;
                     }
                 }
@@ -450,6 +460,22 @@ namespace ei8.Prototypes.HelloWorm
                     precedingVariableInfo = a.VariableInfo;
                 }
             }
+            return net;
+        }
+
+        private static ReadOnlyNetwork CreateDynamicAdder()
+        {
+            Network net = new();
+            
+            if 
+            (
+                BinaryNeuronParameter.TryCreate(out var precedingCarryOver) &&
+                Adder.TryCreate(out Adder? a, 0, precedingCarryOver, null, nameof(Adder) + 1)
+            )
+            {
+                net.AddReplaceItems(a);
+            }
+
             return net;
         }
 

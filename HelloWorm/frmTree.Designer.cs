@@ -56,6 +56,8 @@
             mnuHideLogicGatesInterneuronsTags = new ToolStripMenuItem();
             tsbCopyIds = new ToolStripButton();
             timer1 = new System.Windows.Forms.Timer(components);
+            sequentialToolStripMenuItem = new ToolStripMenuItem();
+            dynamicToolStripMenuItem = new ToolStripMenuItem();
             toolStrip1.SuspendLayout();
             SuspendLayout();
             // 
@@ -146,10 +148,10 @@
             // 
             // mnuStartProcessAddition
             // 
+            mnuStartProcessAddition.DropDownItems.AddRange(new ToolStripItem[] { sequentialToolStripMenuItem, dynamicToolStripMenuItem });
             mnuStartProcessAddition.Name = "mnuStartProcessAddition";
             mnuStartProcessAddition.Size = new Size(180, 22);
-            mnuStartProcessAddition.Text = "Addition...";
-            mnuStartProcessAddition.Click += mnuStartProcessAddition_Click;
+            mnuStartProcessAddition.Text = "Addition";
             // 
             // toolStripMenuItem1
             // 
@@ -273,6 +275,20 @@
             timer1.Interval = 1000;
             timer1.Tick += timer1_Tick;
             // 
+            // sequentialToolStripMenuItem
+            // 
+            sequentialToolStripMenuItem.Name = "sequentialToolStripMenuItem";
+            sequentialToolStripMenuItem.Size = new Size(180, 22);
+            sequentialToolStripMenuItem.Text = "Sequential";
+            sequentialToolStripMenuItem.Click += mnuStartProcessAddition_Click;
+            // 
+            // dynamicToolStripMenuItem
+            // 
+            dynamicToolStripMenuItem.Name = "dynamicToolStripMenuItem";
+            dynamicToolStripMenuItem.Size = new Size(180, 22);
+            dynamicToolStripMenuItem.Text = "Dynamic";
+            dynamicToolStripMenuItem.Click += dynamicToolStripMenuItem_Click;
+            // 
             // frmTree
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -317,5 +333,7 @@
         private ToolStripMenuItem mnuStartProcessAddition;
         private ToolStripSeparator toolStripMenuItem1;
         private ToolStripMenuItem setTimerIntervalToolStripMenuItem;
+        private ToolStripMenuItem sequentialToolStripMenuItem;
+        private ToolStripMenuItem dynamicToolStripMenuItem;
     }
 }
