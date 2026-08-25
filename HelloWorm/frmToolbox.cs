@@ -117,7 +117,8 @@ namespace ei8.Prototypes.HelloWorm
                     "5 - Biphasic Next",
                     "6 - Addition - Sequential",
                     "7 - Addition - Dynamic",
-                    "8 - Multiplication"
+                    "8 - Multiplication",
+                    "9 - Multiplication - Dynamic"
                 ];
                 string option = InputBox.ShowDialog(
                     this,
@@ -165,6 +166,9 @@ namespace ei8.Prototypes.HelloWorm
                             break;
                         case "8":
                             sheet.Load(frmToolbox.CreateMultiplier());
+                            break;
+                        case "9":
+                            sheet.Load(frmToolbox.CreateDynamicMultiplier());
                             break;
                         default:
                             throw new ArgumentOutOfRangeException(nameof(option));
@@ -521,6 +525,42 @@ namespace ei8.Prototypes.HelloWorm
             )
             {
                 net.AddReplaceItems(a);
+            }
+
+            return net;
+        }
+
+        private static ReadOnlyNetwork CreateDynamicMultiplier()
+        {
+            Network net = new();
+
+            if
+            (
+                BinaryNeuronParameter.TryCreate(out var precedingCarryOver) &&
+                Adder.TryCreate
+                (
+                    out Adder? a,
+                    0,
+                    precedingCarryOver,
+                    null,
+                    nameof(Adder) + 1
+                ) &&
+                Multiplier.TryCreate
+                (
+                    out Multiplier? m,
+                    0,
+                    nameof(Multiplier) + 1
+                ) &&
+                DynamicMultiplier.TryCreate
+                (
+                    out DynamicMultiplier? dm,
+                    m,
+                    a,
+                    nameof(DynamicMultiplier) + 1
+                )
+            )
+            {
+                net.AddReplaceItems(dm);
             }
 
             return net;
