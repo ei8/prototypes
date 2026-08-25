@@ -108,26 +108,29 @@ namespace ei8.Prototypes.HelloWorm
         {
             if (this.selectionService.PrimarySelection is Dish dish)
             {
+                string[] options = 
+                [
+                    "1 - Logic Gates",
+                    "2 - Addition - Fast",
+                    "3 - Subtraction",
+                    "4 - Next",
+                    "5 - Biphasic Next",
+                    "6 - Addition - Sequential",
+                    "7 - Addition - Dynamic",
+                    "8 - Multiplication"
+                ];
                 string option = InputBox.ShowDialog(
                     this,
                     "Select Worksheet Type",
-                    string.Join(
+                    string.Join
+                    (
                         Environment.NewLine,
-                        [
-                            "1 - Logic Gates",
-                            "2 - Addition - Fast",
-                            "3 - Subtraction",
-                            "4 - Next",
-                            "5 - Biphasic Nexts",
-                            "6 - Addition - Sequential",
-                            "7 - Addition - Dynamic"
-                        ]
+                        options
                     ), 
                     string.Empty
                 );
 
                 var sheet = this.serviceProvider.GetRequiredService<Worksheet>();
-                var suffix = string.Empty;
                 if (!string.IsNullOrWhiteSpace(option))
                 {
                     int createParameter = 1;
@@ -135,44 +138,42 @@ namespace ei8.Prototypes.HelloWorm
                     {
                         case "1":
                             sheet.Load(frmToolbox.CreateLogicGates());
-                            suffix = "Logic Gates";
                             break;
                         case "2":
                             createParameter = int.Parse(InputBox.ShowDialog(this, "Number of digit(s)", "Enter number of digit(s):", "1"));
                             ArgumentOutOfRangeException.ThrowIfLessThan(createParameter, 1);
                             sheet.Load(frmToolbox.CreateAdders(createParameter));
-                            suffix = "Addition - Fast";
                             break;
                         case "3":
                             sheet.Load(frmToolbox.CreateSubtractors(4));
-                            suffix = "Subtraction";
                             break;
                         case "4":
                             createParameter = int.Parse(InputBox.ShowDialog(this, "Number of next(s)", "Enter number of next(s):", "1"));
                             ArgumentOutOfRangeException.ThrowIfLessThan(createParameter, 1);
                             sheet.Load(frmToolbox.CreateNexts(10));
-                            suffix = "Next";
                             break;
                         case "5":
                             sheet.Load(frmToolbox.CreateBiphasicNexts(4));
-                            suffix = "Biphasic Next";
                             break;
                         case "6":
                             createParameter = int.Parse(InputBox.ShowDialog(this, "Number of digit(s)", "Enter number of digit(s):", "1"));
                             ArgumentOutOfRangeException.ThrowIfLessThan(createParameter, 1);
                             sheet.Load(frmToolbox.CreateSequentialAdders(createParameter));
-                            suffix = "Addition - Sequential";
                             break;
                         case "7":
                             sheet.Load(frmToolbox.CreateDynamicAdder());
-                            suffix = "Addition - Dynamic";
                             break;
+                        case "8":
+                            sheet.Load(frmToolbox.CreateMultiplier());
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException(nameof(option));
                     }
                 }
                 
                 sheet.Initialize(
                     ExtensionMethods.CreateUnusedName(
-                        (i) => $"{nameof(Worksheet)}{i} ({suffix})",
+                        (i) => $"{nameof(Worksheet)}{i} ({options[int.Parse(option) - 1].Substring(4)})",
                         (s) => dish.Components.OfType<INamed>().Any(dcn => dcn.Name == s)
                     ),
                     dish
@@ -472,7 +473,14 @@ namespace ei8.Prototypes.HelloWorm
             if 
             (
                 BinaryNeuronParameter.TryCreate(out var precedingCarryOver) &&
-                Adder.TryCreate(out Adder? a, 0, precedingCarryOver, null, nameof(Adder) + 1)
+                Adder.TryCreate
+                (
+                    out Adder? a, 
+                    0, 
+                    precedingCarryOver, 
+                    null, 
+                    nameof(Adder) + 1
+                )
             )
             {
                 net.AddReplaceItems(a);
@@ -495,6 +503,26 @@ namespace ei8.Prototypes.HelloWorm
                     precedingVariableInfo = s.VariableInfo;
                 }
             }
+            return net;
+        }
+
+        private static ReadOnlyNetwork CreateMultiplier()
+        {
+            Network net = new();
+
+            if
+            (
+                Multiplier.TryCreate
+                (
+                    out Multiplier? a,
+                    0,
+                    nameof(Multiplier) + 1
+                )
+            )
+            {
+                net.AddReplaceItems(a);
+            }
+
             return net;
         }
     }
