@@ -130,7 +130,7 @@ namespace ei8.Prototypes.HelloWorm
                 var suffix = string.Empty;
                 if (!string.IsNullOrWhiteSpace(option))
                 {
-                    int numberOfDigits = 1;
+                    int createParameter = 1;
                     switch (option)
                     {
                         case "1":
@@ -138,9 +138,9 @@ namespace ei8.Prototypes.HelloWorm
                             suffix = "Logic Gates";
                             break;
                         case "2":
-                            numberOfDigits = int.Parse(InputBox.ShowDialog(this, "Number of digits", "Enter number of digits:", "1"));
-                            ArgumentOutOfRangeException.ThrowIfLessThan(numberOfDigits, 1);
-                            sheet.Load(frmToolbox.CreateAdders(numberOfDigits));
+                            createParameter = int.Parse(InputBox.ShowDialog(this, "Number of digit(s)", "Enter number of digit(s):", "1"));
+                            ArgumentOutOfRangeException.ThrowIfLessThan(createParameter, 1);
+                            sheet.Load(frmToolbox.CreateAdders(createParameter));
                             suffix = "Addition - Fast";
                             break;
                         case "3":
@@ -148,6 +148,8 @@ namespace ei8.Prototypes.HelloWorm
                             suffix = "Subtraction";
                             break;
                         case "4":
+                            createParameter = int.Parse(InputBox.ShowDialog(this, "Number of next(s)", "Enter number of next(s):", "1"));
+                            ArgumentOutOfRangeException.ThrowIfLessThan(createParameter, 1);
                             sheet.Load(frmToolbox.CreateNexts(10));
                             suffix = "Next";
                             break;
@@ -156,9 +158,9 @@ namespace ei8.Prototypes.HelloWorm
                             suffix = "Biphasic Next";
                             break;
                         case "6":
-                            numberOfDigits = int.Parse(InputBox.ShowDialog(this, "Number of digits", "Enter number of digits:", "1"));
-                            ArgumentOutOfRangeException.ThrowIfLessThan(numberOfDigits, 1);
-                            sheet.Load(frmToolbox.CreateSequentialAdders(numberOfDigits));
+                            createParameter = int.Parse(InputBox.ShowDialog(this, "Number of digit(s)", "Enter number of digit(s):", "1"));
+                            ArgumentOutOfRangeException.ThrowIfLessThan(createParameter, 1);
+                            sheet.Load(frmToolbox.CreateSequentialAdders(createParameter));
                             suffix = "Addition - Sequential";
                             break;
                         case "7":
