@@ -1,5 +1,6 @@
 ﻿using ei8.Cortex.Coding;
 using ei8.Cortex.Coding.d23;
+using ei8.Cortex.Coding.d23.Math.Arithmetic;
 using ei8.Cortex.Coding.d23.Math.Logic;
 using ei8.Cortex.Coding.d23.Process;
 using ei8.Cortex.Coding.d23.Process.Iteration;
@@ -384,9 +385,12 @@ namespace ei8.Prototypes.HelloWorm
                             ]
                         )
                     ),
-                    new(checkedNeurons[0]),
-                    new(this.spikable.Network.GetItems<Neuron>().Where(n => n.Tag.ToUpper().StartsWith("DIGIT"))),
-                    new(checkedNeurons[1]),
+                    new
+                    (
+                        new(checkedNeurons[0]),
+                        new(this.spikable.Network.GetItems<Neuron>().Where(n => n.Tag.ToUpper().StartsWith("DIGIT"))),
+                        new(checkedNeurons[1])
+                    ),
                     (n) => int.Parse(n.Tag.ToUpper().Replace("DIGIT", string.Empty)) - 1,
                     (i, wm) =>
                     {
@@ -589,6 +593,126 @@ namespace ei8.Prototypes.HelloWorm
                         frmTree.logger.Info
                         (
                             new LogMessageGenerator(() => $"Sum: {string.Join(string.Empty, s.Reverse().Select(s => s.Tag.Last()))}")
+                        );
+                    }
+                );
+
+                this.timer1.Start();
+            }
+        }
+
+        private void dynamicMultiplicationToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (this.spikable != null)
+            {
+                this.timer1.Stop();
+
+                this.spikable.Network.TryGetByTag("Adder1.Addend1 = 1", out var addend1_1);
+                this.spikable.Network.TryGetByTag("Adder1.Addend1 = 0", out var addend1_0);
+                this.spikable.Network.TryGetByTag("Adder1.Addend2 = 1", out var addend2_1);
+                this.spikable.Network.TryGetByTag("Adder1.Addend2 = 0", out var addend2_0);
+                this.spikable.Network.TryGetByTag("Adder1.Sum = 1", out var sum_1);
+                this.spikable.Network.TryGetByTag("Adder1.Sum = 0", out var sum_0);
+                this.spikable.Network.TryGetByTag("Adder1.CarryOver = 1", out var carryOver_1);
+                this.spikable.Network.TryGetByTag("Adder1.CarryOver = 0", out var carryOver_0);
+                this.spikable.Network.TryGetByTag("PrecedingCarryOver = 1", out var precedingCarryOver_1);
+                this.spikable.Network.TryGetByTag("PrecedingCarryOver = 0", out var precedingCarryOver_0);
+
+                this.spikable.Network.TryGetByTag("Multiplier1.Multiplicand = 1", out var multiplicand_1);
+                this.spikable.Network.TryGetByTag("Multiplier1.Multiplicand = 0", out var multiplicand_0);
+                this.spikable.Network.TryGetByTag("Multiplier1.Multiplier = 1", out var multiplier_1);
+                this.spikable.Network.TryGetByTag("Multiplier1.Multiplier = 0", out var multiplier_0);
+                this.spikable.Network.TryGetByTag("Multiplier1.Product = 1", out var product_1);
+                this.spikable.Network.TryGetByTag("Multiplier1.Product = 0", out var product_0);
+
+                var factorString = InputBox.ShowDialog
+                (
+                    this,
+                    "Factors",
+                    "Enter two binary factors separated by a comma (,):",
+                    string.Empty
+                );
+
+                ArgumentOutOfRangeException.ThrowIfNotEqual(factorString.Count(c => c == ','), 1);
+                var factors = factorString.Split(',');
+                ArgumentOutOfRangeException.ThrowIfNotEqual(factors.Length, 2);
+                foreach (var factor in factors)
+                    foreach (var chunk16Bit in frmTree.ChunksUpto(factor, 16))
+                        int.Parse(chunk16Bit, System.Globalization.NumberStyles.BinaryNumber);
+
+                this.process = new DynamicMultiplication
+                (
+                    factors[0].Select(f => f == '0' ? multiplicand_0.Single() : multiplicand_1.Single()).Reverse(),
+                    factors[1].Select(f => f == '0' ? multiplier_0.Single() : multiplier_1.Single()).Reverse(),
+                    new
+                    (
+                        new
+                        (
+                            [
+                                multiplicand_1.Single(),
+                                multiplicand_0.Single()
+                            ]
+                        ),
+                        new
+                        (
+                            [
+                                multiplier_1.Single(),
+                                multiplier_0.Single()
+                            ]
+                        ),
+                        new
+                        (
+                            [
+                                product_1.Single(),
+                                product_0.Single()
+                            ]
+                        )
+                    ),
+                    new
+                    (
+                        new
+                        (
+                            [
+                                precedingCarryOver_1.Single(),
+                                precedingCarryOver_0.Single()
+                            ]
+                        ),
+                        new
+                        (
+                            [
+                                addend1_1.Single(),
+                                addend1_0.Single()
+                            ]
+                        ),
+                        new
+                        (
+                            [
+                                addend2_1.Single(),
+                                addend2_0.Single()
+                            ]
+                        ),
+                        new
+                        (
+                            [
+                                sum_1.Single(),
+                                sum_0.Single()
+                            ]
+                        ),
+                        new
+                        (
+                            [
+                                carryOver_1.Single(),
+                                carryOver_0.Single()
+                            ]
+                        )
+                    ),
+                    (dm, p) =>
+                    {
+                        this.timer1.Stop();
+
+                        frmTree.logger.Info
+                        (
+                            new LogMessageGenerator(() => $"Product: {string.Join(string.Empty, p.Reverse().Select(s => s.Tag.Last()))}")
                         );
                     }
                 );

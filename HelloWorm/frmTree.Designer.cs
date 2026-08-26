@@ -41,6 +41,8 @@
             tsbStartProcess = new ToolStripDropDownButton();
             mnuStartProcessDoUntil = new ToolStripMenuItem();
             mnuStartProcessAddition = new ToolStripMenuItem();
+            sequentialToolStripMenuItem = new ToolStripMenuItem();
+            dynamicToolStripMenuItem = new ToolStripMenuItem();
             toolStripMenuItem1 = new ToolStripSeparator();
             setTimerIntervalToolStripMenuItem = new ToolStripMenuItem();
             tsbStopProcess = new ToolStripButton();
@@ -56,8 +58,8 @@
             mnuHideLogicGatesInterneuronsTags = new ToolStripMenuItem();
             tsbCopyIds = new ToolStripButton();
             timer1 = new System.Windows.Forms.Timer(components);
-            sequentialToolStripMenuItem = new ToolStripMenuItem();
-            dynamicToolStripMenuItem = new ToolStripMenuItem();
+            toolStripMenuItem2 = new ToolStripMenuItem();
+            dynamicMultiplicationToolStripMenuItem = new ToolStripMenuItem();
             toolStrip1.SuspendLayout();
             SuspendLayout();
             // 
@@ -131,7 +133,7 @@
             // tsbStartProcess
             // 
             tsbStartProcess.DisplayStyle = ToolStripItemDisplayStyle.Image;
-            tsbStartProcess.DropDownItems.AddRange(new ToolStripItem[] { mnuStartProcessDoUntil, mnuStartProcessAddition, toolStripMenuItem1, setTimerIntervalToolStripMenuItem });
+            tsbStartProcess.DropDownItems.AddRange(new ToolStripItem[] { mnuStartProcessDoUntil, mnuStartProcessAddition, toolStripMenuItem2, toolStripMenuItem1, setTimerIntervalToolStripMenuItem });
             tsbStartProcess.Image = (Image)resources.GetObject("tsbStartProcess.Image");
             tsbStartProcess.ImageTransparentColor = Color.Magenta;
             tsbStartProcess.Name = "tsbStartProcess";
@@ -152,6 +154,20 @@
             mnuStartProcessAddition.Name = "mnuStartProcessAddition";
             mnuStartProcessAddition.Size = new Size(180, 22);
             mnuStartProcessAddition.Text = "Addition";
+            // 
+            // sequentialToolStripMenuItem
+            // 
+            sequentialToolStripMenuItem.Name = "sequentialToolStripMenuItem";
+            sequentialToolStripMenuItem.Size = new Size(129, 22);
+            sequentialToolStripMenuItem.Text = "Sequential";
+            sequentialToolStripMenuItem.Click += mnuStartProcessAddition_Click;
+            // 
+            // dynamicToolStripMenuItem
+            // 
+            dynamicToolStripMenuItem.Name = "dynamicToolStripMenuItem";
+            dynamicToolStripMenuItem.Size = new Size(129, 22);
+            dynamicToolStripMenuItem.Text = "Dynamic";
+            dynamicToolStripMenuItem.Click += dynamicToolStripMenuItem_Click;
             // 
             // toolStripMenuItem1
             // 
@@ -275,19 +291,19 @@
             timer1.Interval = 1000;
             timer1.Tick += timer1_Tick;
             // 
-            // sequentialToolStripMenuItem
+            // toolStripMenuItem2
             // 
-            sequentialToolStripMenuItem.Name = "sequentialToolStripMenuItem";
-            sequentialToolStripMenuItem.Size = new Size(180, 22);
-            sequentialToolStripMenuItem.Text = "Sequential";
-            sequentialToolStripMenuItem.Click += mnuStartProcessAddition_Click;
+            toolStripMenuItem2.DropDownItems.AddRange(new ToolStripItem[] { dynamicMultiplicationToolStripMenuItem });
+            toolStripMenuItem2.Name = "toolStripMenuItem2";
+            toolStripMenuItem2.Size = new Size(180, 22);
+            toolStripMenuItem2.Text = "Multiplication";
             // 
-            // dynamicToolStripMenuItem
+            // dynamicMultiplicationToolStripMenuItem
             // 
-            dynamicToolStripMenuItem.Name = "dynamicToolStripMenuItem";
-            dynamicToolStripMenuItem.Size = new Size(180, 22);
-            dynamicToolStripMenuItem.Text = "Dynamic";
-            dynamicToolStripMenuItem.Click += dynamicToolStripMenuItem_Click;
+            dynamicMultiplicationToolStripMenuItem.Name = "dynamicMultiplicationToolStripMenuItem";
+            dynamicMultiplicationToolStripMenuItem.Size = new Size(180, 22);
+            dynamicMultiplicationToolStripMenuItem.Text = "Dynamic";
+            dynamicMultiplicationToolStripMenuItem.Click += dynamicMultiplicationToolStripMenuItem_Click;
             // 
             // frmTree
             // 
@@ -335,5 +351,7 @@
         private ToolStripMenuItem setTimerIntervalToolStripMenuItem;
         private ToolStripMenuItem sequentialToolStripMenuItem;
         private ToolStripMenuItem dynamicToolStripMenuItem;
+        private ToolStripMenuItem toolStripMenuItem2;
+        private ToolStripMenuItem dynamicMultiplicationToolStripMenuItem;
     }
 }
