@@ -151,7 +151,7 @@ namespace ei8.Prototypes.HelloWorm
                         case "4":
                             createParameter = int.Parse(InputBox.ShowDialog(this, "Number of next(s)", "Enter number of next(s):", "1"));
                             ArgumentOutOfRangeException.ThrowIfLessThan(createParameter, 1);
-                            sheet.Load(frmToolbox.CreateNexts(10));
+                            sheet.Load(frmToolbox.CreateNexts(createParameter));
                             break;
                         case "5":
                             sheet.Load(frmToolbox.CreateBiphasicNexts(4));

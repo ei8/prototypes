@@ -289,7 +289,7 @@ namespace ei8.Prototypes.HelloWorm
                     new
                     (
                         new(checkedNeurons[0]),
-                        new(this.spikable.Network.GetItems<Neuron>().Where(n => n.Tag.ToUpper().StartsWith("STEP"))),
+                        new(this.spikable.Network.GetItems<Neuron>().Where(n => n.Tag.ToUpper().StartsWith("STEP")).Select(n => new NeuronChunk(n))),
                         new(checkedNeurons[1]),
                         new(checkedNeurons[2])
                     ),
@@ -352,67 +352,48 @@ namespace ei8.Prototypes.HelloWorm
                         new
                         (
                             [
-                                precedingCarryOver_1.Single(),
-                                precedingCarryOver_0.Single()
+                                new(precedingCarryOver_1.Single()),
+                                new(precedingCarryOver_0.Single())
                             ]
                         ),
                         new
                         (
                             [
-                                addend1_1.Single(),
-                                addend1_0.Single()
+                                new(addend1_1.Single()),
+                                new(addend1_0.Single())
                             ]
                         ),
                         new
                         (
                             [
-                                addend2_1.Single(),
-                                addend2_0.Single()
+                                new(addend2_1.Single()),
+                                new(addend2_0.Single())
+                            ]
+                        ),
+                        new([.. addends[0].Select(a => a == '0' ? addend1_0.Single() : addend1_1.Single()).Reverse().Select(n => new NeuronChunk(n))]),
+                        new([.. addends[1].Select(a => a == '0' ? addend2_0.Single() : addend2_1.Single()).Reverse().Select(n => new NeuronChunk(n))]),
+                        new
+                        (
+                            [
+                                new(sum_1.Single()),
+                                new(sum_0.Single())
                             ]
                         ),
                         new
                         (
                             [
-                                sum_1.Single(),
-                                sum_0.Single()
-                            ]
-                        ),
-                        new
-                        (
-                            [
-                                carryOver_1.Single(),
-                                carryOver_0.Single()
+                                new(carryOver_1.Single()),
+                                new(carryOver_0.Single())
                             ]
                         )
                     ),
                     new
                     (
                         new(checkedNeurons[0]),
-                        new(this.spikable.Network.GetItems<Neuron>().Where(n => n.Tag.ToUpper().StartsWith("DIGIT"))),
+                        new(this.spikable.Network.GetItems<Neuron>().Where(n => n.Tag.ToUpper().StartsWith("DIGIT")).Select(n => new NeuronChunk(n))),
                         new(checkedNeurons[1])
                     ),
                     (n) => int.Parse(n.Tag.ToUpper().Replace("DIGIT", string.Empty)) - 1,
-                    (i, wm) =>
-                    {
-                        List<Neuron> result = [];
-
-                        if (addends.Any(a => i < a.Length))
-                            foreach (var addend in addends)
-                            {
-                                EnumerableChunk values;
-                                if (addends.IndexOf(addend) == 0)
-                                    values = wm.Addend1Values;
-                                else
-                                    values = wm.Addend2Values;
-
-                                if (i < addend.Length)
-                                    result.Add(values.Content.Single(ad => ad.Tag.EndsWith(addend[addend.Length - i - 1])));
-                                else
-                                    result.Add(values.Content.Single(ad => ad.Tag.EndsWith('0')));
-                            }
-
-                        return result;
-                    },
                     (a, d, s) =>
                     {
                         this.timer1.Stop();
@@ -521,8 +502,6 @@ namespace ei8.Prototypes.HelloWorm
                     foreach (var chunk16Bit in frmTree.ChunksUpto(addend, 16))
                         int.Parse(chunk16Bit, System.Globalization.NumberStyles.BinaryNumber);
 
-                var currentDigit = 0;
-
                 this.process = new DynamicAddition
                 (
                     new
@@ -530,62 +509,41 @@ namespace ei8.Prototypes.HelloWorm
                         new
                         (
                             [
-                                precedingCarryOver_1.Single(),
-                                precedingCarryOver_0.Single()
+                                new(precedingCarryOver_1.Single()),
+                                new(precedingCarryOver_0.Single())
                             ]
                         ),
                         new
                         (
                             [
-                                addend1_1.Single(),
-                                addend1_0.Single()
+                                new(addend1_1.Single()),
+                                new(addend1_0.Single())
                             ]
                         ),
                         new
                         (
                             [
-                                addend2_1.Single(),
-                                addend2_0.Single()
+                                new(addend2_1.Single()),
+                                new(addend2_0.Single())
+                            ]
+                        ),
+                        new([.. addends[0].Select(a => a == '0' ? addend1_0.Single() : addend1_1.Single()).Reverse().Select(n => new NeuronChunk(n))]),
+                        new([.. addends[1].Select(a => a == '0' ? addend2_0.Single() : addend2_1.Single()).Reverse().Select(n => new NeuronChunk(n))]),
+                        new
+                        (
+                            [
+                                new(sum_1.Single()),
+                                new(sum_0.Single())
                             ]
                         ),
                         new
                         (
                             [
-                                sum_1.Single(),
-                                sum_0.Single()
-                            ]
-                        ),
-                        new
-                        (
-                            [
-                                carryOver_1.Single(),
-                                carryOver_0.Single()
+                                new(carryOver_1.Single()),
+                                new(carryOver_0.Single())
                             ]
                         )
                     ),
-                    () => currentDigit,
-                    () => currentDigit++,
-                    (i, wm) =>
-                    {
-                        List<Neuron> result = [];
-
-                        if (addends.Any(a => i < a.Length))
-                            foreach (var addend in addends)
-                            {
-                                EnumerableChunk values;
-                                if (addends.IndexOf(addend) == 0)
-                                    values = wm.Addend1Values;
-                                else
-                                    values = wm.Addend2Values;
-
-                                if (i < addend.Length)
-                                    result.Add(values.Content.Single(ad => ad.Tag.EndsWith(addend[addend.Length - i - 1])));
-                                else
-                                    result.Add(values.Content.Single(ad => ad.Tag.EndsWith('0')));
-                            }
-
-                        return result;
-                    },
                     (a, s) =>
                     {
                         this.timer1.Stop();
@@ -642,29 +600,29 @@ namespace ei8.Prototypes.HelloWorm
 
                 this.process = new DynamicMultiplication
                 (
-                    factors[0].Select(f => f == '0' ? multiplicand_0.Single() : multiplicand_1.Single()).Reverse(),
-                    factors[1].Select(f => f == '0' ? multiplier_0.Single() : multiplier_1.Single()).Reverse(),
                     new
                     (
                         new
                         (
                             [
-                                multiplicand_1.Single(),
-                                multiplicand_0.Single()
+                                new(multiplicand_1.Single()),
+                                new(multiplicand_0.Single())
                             ]
                         ),
                         new
                         (
                             [
-                                multiplier_1.Single(),
-                                multiplier_0.Single()
+                                new(multiplier_1.Single()),
+                                new(multiplier_0.Single())
                             ]
                         ),
+                        new([.. factors[0].Select(f => f == '0' ? multiplicand_0.Single() : multiplicand_1.Single()).Reverse().Select(n => new NeuronChunk(n))]),
+                        new([.. factors[1].Select(f => f == '0' ? multiplier_0.Single() : multiplier_1.Single()).Reverse().Select(n => new NeuronChunk(n))]),
                         new
                         (
                             [
-                                product_1.Single(),
-                                product_0.Single()
+                                new(product_1.Single()),
+                                new(product_0.Single())
                             ]
                         )
                     ),
@@ -673,36 +631,36 @@ namespace ei8.Prototypes.HelloWorm
                         new
                         (
                             [
-                                precedingCarryOver_1.Single(),
-                                precedingCarryOver_0.Single()
+                                new(precedingCarryOver_1.Single()),
+                                new(precedingCarryOver_0.Single())
                             ]
                         ),
                         new
                         (
                             [
-                                addend1_1.Single(),
-                                addend1_0.Single()
+                                new(addend1_1.Single()),
+                                new(addend1_0.Single())
                             ]
                         ),
                         new
                         (
                             [
-                                addend2_1.Single(),
-                                addend2_0.Single()
+                                new(addend2_1.Single()),
+                                new(addend2_0.Single())
                             ]
                         ),
                         new
                         (
                             [
-                                sum_1.Single(),
-                                sum_0.Single()
+                                new(sum_1.Single()),
+                                new(sum_0.Single())
                             ]
                         ),
                         new
                         (
                             [
-                                carryOver_1.Single(),
-                                carryOver_0.Single()
+                                new(carryOver_1.Single()),
+                                new(carryOver_0.Single())
                             ]
                         )
                     ),
