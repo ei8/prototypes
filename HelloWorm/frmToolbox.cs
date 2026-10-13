@@ -1,13 +1,16 @@
 ﻿using ei8.Cortex.Coding;
 using ei8.Cortex.Coding.d23;
-using ei8.Cortex.Coding.d23.Sequences;
 using ei8.Cortex.Coding.d23.Math.Arithmetic;
+using ei8.Cortex.Coding.d23.Math.Comparison;
 using ei8.Cortex.Coding.d23.Math.Logic;
+using ei8.Cortex.Coding.d23.Math.TruthTables;
+using ei8.Cortex.Coding.d23.Sequences;
 using ei8.Cortex.Library.Client;
 using ei8.Cortex.Library.Client.Out;
 using Microsoft.Extensions.DependencyInjection;
 using System.ComponentModel.Design;
 using WeifenLuo.WinFormsUI.Docking;
+using static SQLite.SQLite3;
 
 namespace ei8.Prototypes.HelloWorm
 {
@@ -118,7 +121,9 @@ namespace ei8.Prototypes.HelloWorm
                     "6 - Addition - Sequential",
                     "7 - Addition - Dynamic",
                     "8 - Multiplication",
-                    "9 - Multiplication - Dynamic"
+                    "9 - Multiplication - Dynamic",
+                    "10 - Less Than",
+                    "11 - Comparator"
                 ];
                 string option = InputBox.ShowDialog(
                     this,
@@ -146,7 +151,9 @@ namespace ei8.Prototypes.HelloWorm
                             sheet.Load(frmToolbox.CreateAdders(createParameter));
                             break;
                         case "3":
-                            sheet.Load(frmToolbox.CreateSubtractors(4));
+                            createParameter = int.Parse(InputBox.ShowDialog(this, "Number of digit(s)", "Enter number of digit(s):", "1"));
+                            ArgumentOutOfRangeException.ThrowIfLessThan(createParameter, 1);
+                            sheet.Load(frmToolbox.CreateSubtractors(createParameter));
                             break;
                         case "4":
                             createParameter = int.Parse(InputBox.ShowDialog(this, "Number of next(s)", "Enter number of next(s):", "1"));
@@ -170,14 +177,21 @@ namespace ei8.Prototypes.HelloWorm
                         case "9":
                             sheet.Load(frmToolbox.CreateDynamicMultiplier());
                             break;
+                        case "10":
+                            sheet.Load(frmToolbox.CreateLessThan());
+                            break;
+                        case "11":
+                            sheet.Load(frmToolbox.CreateComparator());
+                            break;
                         default:
                             throw new ArgumentOutOfRangeException(nameof(option));
                     }
                 }
-                
+
+                var optionName = options[int.Parse(option) - 1];
                 sheet.Initialize(
                     ExtensionMethods.CreateUnusedName(
-                        (i) => $"{nameof(Worksheet)}{i} ({options[int.Parse(option) - 1].Substring(4)})",
+                        (i) => $"{nameof(Worksheet)}{i} ({optionName.Substring(optionName.IndexOf('-') + 2)})",
                         (s) => dish.Components.OfType<INamed>().Any(dcn => dcn.Name == s)
                     ),
                     dish
@@ -187,11 +201,59 @@ namespace ei8.Prototypes.HelloWorm
             }
         }
 
+        private static ReadOnlyNetwork CreateComparator()
+        {
+            Network net = new();
+            var tagPrefix = nameof(Comparator) + 1;
+            if
+            (
+                BinaryNeuronParameter.TryCreate(out var input1, tagPrefix) &&
+                BinaryNeuronParameter.TryCreate(out var input2, tagPrefix) &&
+                BinaryNeuronParameter.TryCreate(out var areEqual, tagPrefix) &&
+                BinaryNeuronParameter.TryCreate(out var isLessThan, tagPrefix) &&
+                BinaryNeuronParameter.TryCreate(out var isGreaterThan, tagPrefix) &&
+                Comparator.TryCreate
+                (
+                    out Comparator? COMPARATOR___Input1__Input2,
+                    new(new(input1, input2), new(areEqual, isLessThan, isGreaterThan)),
+                    InterneuronTagInfo.CreateByCommonTagPrefix(tagPrefix, 2)
+                )
+            )
+            {
+                net.AddReplaceItems(COMPARATOR___Input1__Input2);
+            }
+
+            return net;
+        }
+
+        private static ReadOnlyNetwork CreateLessThan()
+        {
+            Network net = new();
+            var tagPrefix = nameof(LessThan) + 1;
+            if
+            (
+                BinaryNeuronParameter.TryCreate(out var input1, tagPrefix) &&
+                BinaryNeuronParameter.TryCreate(out var input2, tagPrefix) &&
+                BinaryNeuronParameter.TryCreate(out var result, tagPrefix) &&
+                LessThan.TryCreate
+                (
+                    out LessThan? LESSTHAN___Input1__Input2,
+                    new(new(input1, input2), new(result)),
+                    InterneuronTagInfo.CreateByCommonTagPrefix(tagPrefix, 2)
+                )
+            )
+            {
+                net.AddReplaceItems(LESSTHAN___Input1__Input2);
+            }
+
+            return net;
+        }
+
         private static ReadOnlyNetwork CreateSequentialAdders(int last)
         {
             Network net = new();
 
-            FunctionalCircuitParameter<Adder.Input, Adder.Output>? adderParameters = null;
+            Adder.ParameterInfo? adderParameters = null;
 
             if (
                 BinaryNeuronParameter.TryCreate(out var precedingCarryOver) &&
@@ -210,7 +272,7 @@ namespace ei8.Prototypes.HelloWorm
                 )
             )
             {
-                FunctionalCircuitParameter<Next.Input, Next.Output>? biphasicNextParameters = null;
+                Next.ParameterInfo? biphasicNextParameters = null;
                 Next.InterneuronSet? previousInterneurons = null;
                 var inputStrength = 0.25f;
 
@@ -376,42 +438,42 @@ namespace ei8.Prototypes.HelloWorm
                     new(new(input2), new(result)),
                     additionalInputs: NOT
                 ) &&
-                DualInputLogicGateBase.TryCreate(
+                TwoInputOneOutputLogicGateBase.TryCreate(
                     out AndGate? AND___Input1__Input2,
                     new(new(input1, input2), new(result)),
                     additionalInputs: AND
                 ) &&
-                DualInputLogicGateBase.TryCreate(
+                TwoInputOneOutputLogicGateBase.TryCreate(
                     out OrGate? OR___Input1__Input2,
                     new(new(input1, input2), new(result)),
                     additionalInputs: OR
                     ) &&
-                DualInputLogicGateBase.TryCreate(
+                TwoInputOneOutputLogicGateBase.TryCreate(
                     out NandGate? NAND___Input1__Input2,
                     new(new(input1, input2), new(result)),
                     additionalInputs: NAND
                 ) &&
-                DualInputLogicGateBase.TryCreate(
+                TwoInputOneOutputLogicGateBase.TryCreate(
                     out NorGate? NOR___Input1__Input2,
                     new(new(input1, input2), new(result)),
                     additionalInputs: NOR
                 ) &&
-                DualInputLogicGateBase.TryCreate(
+                TwoInputOneOutputLogicGateBase.TryCreate(
                     out XorGate? XOR___Input1__Input2,
                     new(new(input1, input2), new(result)),
                     additionalInputs: XOR
                 ) &&
-                DualInputLogicGateBase.TryCreate(
+                TwoInputOneOutputLogicGateBase.TryCreate(
                     out XnorGate? XNOR___Input1__Input2,
                     new(new(input1, input2), new(result)),
                     additionalInputs: XNOR
                 ) &&
-                DualInputLogicGateBase.TryCreate(
+                TwoInputOneOutputLogicGateBase.TryCreate(
                     out ImplyGate? IMPLY___Input1__Input2,
                     new(new(input1, input2), new(result)),
                     additionalInputs: IMPLY
                 ) &&
-                DualInputLogicGateBase.TryCreate(
+                TwoInputOneOutputLogicGateBase.TryCreate(
                     out NimplyGate? NIMPLY___Input1__Input2,
                     new(new(input1, input2), new(result)),
                     additionalInputs: NIMPLY
