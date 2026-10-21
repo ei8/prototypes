@@ -45,6 +45,8 @@
             dynamicToolStripMenuItem = new ToolStripMenuItem();
             toolStripMenuItem2 = new ToolStripMenuItem();
             dynamicMultiplicationToolStripMenuItem = new ToolStripMenuItem();
+            toolStripMenuItem3 = new ToolStripMenuItem();
+            lessThanToolStripMenuItem = new ToolStripMenuItem();
             toolStripMenuItem1 = new ToolStripSeparator();
             setTimerIntervalToolStripMenuItem = new ToolStripMenuItem();
             tsbStopProcess = new ToolStripButton();
@@ -60,8 +62,6 @@
             mnuHideLogicGatesInterneuronsTags = new ToolStripMenuItem();
             tsbCopyIds = new ToolStripButton();
             timer1 = new System.Windows.Forms.Timer(components);
-            toolStripMenuItem3 = new ToolStripMenuItem();
-            lessThanToolStripMenuItem = new ToolStripMenuItem();
             toolStrip1.SuspendLayout();
             SuspendLayout();
             // 
@@ -181,9 +181,23 @@
             // dynamicMultiplicationToolStripMenuItem
             // 
             dynamicMultiplicationToolStripMenuItem.Name = "dynamicMultiplicationToolStripMenuItem";
-            dynamicMultiplicationToolStripMenuItem.Size = new Size(180, 22);
+            dynamicMultiplicationToolStripMenuItem.Size = new Size(121, 22);
             dynamicMultiplicationToolStripMenuItem.Text = "Dynamic";
             dynamicMultiplicationToolStripMenuItem.Click += dynamicMultiplicationToolStripMenuItem_Click;
+            // 
+            // toolStripMenuItem3
+            // 
+            toolStripMenuItem3.DropDownItems.AddRange(new ToolStripItem[] { lessThanToolStripMenuItem });
+            toolStripMenuItem3.Name = "toolStripMenuItem3";
+            toolStripMenuItem3.Size = new Size(180, 22);
+            toolStripMenuItem3.Text = "Comparison";
+            // 
+            // lessThanToolStripMenuItem
+            // 
+            lessThanToolStripMenuItem.Name = "lessThanToolStripMenuItem";
+            lessThanToolStripMenuItem.Size = new Size(122, 22);
+            lessThanToolStripMenuItem.Text = "LessThan";
+            lessThanToolStripMenuItem.Click += lessThanToolStripMenuItem_Click;
             // 
             // toolStripMenuItem1
             // 
@@ -304,22 +318,7 @@
             // 
             // timer1
             // 
-            timer1.Interval = 1000;
             timer1.Tick += timer1_Tick;
-            // 
-            // toolStripMenuItem3
-            // 
-            toolStripMenuItem3.DropDownItems.AddRange(new ToolStripItem[] { lessThanToolStripMenuItem });
-            toolStripMenuItem3.Name = "toolStripMenuItem3";
-            toolStripMenuItem3.Size = new Size(180, 22);
-            toolStripMenuItem3.Text = "Comparison";
-            // 
-            // lessThanToolStripMenuItem
-            // 
-            lessThanToolStripMenuItem.Name = "lessThanToolStripMenuItem";
-            lessThanToolStripMenuItem.Size = new Size(180, 22);
-            lessThanToolStripMenuItem.Text = "LessThan";
-            lessThanToolStripMenuItem.Click += lessThanToolStripMenuItem_Click;
             // 
             // frmTree
             // 
@@ -358,7 +357,6 @@
         private ToolStripMenuItem mnuStartProcessDoUntil;
         private ToolStripButton tsbStopProcess;
         private ToolStripSeparator toolStripSeparator4;
-        private System.Windows.Forms.Timer timer1;
         private ToolStripDropDownButton tsbHideSelectedTags;
         private ToolStripMenuItem hideSelectedTagsToolStripMenuItem;
         private ToolStripMenuItem mnuHideLogicGatesInterneuronsTags;
@@ -371,5 +369,6 @@
         private ToolStripMenuItem dynamicMultiplicationToolStripMenuItem;
         private ToolStripMenuItem toolStripMenuItem3;
         private ToolStripMenuItem lessThanToolStripMenuItem;
+        private System.Windows.Forms.Timer timer1;
     }
 }

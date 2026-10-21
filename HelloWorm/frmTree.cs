@@ -1,11 +1,10 @@
 ﻿using ei8.Cortex.Coding;
 using ei8.Cortex.Coding.d23;
-using ei8.Cortex.Coding.d23.Math.Arithmetic;
-using ei8.Cortex.Coding.d23.Math.Comparison;
 using ei8.Cortex.Coding.d23.Math.Logic;
 using ei8.Cortex.Coding.d23.Process;
 using ei8.Cortex.Coding.d23.Process.Iteration;
 using ei8.Cortex.Coding.d23.Process.Operation;
+using neurUL.Common.Domain.Model;
 using NLog;
 using System.ComponentModel.Design;
 using WeifenLuo.WinFormsUI.Docking;
@@ -21,6 +20,7 @@ namespace ei8.Prototypes.HelloWorm
         private readonly ISpikableReporting? spikable;
         private readonly ISelectionService selectionService;
         private IProcess? process;
+        private bool isProcesing = false;
 
         public frmTree(ISelectionService selectionService)
         {
@@ -56,7 +56,7 @@ namespace ei8.Prototypes.HelloWorm
                     )
                 );
 
-                this.process.HandleFire(e.FireInfo.Target, this.spikable.Network);
+                this.process.HandleFire(e.FireInfo.Target);
             }
         }
 
@@ -284,23 +284,36 @@ namespace ei8.Prototypes.HelloWorm
 
                 ArgumentOutOfRangeException.ThrowIfNotEqual(checkedNeurons.Count(), 3);
 
-                this.timer1.Stop();
-
-                this.process = new DoUntil
-                (
-                    new
+                this.StartProcess(
+                    new DoUntil
                     (
-                        new(checkedNeurons[0]),
-                        new(this.spikable.Network.GetItems<Neuron>().Where(n => n.Tag.ToUpper().StartsWith("STEP")).Select(n => new NeuronChunk(n))),
-                        new(checkedNeurons[1]),
-                        new(checkedNeurons[2])
-                    ),
-                    null,
-                    (du) => this.timer1.Stop()
+                        new
+                        (
+                            new NeuronChunk(checkedNeurons[0]),
+                            new EnumerableChunk<INeuronChunk>(this.spikable.Network.GetItems<Neuron>().Where(n => n.Tag.ToUpper().StartsWith("STEP")).Select(n => new NeuronChunk(n))),
+                            new NeuronChunk(checkedNeurons[1]),
+                            new NeuronChunk(checkedNeurons[2])
+                        ),
+                        null,
+                        (du) => this.StopProcessing()
+                    )
                 );
-
-                this.timer1.Start();
             }
+        }
+
+        private void StartProcess(IProcess process)
+        {
+            AssertionConcern.AssertArgumentFalse(this.isProcesing, "Cannot start process as another one is already in progress.");
+
+            this.process = process;
+            this.isProcesing = true;
+            this.timer1.Start();
+        }
+
+        private void StopProcessing()
+        {
+            this.isProcesing = false;
+            this.timer1.Stop();
         }
 
         // Source - https://stackoverflow.com/a/1450889
@@ -318,8 +331,6 @@ namespace ei8.Prototypes.HelloWorm
             {
                 var checkedNeurons = this.GetCheckedNeurons().ToArray();
                 ArgumentOutOfRangeException.ThrowIfNotEqual(checkedNeurons.Count(), 2);
-
-                this.timer1.Stop();
 
                 this.spikable.Network.TryGetByTag("Adder1.Addend1 = 1", out var addend1_1);
                 this.spikable.Network.TryGetByTag("Adder1.Addend1 = 0", out var addend1_0);
@@ -347,105 +358,102 @@ namespace ei8.Prototypes.HelloWorm
                     foreach (var chunk16Bit in frmTree.ChunksUpto(addend, 16))
                         int.Parse(chunk16Bit, System.Globalization.NumberStyles.BinaryNumber);
 
-                this.process = new SequentialAddition
-                (
-                    new Addition.WorkingMemoryInfo
+                this.StartProcess(
+                    new SequentialAddition
                     (
-                        new EnumerableChunk<INeuronChunk>
-                        (
-                            [
-                                new NeuronChunk(precedingCarryOver_1.Single()),
-                                new NeuronChunk(precedingCarryOver_0.Single())
-                            ]
-                        ),
-                        new OperandChunk
+                        new Addition.WorkingMemoryInfo
                         (
                             new EnumerableChunk<INeuronChunk>
                             (
                                 [
-                                    new NeuronChunk(addend1_1.Single()),
-                                    new NeuronChunk(addend1_0.Single())
+                                    new NeuronChunk(precedingCarryOver_1.Single()),
+                                    new NeuronChunk(precedingCarryOver_0.Single())
                                 ]
                             ),
-                            new EnumerableChunk<INeuronChunk>
+                            new OperandChunk
                             (
-                                [
-                                    .. addends[0].Select(a => a == '0' ? addend1_0.Single() : addend1_1.Single()).Reverse().Select(n => new NeuronChunk(n))
-                                ]
+                                new EnumerableChunk<INeuronChunk>
+                                (
+                                    [
+                                        new NeuronChunk(addend1_1.Single()),
+                                        new NeuronChunk(addend1_0.Single())
+                                    ]
+                                ),
+                                new EnumerableChunk<INeuronChunk>
+                                (
+                                    [
+                                        .. addends[0].Select(a => a == '0' ? addend1_0.Single() : addend1_1.Single()).Reverse().Select(n => new NeuronChunk(n))
+                                    ]
+                                )
+                            ),
+                            new OperandChunk
+                            (
+                                new EnumerableChunk<INeuronChunk>
+                                (
+                                    [
+                                        new NeuronChunk(addend2_1.Single()),
+                                        new NeuronChunk(addend2_0.Single())
+                                    ]
+                                ),
+                                new EnumerableChunk<INeuronChunk>
+                                (
+                                    [
+                                        .. addends[1].Select(a => a == '0' ? addend2_0.Single() : addend2_1.Single()).Reverse().Select(n => new NeuronChunk(n))
+                                    ]
+                                )
+                            ),
+                            new ResultChunk
+                            (
+                                new EnumerableChunk<INeuronChunk>
+                                (
+                                    [
+                                        new NeuronChunk(sum_1.Single()),
+                                        new NeuronChunk(sum_0.Single())
+                                    ]
+                                ),
+                                nameof(Addition.WorkingMemoryInfo.Sum)
+                            ),
+                            new ResultChunk
+                            (
+                                new EnumerableChunk<INeuronChunk>
+                                (
+                                    [
+                                        new NeuronChunk(carryOver_1.Single()),
+                                        new NeuronChunk(carryOver_0.Single())
+                                    ]
+                                ),
+                                nameof(Addition.WorkingMemoryInfo.CarryOver)
                             )
                         ),
-                        new OperandChunk
+                        new
                         (
-                            new EnumerableChunk<INeuronChunk>
-                            (
-                                [
-                                    new NeuronChunk(addend2_1.Single()),
-                                    new NeuronChunk(addend2_0.Single())
-                                ]
-                            ),
-                            new EnumerableChunk<INeuronChunk>
-                            (
-                                [
-                                    .. addends[1].Select(a => a == '0' ? addend2_0.Single() : addend2_1.Single()).Reverse().Select(n => new NeuronChunk(n))
-                                ]
-                            )
+                            new NeuronChunk(checkedNeurons[0]),
+                            new EnumerableChunk<INeuronChunk>(this.spikable.Network.GetItems<Neuron>().Where(n => n.Tag.ToUpper().StartsWith("DIGIT")).Select(n => new NeuronChunk(n))),
+                            new NeuronChunk(checkedNeurons[1])
                         ),
-                        new ResultChunk
-                        (
-                            new EnumerableChunk<INeuronChunk>
-                            (
-                                [
-                                    new NeuronChunk(sum_1.Single()),
-                                    new NeuronChunk(sum_0.Single())
-                                ]
-                            ),
-                            nameof(Addition.WorkingMemoryInfo.Sum)
-                        ),
-                        new ResultChunk
-                        (
-                            new EnumerableChunk<INeuronChunk>
-                            (
-                                [
-                                    new NeuronChunk(carryOver_1.Single()),
-                                    new NeuronChunk(carryOver_0.Single())
-                                ]
-                            ),
-                            nameof(Addition.WorkingMemoryInfo.CarryOver)
-                        )
-                    ),
-                    new
-                    (
-                        new(checkedNeurons[0]),
-                        new(this.spikable.Network.GetItems<Neuron>().Where(n => n.Tag.ToUpper().StartsWith("DIGIT")).Select(n => new NeuronChunk(n))),
-                        new(checkedNeurons[1])
-                    ),
-                    (n) => int.Parse(n.Tag.ToUpper().Replace("DIGIT", string.Empty)) - 1,
-                    (a, d, s) =>
-                    {
-                        this.timer1.Stop();
+                        (n) => int.Parse(n.Tag.ToUpper().Replace("DIGIT", string.Empty)) - 1,
+                        (a, d, s) =>
+                        {
+                            this.StopProcessing();
 
-                        frmTree.logger.Info
-                        (
-                            new LogMessageGenerator(() => $"Sum: {string.Join(string.Empty, s.Reverse().Select(s => s.Tag.Last()))}")
-                        );
-                    }
+                            frmTree.logger.Info
+                            (
+                                new LogMessageGenerator(() => $"Sum: {string.Join(string.Empty, s.Reverse().Select(s => s.Tag.Last()))}")
+                            );
+                        }
+                    )
                 );
-
-                this.timer1.Start();
             }
         }
 
         private void tsbStopProcess_Click(object sender, EventArgs e)
         {
-            if (this.process != null)
-            {
-                this.timer1.Stop();
-            }
+            this.StopProcessing();
         }
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            if (this.spikable != null && this.process != null)
+            if (this.spikable != null && this.process != null && this.isProcesing)
                 this.spikable.Spike(
                     [.. this.process.GetCurrent()]
                 );
@@ -500,8 +508,6 @@ namespace ei8.Prototypes.HelloWorm
         {
             if (this.spikable != null)
             {
-                this.timer1.Stop();
-
                 this.spikable.Network.TryGetByTag("Adder1.Addend1 = 1", out var addend1_1);
                 this.spikable.Network.TryGetByTag("Adder1.Addend1 = 0", out var addend1_0);
                 this.spikable.Network.TryGetByTag("Adder1.Addend2 = 1", out var addend2_1);
@@ -528,84 +534,84 @@ namespace ei8.Prototypes.HelloWorm
                     foreach (var chunk16Bit in frmTree.ChunksUpto(addend, 16))
                         int.Parse(chunk16Bit, System.Globalization.NumberStyles.BinaryNumber);
 
-                this.process = new DynamicAddition
-                (
-                    new Addition.WorkingMemoryInfo
+                this.StartProcess(
+                    new DynamicAddition
                     (
-                        new EnumerableChunk<INeuronChunk>
-                        (
-                            [
-                                new NeuronChunk(precedingCarryOver_1.Single()),
-                                new NeuronChunk(precedingCarryOver_0.Single())
-                            ]
-                        ),
-                        new OperandChunk
+                        new Addition.WorkingMemoryInfo
                         (
                             new EnumerableChunk<INeuronChunk>
                             (
                                 [
-                                    new NeuronChunk(addend1_1.Single()),
-                                    new NeuronChunk(addend1_0.Single())
+                                    new NeuronChunk(precedingCarryOver_1.Single()),
+                                    new NeuronChunk(precedingCarryOver_0.Single())
                                 ]
                             ),
-                            new EnumerableChunk<INeuronChunk>
+                            new OperandChunk
                             (
-                                [
-                                    .. addends[0].Select(a => a == '0' ? addend1_0.Single() : addend1_1.Single()).Reverse().Select(n => new NeuronChunk(n))
-                                ]
+                                new EnumerableChunk<INeuronChunk>
+                                (
+                                    [
+                                        new NeuronChunk(addend1_1.Single()),
+                                        new NeuronChunk(addend1_0.Single())
+                                    ]
+                                ),
+                                new EnumerableChunk<INeuronChunk>
+                                (
+                                    [
+                                        .. addends[0].Select(a => a == '0' ? addend1_0.Single() : addend1_1.Single()).Reverse().Select(n => new NeuronChunk(n))
+                                    ]
+                                )
+                            ),
+                            new OperandChunk
+                            (
+                                new EnumerableChunk<INeuronChunk>
+                                (
+                                    [
+                                        new NeuronChunk(addend2_1.Single()),
+                                        new NeuronChunk(addend2_0.Single())
+                                    ]
+                                ),
+                                new EnumerableChunk<INeuronChunk>
+                                (
+                                    [
+                                        .. addends[1].Select(a => a == '0' ? addend2_0.Single() : addend2_1.Single()).Reverse().Select(n => new NeuronChunk(n))
+                                    ]
+                                )
+                            ),
+                            new ResultChunk
+                            (
+                                new EnumerableChunk<INeuronChunk>
+                                (
+                                    [
+                                        new NeuronChunk(sum_1.Single()),
+                                        new NeuronChunk(sum_0.Single())
+                                    ]
+                                ),
+                                nameof(Addition.WorkingMemoryInfo.Sum)
+                            ),
+                            new ResultChunk
+                            (
+                                new EnumerableChunk<INeuronChunk>
+                                (
+                                    [
+                                        new NeuronChunk(carryOver_1.Single()),
+                                        new NeuronChunk(carryOver_0.Single())
+                                    ]
+                                ),
+                                nameof(Addition.WorkingMemoryInfo.CarryOver)
                             )
                         ),
-                        new OperandChunk
-                        (
-                            new EnumerableChunk<INeuronChunk>
-                            (
-                                [
-                                    new NeuronChunk(addend2_1.Single()),
-                                    new NeuronChunk(addend2_0.Single())
-                                ]
-                            ),
-                            new EnumerableChunk<INeuronChunk>
-                            (
-                                [
-                                    .. addends[1].Select(a => a == '0' ? addend2_0.Single() : addend2_1.Single()).Reverse().Select(n => new NeuronChunk(n))
-                                ]
-                            )
-                        ),
-                        new ResultChunk
-                        (
-                            new EnumerableChunk<INeuronChunk>
-                            (
-                                [
-                                    new NeuronChunk(sum_1.Single()),
-                                    new NeuronChunk(sum_0.Single())
-                                ]
-                            ),
-                            nameof(Addition.WorkingMemoryInfo.Sum)
-                        ),
-                        new ResultChunk
-                        (
-                            new EnumerableChunk<INeuronChunk>
-                            (
-                                [
-                                    new NeuronChunk(carryOver_1.Single()),
-                                    new NeuronChunk(carryOver_0.Single())
-                                ]
-                            ),
-                            nameof(Addition.WorkingMemoryInfo.CarryOver)
-                        )
-                    ),
-                    (a, s) =>
-                    {
-                        this.timer1.Stop();
+                        (a, s) =>
+                        {
+                            this.StopProcessing();
 
-                        frmTree.logger.Info
-                        (
-                            new LogMessageGenerator(() => $"Sum: {string.Join(string.Empty, s.Reverse().Select(s => s.Tag.Last()))}")
-                        );
-                    }
+                            frmTree.logger.Info
+                            (
+                                new LogMessageGenerator(() => $"Sum: {string.Join(string.Empty, s.Reverse().Select(s => s.Tag.Last()))}")
+                            );
+                        }
+                    )
                 );
-
-                this.timer1.Start();
             }
         }
 
@@ -613,8 +619,6 @@ namespace ei8.Prototypes.HelloWorm
         {
             if (this.spikable != null)
             {
-                this.timer1.Stop();
-
                 this.spikable.Network.TryGetByTag("Adder1.Addend1 = 1", out var addend1_1);
                 this.spikable.Network.TryGetByTag("Adder1.Addend1 = 0", out var addend1_0);
                 this.spikable.Network.TryGetByTag("Adder1.Addend2 = 1", out var addend2_1);
@@ -648,99 +652,113 @@ namespace ei8.Prototypes.HelloWorm
                     foreach (var chunk16Bit in frmTree.ChunksUpto(factor, 16))
                         int.Parse(chunk16Bit, System.Globalization.NumberStyles.BinaryNumber);
 
-                this.process = new DynamicMultiplication
-                (
-                    new
+                this.StartProcess(
+                    new DynamicMultiplication
                     (
-                        new
+                        new DynamicMultiplication.WorkingMemoryInfo
                         (
-                            [
-                                new(multiplicand_1.Single()),
-                                new(multiplicand_0.Single())
-                            ]
-                        ),
-                        new
-                        (
-                            [
-                                new(multiplier_1.Single()),
-                                new(multiplier_0.Single())
-                            ]
-                        ),
-                        new([.. factors[0].Select(f => f == '0' ? multiplicand_0.Single() : multiplicand_1.Single()).Reverse().Select(n => new NeuronChunk(n))]),
-                        new([.. factors[1].Select(f => f == '0' ? multiplier_0.Single() : multiplier_1.Single()).Reverse().Select(n => new NeuronChunk(n))]),
-                        new
-                        (
-                            [
-                                new(product_1.Single()),
-                                new(product_0.Single())
-                            ]
-                        )
-                    ),
-                    new Addition.WorkingMemoryInfo
-                    (
-                        new EnumerableChunk<INeuronChunk>
-                        (
-                            [
-                                new NeuronChunk(precedingCarryOver_1.Single()),
-                                new NeuronChunk(precedingCarryOver_0.Single())
-                            ]
-                        ),
-                        new OperandChunk
-                        (
-                            new EnumerableChunk<INeuronChunk>
+                            new OperandChunk
                             (
-                                [
-                                    new NeuronChunk(addend1_1.Single()),
-                                    new NeuronChunk(addend1_0.Single())
-                                ]
+                                new EnumerableChunk<INeuronChunk>(
+                                    [
+                                        new NeuronChunk(multiplicand_1.Single()),
+                                        new NeuronChunk(multiplicand_0.Single())
+                                    ]
+                                ),
+                                new EnumerableChunk<INeuronChunk>(
+                                    factors[0].Select(f => f == '0' ? multiplicand_0.Single() : multiplicand_1.Single()).Reverse().Select(n => new NeuronChunk(n)).ToArray()
+                                )
+                            ),
+                            new OperandChunk
+                            (
+                                new EnumerableChunk<INeuronChunk>(
+                                    [
+                                        new NeuronChunk(multiplier_1.Single()),
+                                        new NeuronChunk(multiplier_0.Single())
+                                    ]
+                                ),
+                                new EnumerableChunk<INeuronChunk>(
+                                    factors[1].Select(f => f == '0' ? multiplier_0.Single() : multiplier_1.Single()).Reverse().Select(n => new NeuronChunk(n)).ToArray()
+                                )
+                            ),
+                            new NestedNeuronListChunk(),
+                            null,
+                            null,
+                            new ResultChunk
+                            (
+                                new EnumerableChunk<INeuronChunk>(
+                                    [
+                                        new NeuronChunk(product_1.Single()),
+                                        new NeuronChunk(product_0.Single())
+                                    ]
+                                ),
+                                nameof(DynamicMultiplication.WorkingMemoryInfo.Product)
                             )
                         ),
-                        new OperandChunk
+                        new Addition.WorkingMemoryInfo
                         (
                             new EnumerableChunk<INeuronChunk>
                             (
                                 [
-                                    new NeuronChunk(addend2_1.Single()),
-                                    new NeuronChunk(addend2_0.Single())
+                                    new NeuronChunk(precedingCarryOver_1.Single()),
+                                    new NeuronChunk(precedingCarryOver_0.Single())
                                 ]
+                            ),
+                            new OperandChunk
+                            (
+                                new EnumerableChunk<INeuronChunk>
+                                (
+                                    [
+                                        new NeuronChunk(addend1_1.Single()),
+                                        new NeuronChunk(addend1_0.Single())
+                                    ]
+                                )
+                            ),
+                            new OperandChunk
+                            (
+                                new EnumerableChunk<INeuronChunk>
+                                (
+                                    [
+                                        new NeuronChunk(addend2_1.Single()),
+                                        new NeuronChunk(addend2_0.Single())
+                                    ]
+                                )
+                            ),
+                            new ResultChunk
+                            (
+                                new EnumerableChunk<INeuronChunk>
+                                (
+                                    [
+                                        new NeuronChunk(sum_1.Single()),
+                                        new NeuronChunk(sum_0.Single())
+                                    ]
+                                ),
+                                nameof(Addition.WorkingMemoryInfo.Sum)
+                            ),
+                            new ResultChunk
+                            (
+                                new EnumerableChunk<INeuronChunk>
+                                (
+                                    [
+                                        new NeuronChunk(carryOver_1.Single()),
+                                        new NeuronChunk(carryOver_0.Single())
+                                    ]
+                                ),
+                                nameof(Addition.WorkingMemoryInfo.CarryOver)
                             )
                         ),
-                        new ResultChunk
-                        (
-                            new EnumerableChunk<INeuronChunk>
-                            (
-                                [
-                                    new NeuronChunk(sum_1.Single()),
-                                    new NeuronChunk(sum_0.Single())
-                                ]
-                            ),
-                            nameof(Addition.WorkingMemoryInfo.Sum)
-                        ),
-                        new ResultChunk
-                        (
-                            new EnumerableChunk<INeuronChunk>
-                            (
-                                [
-                                    new NeuronChunk(carryOver_1.Single()),
-                                    new NeuronChunk(carryOver_0.Single())
-                                ]
-                            ),
-                            nameof(Addition.WorkingMemoryInfo.CarryOver)
-                        )
-                    ),
-                    (dm, p) =>
-                    {
-                        this.timer1.Stop();
+                        (dm, p) =>
+                        {
+                            this.StopProcessing();
 
-                        frmTree.logger.Info
-                        (
-                            // TODO: Result Reversal should be performed internally
-                            new LogMessageGenerator(() => $"Product: {string.Join(string.Empty, p.Reverse().Select(s => s.Tag.Last()))}")
-                        );
-                    }
+                            frmTree.logger.Info
+                            (
+                                // TODO: Result Reversal should be performed internally
+                                new LogMessageGenerator(() => $"Product: {string.Join(string.Empty, p.Reverse().Select(s => s.Tag.Last()))}")
+                            );
+                        }
+                    )
                 );
-
-                this.timer1.Start();
             }
         }
 
@@ -748,8 +766,6 @@ namespace ei8.Prototypes.HelloWorm
         {
             if (this.spikable != null)
             {
-                this.timer1.Stop();
-
                 this.spikable.Network.TryGetByTag("Comparator1.Input1 = 1", out var input1_1);
                 this.spikable.Network.TryGetByTag("Comparator1.Input1 = 0", out var input1_0);
                 this.spikable.Network.TryGetByTag("Comparator1.Input2 = 1", out var input2_1);
@@ -779,80 +795,80 @@ namespace ei8.Prototypes.HelloWorm
                 var comparand1 = new EnumerableChunk<INeuronChunk>([.. comparands[0].Select(c => c == '0' ? input1_0.Single() : input1_1.Single()).Reverse().Select(n => new NeuronChunk(n))]);
                 var comparand2 = new EnumerableChunk<INeuronChunk>([.. comparands[1].Select(c => c == '0' ? input2_0.Single() : input2_1.Single()).Reverse().Select(n => new NeuronChunk(n))]);
 
-                this.process = new DynamicLessThan
-                (
-                    new Comparator.WorkingMemoryInfo
+                this.StartProcess(
+                    new DynamicLessThan
                     (
-                        new OperandChunk
+                        new Comparator.WorkingMemoryInfo
                         (
-                            new EnumerableChunk<INeuronChunk>
+                            new OperandChunk
                             (
-                                [
-                                    new NeuronChunk(input1_1.Single()),
-                                    new NeuronChunk(input1_0.Single())
-                                ]
+                                new EnumerableChunk<INeuronChunk>
+                                (
+                                    [
+                                        new NeuronChunk(input1_1.Single()),
+                                        new NeuronChunk(input1_0.Single())
+                                    ]
+                                ),
+                                comparand1,
+                                comparand1.Items.Last()
                             ),
-                            comparand1,
-                            comparand1.Items.Last()
+                            new OperandChunk
+                            (
+                                new EnumerableChunk<INeuronChunk>
+                                (
+                                    [
+                                        new NeuronChunk(input2_1.Single()),
+                                        new NeuronChunk(input2_0.Single())
+                                    ]
+                                ),
+                                comparand2,
+                                comparand2.Items.Last()
+                            ),
+                            new ResultChunk
+                            (
+                                new EnumerableChunk<INeuronChunk>
+                                (
+                                    [
+                                        new NeuronChunk(areEqual_1.Single()),
+                                        new NeuronChunk(areEqual_0.Single())
+                                    ]
+                                ),
+                                nameof(Comparator.WorkingMemoryInfo.AreEqual)
+                            ),
+                            new ResultChunk
+                            (
+                                new EnumerableChunk<INeuronChunk>
+                                (
+                                    [
+                                        new NeuronChunk(isLessThan_1.Single()),
+                                        new NeuronChunk(isLessThan_0.Single())
+                                    ]
+                                ),
+                                nameof(Comparator.WorkingMemoryInfo.IsLessThan)
+                            ),
+                            new ResultChunk
+                            (
+                                new EnumerableChunk<INeuronChunk>
+                                (
+                                    [
+                                        new NeuronChunk(isGreaterThan_1.Single()),
+                                        new NeuronChunk(isGreaterThan_0.Single())
+                                    ]
+                                ),
+                                nameof(Comparator.WorkingMemoryInfo.IsGreaterThan)
+                            )
                         ),
-                        new OperandChunk
-                        (
-                            new EnumerableChunk<INeuronChunk>
-                            (
-                                [
-                                    new NeuronChunk(input2_1.Single()),
-                                    new NeuronChunk(input2_0.Single())
-                                ]
-                            ),
-                            comparand2,
-                            comparand2.Items.Last()
-                        ),
-                        new ResultChunk
-                        (
-                            new EnumerableChunk<INeuronChunk>
-                            (
-                                [
-                                    new NeuronChunk(areEqual_1.Single()),
-                                    new NeuronChunk(areEqual_0.Single())
-                                ]
-                            ),
-                            nameof(Comparator.WorkingMemoryInfo.AreEqual)
-                        ),
-                        new ResultChunk
-                        (
-                            new EnumerableChunk<INeuronChunk>
-                            (
-                                [
-                                    new NeuronChunk(isLessThan_1.Single()),
-                                    new NeuronChunk(isLessThan_0.Single())
-                                ]
-                            ),
-                            nameof(Comparator.WorkingMemoryInfo.IsLessThan)
-                        ),
-                        new ResultChunk
-                        (
-                            new EnumerableChunk<INeuronChunk>
-                            (
-                                [
-                                    new NeuronChunk(isGreaterThan_1.Single()),
-                                    new NeuronChunk(isGreaterThan_0.Single())
-                                ]
-                            ),
-                            nameof(Comparator.WorkingMemoryInfo.IsGreaterThan)
-                        )
-                    ),
-                    (dm, p) =>
-                    {
-                        this.timer1.Stop();
+                        (dm, p) =>
+                        {
+                            this.StopProcessing();
 
-                        frmTree.logger.Info
-                        (
-                            new LogMessageGenerator(() => $"Result: {string.Join(string.Empty, p.Select(s => s.Tag.Last()))}")
-                        );
-                    }
+                            frmTree.logger.Info
+                            (
+                                new LogMessageGenerator(() => $"Result: {string.Join(string.Empty, p.Select(s => s.Tag.Last()))}")
+                            );
+                        }
+                    )
                 );
-
-                this.timer1.Start();
             }
         }
     }
