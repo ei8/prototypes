@@ -216,7 +216,7 @@ namespace ei8.Prototypes.HelloWorm
                 (
                     out Comparator? COMPARATOR___Input1__Input2,
                     new(new(input1, input2), new(areEqual, isLessThan, isGreaterThan)),
-                    InterneuronTagInfo.CreateByCommonTagPrefix(tagPrefix, 2)
+                    new(InterneuronTagInfo.CreateByCommonTagPrefix(tagPrefix, 2))
                 )
             )
             {
@@ -239,7 +239,7 @@ namespace ei8.Prototypes.HelloWorm
                 (
                     out LessThan? LESSTHAN___Input1__Input2,
                     new(new(input1, input2), new(result)),
-                    InterneuronTagInfo.CreateByCommonTagPrefix(tagPrefix, 2)
+                    new(InterneuronTagInfo.CreateByCommonTagPrefix(tagPrefix, 2))
                 )
             )
             {
@@ -266,9 +266,12 @@ namespace ei8.Prototypes.HelloWorm
                 Adder.TryCreate
                 (
                     out Adder? adder,
-                    0,
-                    precedingCarryOver,
-                    null
+                    Adder.CreateDefaultParameters
+                    (
+                        precedingCarryOver, 
+                        0
+                    ),
+                    new(string.Empty)
                 )
             )
             {
@@ -428,55 +431,56 @@ namespace ei8.Prototypes.HelloWorm
                 NetworkHelper.TryCreateNeuron(out var XNOR) &&
                 NetworkHelper.TryCreateNeuron(out var IMPLY) &&
                 NetworkHelper.TryCreateNeuron(out var NIMPLY) &&
-                NotGate.TryCreate(
-                    out NotGate? NOT___Input1,
+                NotGate.TryCreate
+                (
+                    out var NOT___Input1,
                     new(new(input1), new(result)),
-                    additionalInputs: NOT
+                    additionalInputNeurons: new(NOT)
                 ) &&
                 NotGate.TryCreate(
-                    out NotGate? NOT___Input2,
+                    out var NOT___Input2,
                     new(new(input2), new(result)),
-                    additionalInputs: NOT
+                    additionalInputNeurons: new(NOT)
                 ) &&
-                TwoInputOneOutputLogicGateBase.TryCreate(
-                    out AndGate? AND___Input1__Input2,
+                AndGate.TryCreate(
+                    out var AND___Input1__Input2,
                     new(new(input1, input2), new(result)),
-                    additionalInputs: AND
+                    additionalInputNeurons: new(AND)
                 ) &&
-                TwoInputOneOutputLogicGateBase.TryCreate(
-                    out OrGate? OR___Input1__Input2,
+                OrGate.TryCreate(
+                    out var OR___Input1__Input2,
                     new(new(input1, input2), new(result)),
-                    additionalInputs: OR
+                    additionalInputNeurons: new(OR)
                     ) &&
-                TwoInputOneOutputLogicGateBase.TryCreate(
-                    out NandGate? NAND___Input1__Input2,
+                NandGate.TryCreate(
+                    out var NAND___Input1__Input2,
                     new(new(input1, input2), new(result)),
-                    additionalInputs: NAND
+                    additionalInputNeurons: new(NAND)
                 ) &&
-                TwoInputOneOutputLogicGateBase.TryCreate(
-                    out NorGate? NOR___Input1__Input2,
+                NorGate.TryCreate(
+                    out var NOR___Input1__Input2,
                     new(new(input1, input2), new(result)),
-                    additionalInputs: NOR
+                    additionalInputNeurons: new(NOR)
                 ) &&
-                TwoInputOneOutputLogicGateBase.TryCreate(
-                    out XorGate? XOR___Input1__Input2,
+                XorGate.TryCreate(
+                    out var XOR___Input1__Input2,
                     new(new(input1, input2), new(result)),
-                    additionalInputs: XOR
+                    additionalInputNeurons: new(XOR)
                 ) &&
-                TwoInputOneOutputLogicGateBase.TryCreate(
-                    out XnorGate? XNOR___Input1__Input2,
+                XnorGate.TryCreate(
+                    out var XNOR___Input1__Input2,
                     new(new(input1, input2), new(result)),
-                    additionalInputs: XNOR
+                    additionalInputNeurons: new(XNOR)
                 ) &&
-                TwoInputOneOutputLogicGateBase.TryCreate(
-                    out ImplyGate? IMPLY___Input1__Input2,
+                ImplyGate.TryCreate(
+                    out var IMPLY___Input1__Input2,
                     new(new(input1, input2), new(result)),
-                    additionalInputs: IMPLY
+                    additionalInputNeurons: new(IMPLY)
                 ) &&
-                TwoInputOneOutputLogicGateBase.TryCreate(
-                    out NimplyGate? NIMPLY___Input1__Input2,
+                NimplyGate.TryCreate(
+                    out var NIMPLY___Input1__Input2,
                     new(new(input1, input2), new(result)),
-                    additionalInputs: NIMPLY
+                    additionalInputNeurons: new(NIMPLY)
                 )
             )
             {
@@ -522,7 +526,25 @@ namespace ei8.Prototypes.HelloWorm
             VariableInfo? precedingVariableInfo = null;
             for (int i = 0; i < count; i++)
             {
-                if (Adder.TryCreate(out Adder? a, i, precedingCarryOver, precedingVariableInfo, nameof(Adder) + (i +1)))
+                if 
+                (
+                    Adder.TryCreate
+                    (
+                        out Adder? a,
+                        Adder.CreateDefaultParameters
+                        (
+                            precedingCarryOver,
+                            i
+                        ),
+                        new Adder.KeyedInterneuronTagger
+                        (
+                            precedingVariableInfo != null ?
+                                precedingVariableInfo.Inputs.First() :
+                                string.Empty
+                        ), 
+                        parameterExpression: nameof(Adder) + (i + 1)
+                    )
+                )
                 {
                     net.AddReplaceItems(a);
                     precedingCarryOver = a.Parameters.Outputs.CarryOver;
@@ -542,10 +564,13 @@ namespace ei8.Prototypes.HelloWorm
                 Adder.TryCreate
                 (
                     out Adder? a, 
-                    0, 
-                    precedingCarryOver, 
-                    null, 
-                    nameof(Adder) + 1
+                    Adder.CreateDefaultParameters
+                    (
+                        precedingCarryOver,
+                        0
+                    ),
+                    new(),
+                    parameterExpression: nameof(Adder) + 1
                 )
             )
             {
@@ -562,7 +587,25 @@ namespace ei8.Prototypes.HelloWorm
             VariableInfo? precedingVariableInfo = null;
             for (int i = 0; i < count; i++)
             {
-                if (Subtractor.TryCreate(out Subtractor? s, i, precedingBorrow, precedingVariableInfo, nameof(Subtractor) + (i + 1)))
+                if 
+                (
+                    Subtractor.TryCreate
+                    (
+                        out Subtractor? s, 
+                        Subtractor.CreateDefaultParameters
+                        (
+                            precedingBorrow, 
+                            i
+                        ),
+                        new 
+                        (
+                            precedingVariableInfo != null ?
+                                precedingVariableInfo.Inputs.First() :
+                                string.Empty
+                        ),
+                        parameterExpression: nameof(Subtractor) + (i + 1)
+                    )
+                )
                 {
                     net.AddReplaceItems(s);
                     precedingBorrow = s.Parameters.Outputs.Borrow;
@@ -581,8 +624,9 @@ namespace ei8.Prototypes.HelloWorm
                 Multiplier.TryCreate
                 (
                     out Multiplier? a,
-                    0,
-                    nameof(Multiplier) + 1
+                    Multiplier.CreateDefaultParameters(),
+                    new(),
+                    parameterExpression: nameof(Multiplier) + 1
                 )
             )
             {
@@ -602,16 +646,20 @@ namespace ei8.Prototypes.HelloWorm
                 Adder.TryCreate
                 (
                     out Adder? a,
-                    0,
-                    precedingCarryOver,
-                    null,
-                    nameof(Adder) + 1
+                    Adder.CreateDefaultParameters
+                    (
+                        precedingCarryOver,
+                        0
+                    ),
+                    new(),
+                    parameterExpression: nameof(Adder) + 1
                 ) &&
                 Multiplier.TryCreate
                 (
                     out Multiplier? m,
-                    0,
-                    nameof(Multiplier) + 1
+                    Multiplier.CreateDefaultParameters(),
+                    new(),
+                    parameterExpression: nameof(Multiplier) + 1
                 ) &&
                 DynamicMultiplier.TryCreate
                 (

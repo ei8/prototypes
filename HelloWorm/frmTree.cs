@@ -1,6 +1,7 @@
 ﻿using ei8.Cortex.Coding;
 using ei8.Cortex.Coding.d23;
 using ei8.Cortex.Coding.d23.Math.Logic;
+using ei8.Cortex.Coding.d23.Math.TruthTables;
 using ei8.Cortex.Coding.d23.Process;
 using ei8.Cortex.Coding.d23.Process.Iteration;
 using ei8.Cortex.Coding.d23.Process.Operation;
@@ -343,6 +344,17 @@ namespace ei8.Prototypes.HelloWorm
                 this.spikable.Network.TryGetByTag("PrecedingCarryOver = 1", out var precedingCarryOver_1);
                 this.spikable.Network.TryGetByTag("PrecedingCarryOver = 0", out var precedingCarryOver_0);
 
+                ArgumentNullException.ThrowIfNull(addend1_1);
+                ArgumentNullException.ThrowIfNull(addend1_0);
+                ArgumentNullException.ThrowIfNull(addend2_1);
+                ArgumentNullException.ThrowIfNull(addend2_0);
+                ArgumentNullException.ThrowIfNull(sum_1);
+                ArgumentNullException.ThrowIfNull(sum_0);
+                ArgumentNullException.ThrowIfNull(carryOver_1);
+                ArgumentNullException.ThrowIfNull(carryOver_0);
+                ArgumentNullException.ThrowIfNull(precedingCarryOver_1);
+                ArgumentNullException.ThrowIfNull(precedingCarryOver_0);
+
                 var addendString = InputBox.ShowDialog
                 (
                     this,
@@ -471,10 +483,12 @@ namespace ei8.Prototypes.HelloWorm
                     .Where
                     (
                         x =>
-                            typeof(ILogicGate)
+                            typeof(ITruthTable)
                                 .IsAssignableFrom(x) &&
                             !x.IsInterface &&
-                            !x.IsAbstract
+                            !x.IsAbstract &&
+                            x.Namespace != null &&
+                            x.Namespace.Contains("Math.Logic")
                     )
                     .Select(x => x.Name.ToUpper().Replace("GATE", "")).ToList();
 
@@ -518,6 +532,17 @@ namespace ei8.Prototypes.HelloWorm
                 this.spikable.Network.TryGetByTag("Adder1.CarryOver = 0", out var carryOver_0);
                 this.spikable.Network.TryGetByTag("PrecedingCarryOver = 1", out var precedingCarryOver_1);
                 this.spikable.Network.TryGetByTag("PrecedingCarryOver = 0", out var precedingCarryOver_0);
+
+                ArgumentNullException.ThrowIfNull(addend1_1);
+                ArgumentNullException.ThrowIfNull(addend1_0);
+                ArgumentNullException.ThrowIfNull(addend2_1);
+                ArgumentNullException.ThrowIfNull(addend2_0);
+                ArgumentNullException.ThrowIfNull(sum_1);
+                ArgumentNullException.ThrowIfNull(sum_0);
+                ArgumentNullException.ThrowIfNull(carryOver_1);
+                ArgumentNullException.ThrowIfNull(carryOver_0);
+                ArgumentNullException.ThrowIfNull(precedingCarryOver_1);
+                ArgumentNullException.ThrowIfNull(precedingCarryOver_0);
 
                 var addendString = InputBox.ShowDialog
                 (
@@ -630,12 +655,30 @@ namespace ei8.Prototypes.HelloWorm
                 this.spikable.Network.TryGetByTag("PrecedingCarryOver = 1", out var precedingCarryOver_1);
                 this.spikable.Network.TryGetByTag("PrecedingCarryOver = 0", out var precedingCarryOver_0);
 
-                this.spikable.Network.TryGetByTag("Multiplier1.Multiplicand = 1", out var multiplicand_1);
-                this.spikable.Network.TryGetByTag("Multiplier1.Multiplicand = 0", out var multiplicand_0);
-                this.spikable.Network.TryGetByTag("Multiplier1.Multiplier = 1", out var multiplier_1);
-                this.spikable.Network.TryGetByTag("Multiplier1.Multiplier = 0", out var multiplier_0);
-                this.spikable.Network.TryGetByTag("Multiplier1.Product = 1", out var product_1);
-                this.spikable.Network.TryGetByTag("Multiplier1.Product = 0", out var product_0);
+                this.spikable.Network.TryGetByTag("Multiplier.Multiplicand = 1", out var multiplicand_1);
+                this.spikable.Network.TryGetByTag("Multiplier.Multiplicand = 0", out var multiplicand_0);
+                this.spikable.Network.TryGetByTag("Multiplier.Multiplier = 1", out var multiplier_1);
+                this.spikable.Network.TryGetByTag("Multiplier.Multiplier = 0", out var multiplier_0);
+                this.spikable.Network.TryGetByTag("Multiplier.Product = 1", out var product_1);
+                this.spikable.Network.TryGetByTag("Multiplier.Product = 0", out var product_0);
+
+                ArgumentNullException.ThrowIfNull(addend1_1);
+                ArgumentNullException.ThrowIfNull(addend1_0);
+                ArgumentNullException.ThrowIfNull(addend2_1);
+                ArgumentNullException.ThrowIfNull(addend2_0);
+                ArgumentNullException.ThrowIfNull(sum_1);
+                ArgumentNullException.ThrowIfNull(sum_0);
+                ArgumentNullException.ThrowIfNull(carryOver_1);
+                ArgumentNullException.ThrowIfNull(carryOver_0);
+                ArgumentNullException.ThrowIfNull(precedingCarryOver_1);
+                ArgumentNullException.ThrowIfNull(precedingCarryOver_0);
+
+                ArgumentNullException.ThrowIfNull(multiplicand_1);
+                ArgumentNullException.ThrowIfNull(multiplicand_0);
+                ArgumentNullException.ThrowIfNull(multiplier_1);
+                ArgumentNullException.ThrowIfNull(multiplier_0);
+                ArgumentNullException.ThrowIfNull(product_1);
+                ArgumentNullException.ThrowIfNull(product_0);
 
                 var factorString = InputBox.ShowDialog
                 (
@@ -776,6 +819,17 @@ namespace ei8.Prototypes.HelloWorm
                 this.spikable.Network.TryGetByTag("Comparator1.IsLessThan = 0", out var isLessThan_0);
                 this.spikable.Network.TryGetByTag("Comparator1.IsGreaterThan = 1", out var isGreaterThan_1);
                 this.spikable.Network.TryGetByTag("Comparator1.IsGreaterThan = 0", out var isGreaterThan_0);
+
+                ArgumentNullException.ThrowIfNull(input1_1);
+                ArgumentNullException.ThrowIfNull(input1_0);
+                ArgumentNullException.ThrowIfNull(input2_1);
+                ArgumentNullException.ThrowIfNull(input2_0);
+                ArgumentNullException.ThrowIfNull(areEqual_1);
+                ArgumentNullException.ThrowIfNull(areEqual_0);
+                ArgumentNullException.ThrowIfNull(isLessThan_1);
+                ArgumentNullException.ThrowIfNull(isLessThan_0);
+                ArgumentNullException.ThrowIfNull(isGreaterThan_1);
+                ArgumentNullException.ThrowIfNull(isGreaterThan_0);
 
                 var comparandString = InputBox.ShowDialog
                 (
