@@ -8,8 +8,8 @@ namespace ei8.Prototypes.HelloWorm
     public class Graph : IGraph
     {
         public event PropertyChangedEventHandler? PropertyChanged;
-        public event EventHandler Reloaded;
-        public event EventHandler<ActivityLoggedEventArgs> ActivityLogged;
+        public event EventHandler? Reloaded;
+        public event EventHandler<ActivityLoggedEventArgs>? ActivityLogged;
 
         private readonly ConcurrentDictionary<Guid, NeuronSpikeInfo> spikes;
         private readonly GraphSettings settings;

@@ -10,7 +10,6 @@ using ei8.Cortex.Library.Client.Out;
 using Microsoft.Extensions.DependencyInjection;
 using System.ComponentModel.Design;
 using WeifenLuo.WinFormsUI.Docking;
-using static SQLite.SQLite3;
 
 namespace ei8.Prototypes.HelloWorm
 {
@@ -123,7 +122,10 @@ namespace ei8.Prototypes.HelloWorm
                     "8 - Multiplication",
                     "9 - Multiplication - Dynamic",
                     "10 - Less Than",
-                    "11 - Comparator"
+                    "11 - Comparator",
+                    "12 - Division",
+                    "13 - Subtraction - Dynamic",
+                    "14 - Division - Dynamic"
                 ];
                 string option = InputBox.ShowDialog(
                     this,
@@ -183,6 +185,15 @@ namespace ei8.Prototypes.HelloWorm
                         case "11":
                             sheet.Load(frmToolbox.CreateComparator());
                             break;
+                        case "12":
+                            sheet.Load(frmToolbox.CreateDivider());
+                            break;
+                        case "13":
+                            sheet.Load(frmToolbox.CreateDynamicSubtractor());
+                            break;
+                        case "14":
+                            sheet.Load(frmToolbox.CreateDynamicDivider());
+                            break;
                         default:
                             throw new ArgumentOutOfRangeException(nameof(option));
                     }
@@ -201,6 +212,93 @@ namespace ei8.Prototypes.HelloWorm
             }
         }
 
+        private static ReadOnlyNetwork CreateDynamicSubtractor()
+        {
+            Network net = new();
+
+            if
+            (
+                BinaryNeuronParameter.TryCreate(out var precedingBorrow) &&
+                Subtractor.TryCreate
+                (
+                    out var a,
+                    Subtractor.CreateDefaultParameters
+                    (
+                        precedingBorrow,
+                        0
+                    ),
+                    new(),
+                    parameterExpression: nameof(Subtractor) + 1
+                )
+            )
+            {
+                net.AddReplaceItems(a);
+            }
+
+            return net;
+        }
+
+        private static ReadOnlyNetwork CreateDynamicDivider()
+        {
+            Network net = new();
+
+            if
+            (
+                BinaryNeuronParameter.TryCreate(out var precedingBorrow) &&
+                Subtractor.TryCreate
+                (
+                    out var s,
+                    Subtractor.CreateDefaultParameters
+                    (
+                        precedingBorrow,
+                        0
+                    ),
+                    new(),
+                    parameterExpression: nameof(Subtractor) + 1
+                ) &&
+                Divider.TryCreate
+                (
+                    out var d,
+                    Divider.CreateDefaultParameters(),
+                    new(),
+                    parameterExpression: nameof(Divider) + 1
+                ) &&
+                DynamicDivider.TryCreate
+                (
+                    out var dd,
+                    d,
+                    s,
+                    nameof(DynamicDivider) + 1
+                )
+            )
+            {
+                net.AddReplaceItems(dd);
+            }
+
+            return net;
+        }
+
+        private static ReadOnlyNetwork CreateDivider()
+        {
+            Network net = new();
+
+            if
+            (
+                Divider.TryCreate
+                (
+                    out var d,
+                    Divider.CreateDefaultParameters(),
+                    new(),
+                    parameterExpression: nameof(Divider) + 1
+                )
+            )
+            {
+                net.AddReplaceItems(d);
+            }
+
+            return net;
+        }
+
         private static ReadOnlyNetwork CreateComparator()
         {
             Network net = new();
@@ -214,7 +312,7 @@ namespace ei8.Prototypes.HelloWorm
                 BinaryNeuronParameter.TryCreate(out var isGreaterThan, tagPrefix) &&
                 Comparator.TryCreate
                 (
-                    out Comparator? COMPARATOR___Input1__Input2,
+                    out var COMPARATOR___Input1__Input2,
                     new(new(input1, input2), new(areEqual, isLessThan, isGreaterThan)),
                     new(InterneuronTagInfo.CreateByCommonTagPrefix(tagPrefix, 2))
                 )
@@ -237,7 +335,7 @@ namespace ei8.Prototypes.HelloWorm
                 BinaryNeuronParameter.TryCreate(out var result, tagPrefix) &&
                 LessThan.TryCreate
                 (
-                    out LessThan? LESSTHAN___Input1__Input2,
+                    out var LESSTHAN___Input1__Input2,
                     new(new(input1, input2), new(result)),
                     new(InterneuronTagInfo.CreateByCommonTagPrefix(tagPrefix, 2))
                 )
@@ -265,7 +363,7 @@ namespace ei8.Prototypes.HelloWorm
                 UnaryNeuronParameter.TryCreate(out var currentDigit, parameterExpression: "digit1") &&
                 Adder.TryCreate
                 (
-                    out Adder? adder,
+                    out var adder,
                     Adder.CreateDefaultParameters
                     (
                         precedingCarryOver, 
@@ -319,7 +417,7 @@ namespace ei8.Prototypes.HelloWorm
                         currentDigit.VariableInfo != null &&
                         Next.TryCreate
                         (
-                            out Next? next,
+                            out var next,
                             biphasicNextParameters,
                             inputStrength,
                             previousInterneurons,
@@ -327,7 +425,7 @@ namespace ei8.Prototypes.HelloWorm
                         ) &&
                         SequentialAdder.TryCreate
                         (
-                            out SequentialAdder? sequentialAdder,
+                            out var sequentialAdder,
                             next,
                             adder,
                             inputStrength
@@ -360,7 +458,7 @@ namespace ei8.Prototypes.HelloWorm
                         UnaryNeuronParameter.TryCreate(out var nextStep, parameterExpression: "step" + i) &&
                         currentStep.VariableInfo != null &&
                         BiphasicNext.TryCreate(
-                            out BiphasicNext? n,
+                            out var n,
                             new(new(NEXT, currentStep), new(nextStep)),
                             0.5f,
                             previousInterneurons,
@@ -395,7 +493,7 @@ namespace ei8.Prototypes.HelloWorm
                         UnaryNeuronParameter.TryCreate(out var nextStep, parameterExpression: "step" + i) &&
                         currentStep.VariableInfo != null &&
                         Next.TryCreate(
-                            out Next? n,
+                            out var n,
                             new(new(NEXT, currentStep), new(nextStep)),
                             0.5f,
                             previousInterneurons,
@@ -530,7 +628,7 @@ namespace ei8.Prototypes.HelloWorm
                 (
                     Adder.TryCreate
                     (
-                        out Adder? a,
+                        out var a,
                         Adder.CreateDefaultParameters
                         (
                             precedingCarryOver,
@@ -563,7 +661,7 @@ namespace ei8.Prototypes.HelloWorm
                 BinaryNeuronParameter.TryCreate(out var precedingCarryOver) &&
                 Adder.TryCreate
                 (
-                    out Adder? a, 
+                    out var a, 
                     Adder.CreateDefaultParameters
                     (
                         precedingCarryOver,
@@ -591,7 +689,7 @@ namespace ei8.Prototypes.HelloWorm
                 (
                     Subtractor.TryCreate
                     (
-                        out Subtractor? s, 
+                        out var s, 
                         Subtractor.CreateDefaultParameters
                         (
                             precedingBorrow, 
@@ -623,7 +721,7 @@ namespace ei8.Prototypes.HelloWorm
             (
                 Multiplier.TryCreate
                 (
-                    out Multiplier? a,
+                    out var a,
                     Multiplier.CreateDefaultParameters(),
                     new(),
                     parameterExpression: nameof(Multiplier) + 1
@@ -645,7 +743,7 @@ namespace ei8.Prototypes.HelloWorm
                 BinaryNeuronParameter.TryCreate(out var precedingCarryOver) &&
                 Adder.TryCreate
                 (
-                    out Adder? a,
+                    out var a,
                     Adder.CreateDefaultParameters
                     (
                         precedingCarryOver,
@@ -656,14 +754,14 @@ namespace ei8.Prototypes.HelloWorm
                 ) &&
                 Multiplier.TryCreate
                 (
-                    out Multiplier? m,
+                    out var m,
                     Multiplier.CreateDefaultParameters(),
                     new(),
                     parameterExpression: nameof(Multiplier) + 1
                 ) &&
                 DynamicMultiplier.TryCreate
                 (
-                    out DynamicMultiplier? dm,
+                    out var dm,
                     m,
                     a,
                     nameof(DynamicMultiplier) + 1

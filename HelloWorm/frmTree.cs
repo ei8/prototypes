@@ -1,6 +1,5 @@
 ﻿using ei8.Cortex.Coding;
 using ei8.Cortex.Coding.d23;
-using ei8.Cortex.Coding.d23.Math.Logic;
 using ei8.Cortex.Coding.d23.Math.TruthTables;
 using ei8.Cortex.Coding.d23.Process;
 using ei8.Cortex.Coding.d23.Process.Iteration;
@@ -919,6 +918,128 @@ namespace ei8.Prototypes.HelloWorm
                             frmTree.logger.Info
                             (
                                 new LogMessageGenerator(() => $"Result: {string.Join(string.Empty, p.Select(s => s.Tag.Last()))}")
+                            );
+                        }
+                    )
+                );
+            }
+        }
+
+        private void mnuSubtractionDynamic_Click(object sender, EventArgs e)
+        {
+            if (this.spikable != null)
+            {
+                this.spikable.Network.TryGetByTag("Subtractor1.Minuend = 1", out var minuend_1);
+                this.spikable.Network.TryGetByTag("Subtractor1.Minuend = 0", out var minuend_0);
+                this.spikable.Network.TryGetByTag("Subtractor1.Subtrahend = 1", out var subtrahend_1);
+                this.spikable.Network.TryGetByTag("Subtractor1.Subtrahend = 0", out var subtrahend_0);
+                this.spikable.Network.TryGetByTag("Subtractor1.Difference = 1", out var difference_1);
+                this.spikable.Network.TryGetByTag("Subtractor1.Difference = 0", out var difference_0);
+                this.spikable.Network.TryGetByTag("Subtractor1.Borrow = 1", out var borrow_1);
+                this.spikable.Network.TryGetByTag("Subtractor1.Borrow = 0", out var borrow_0);
+                this.spikable.Network.TryGetByTag("PrecedingBorrow = 1", out var precedingBorrow_1);
+                this.spikable.Network.TryGetByTag("PrecedingBorrow = 0", out var precedingBorrow_0);
+
+                ArgumentNullException.ThrowIfNull(minuend_1);
+                ArgumentNullException.ThrowIfNull(minuend_0);
+                ArgumentNullException.ThrowIfNull(subtrahend_1);
+                ArgumentNullException.ThrowIfNull(subtrahend_0);
+                ArgumentNullException.ThrowIfNull(difference_1);
+                ArgumentNullException.ThrowIfNull(difference_0);
+                ArgumentNullException.ThrowIfNull(borrow_1);
+                ArgumentNullException.ThrowIfNull(borrow_0);
+                ArgumentNullException.ThrowIfNull(precedingBorrow_1);
+                ArgumentNullException.ThrowIfNull(precedingBorrow_0);
+
+                var operandsString = InputBox.ShowDialog
+                (
+                    this,
+                    "Minuend, Subtrahend",
+                    "Enter minuend and subtrahend separated by a comma (,):",
+                    string.Empty
+                );
+
+                ArgumentOutOfRangeException.ThrowIfNotEqual(operandsString.Count(c => c == ','), 1);
+                var operands = operandsString.Split(',');
+                ArgumentOutOfRangeException.ThrowIfNotEqual(operands.Length, 2);
+                foreach (var operand in operands)
+                    foreach (var chunk16Bit in frmTree.ChunksUpto(operand, 16))
+                        int.Parse(chunk16Bit, System.Globalization.NumberStyles.BinaryNumber);
+
+                this.StartProcess(
+                    new DynamicSubtraction
+                    (
+                        new Subtraction.WorkingMemoryInfo
+                        (
+                            new EnumerableChunk<INeuronChunk>
+                            (
+                                [
+                                    new NeuronChunk(precedingBorrow_1.Single()),
+                                    new NeuronChunk(precedingBorrow_0.Single())
+                                ]
+                            ),
+                            new OperandChunk
+                            (
+                                new EnumerableChunk<INeuronChunk>
+                                (
+                                    [
+                                        new NeuronChunk(minuend_1.Single()),
+                                        new NeuronChunk(minuend_0.Single())
+                                    ]
+                                ),
+                                new EnumerableChunk<INeuronChunk>
+                                (
+                                    [
+                                        .. operands[0].Select(a => a == '0' ? minuend_0.Single() : minuend_1.Single()).Reverse().Select(n => new NeuronChunk(n))
+                                    ]
+                                )
+                            ),
+                            new OperandChunk
+                            (
+                                new EnumerableChunk<INeuronChunk>
+                                (
+                                    [
+                                        new NeuronChunk(subtrahend_1.Single()),
+                                        new NeuronChunk(subtrahend_0.Single())
+                                    ]
+                                ),
+                                new EnumerableChunk<INeuronChunk>
+                                (
+                                    [
+                                        .. operands[1].Select(a => a == '0' ? subtrahend_0.Single() : subtrahend_1.Single()).Reverse().Select(n => new NeuronChunk(n))
+                                    ]
+                                )
+                            ),
+                            new ResultChunk
+                            (
+                                new EnumerableChunk<INeuronChunk>
+                                (
+                                    [
+                                        new NeuronChunk(difference_1.Single()),
+                                        new NeuronChunk(difference_0.Single())
+                                    ]
+                                ),
+                                nameof(Subtraction.WorkingMemoryInfo.Difference)
+                            ),
+                            new ResultChunk
+                            (
+                                new EnumerableChunk<INeuronChunk>
+                                (
+                                    [
+                                        new NeuronChunk(borrow_1.Single()),
+                                        new NeuronChunk(borrow_0.Single())
+                                    ]
+                                ),
+                                nameof(Subtraction.WorkingMemoryInfo.Borrow)
+                            )
+                        ),
+                        (a, s) =>
+                        {
+                            this.StopProcessing();
+
+                            frmTree.logger.Info
+                            (
+                                new LogMessageGenerator(() => $"Difference: {string.Join(string.Empty, s.Reverse().Select(s => s.Tag.Last()))}")
                             );
                         }
                     )

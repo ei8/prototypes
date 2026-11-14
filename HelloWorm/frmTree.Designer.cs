@@ -62,6 +62,8 @@
             mnuHideLogicGatesInterneuronsTags = new ToolStripMenuItem();
             tsbCopyIds = new ToolStripButton();
             timer1 = new System.Windows.Forms.Timer(components);
+            subtractionToolStripMenuItem = new ToolStripMenuItem();
+            mnuSubtractionDynamic = new ToolStripMenuItem();
             toolStrip1.SuspendLayout();
             SuspendLayout();
             // 
@@ -135,7 +137,7 @@
             // tsbStartProcess
             // 
             tsbStartProcess.DisplayStyle = ToolStripItemDisplayStyle.Image;
-            tsbStartProcess.DropDownItems.AddRange(new ToolStripItem[] { mnuStartProcessDoUntil, mnuStartProcessAddition, toolStripMenuItem2, toolStripMenuItem3, toolStripMenuItem1, setTimerIntervalToolStripMenuItem });
+            tsbStartProcess.DropDownItems.AddRange(new ToolStripItem[] { mnuStartProcessDoUntil, mnuStartProcessAddition, subtractionToolStripMenuItem, toolStripMenuItem2, toolStripMenuItem3, toolStripMenuItem1, setTimerIntervalToolStripMenuItem });
             tsbStartProcess.Image = (Image)resources.GetObject("tsbStartProcess.Image");
             tsbStartProcess.ImageTransparentColor = Color.Magenta;
             tsbStartProcess.Name = "tsbStartProcess";
@@ -320,6 +322,20 @@
             // 
             timer1.Tick += timer1_Tick;
             // 
+            // subtractionToolStripMenuItem
+            // 
+            subtractionToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { mnuSubtractionDynamic });
+            subtractionToolStripMenuItem.Name = "subtractionToolStripMenuItem";
+            subtractionToolStripMenuItem.Size = new Size(180, 22);
+            subtractionToolStripMenuItem.Text = "Subtraction";
+            // 
+            // mnuSubtractionDynamic
+            // 
+            mnuSubtractionDynamic.Name = "mnuSubtractionDynamic";
+            mnuSubtractionDynamic.Size = new Size(180, 22);
+            mnuSubtractionDynamic.Text = "Dynamic";
+            mnuSubtractionDynamic.Click += mnuSubtractionDynamic_Click;
+            // 
             // frmTree
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -370,5 +386,7 @@
         private ToolStripMenuItem toolStripMenuItem3;
         private ToolStripMenuItem lessThanToolStripMenuItem;
         private System.Windows.Forms.Timer timer1;
+        private ToolStripMenuItem subtractionToolStripMenuItem;
+        private ToolStripMenuItem mnuSubtractionDynamic;
     }
 }
