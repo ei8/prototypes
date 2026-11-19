@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -25,6 +25,14 @@
     <PackageReference Include="Microsoft.Msagl.GraphViewerGDI" Version="1.1.7" />
     <PackageReference Include="NLog.Extensions.Logging" Version="6.1.2" />
     <PackageReference Include="NLog.Windows.Forms.Async" Version="6.10.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="D:\eda\cortex-coding-d23\src\main\d23.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="HelloWorm.Tests\**\*.cs" />
   </ItemGroup>
 
   <ItemGroup>

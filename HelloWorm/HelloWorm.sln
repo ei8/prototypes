@@ -1,9 +1,13 @@
-﻿
+﻿﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.14.36623.8
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HelloWorm", "HelloWorm.csproj", "{C180E707-305E-4949-BC32-91FF002FD36A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HelloWorm.Tests", "HelloWorm.Tests\HelloWorm.Tests.csproj", "{54B392BF-74F5-4B9A-91A1-4F10C9A46D27}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "d23", "D:\eda\cortex-coding-d23\src\main\d23.csproj", "{63F32003-3DA5-A6EE-CEE4-45899B59BA94}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +19,14 @@ Global
 		{C180E707-305E-4949-BC32-91FF002FD36A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C180E707-305E-4949-BC32-91FF002FD36A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C180E707-305E-4949-BC32-91FF002FD36A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{54B392BF-74F5-4B9A-91A1-4F10C9A46D27}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{54B392BF-74F5-4B9A-91A1-4F10C9A46D27}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{54B392BF-74F5-4B9A-91A1-4F10C9A46D27}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{54B392BF-74F5-4B9A-91A1-4F10C9A46D27}.Release|Any CPU.Build.0 = Release|Any CPU
+		{63F32003-3DA5-A6EE-CEE4-45899B59BA94}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{63F32003-3DA5-A6EE-CEE4-45899B59BA94}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{63F32003-3DA5-A6EE-CEE4-45899B59BA94}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{63F32003-3DA5-A6EE-CEE4-45899B59BA94}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
