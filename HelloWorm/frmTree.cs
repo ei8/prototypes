@@ -52,7 +52,7 @@ namespace ei8.Prototypes.HelloWorm
                     LogLevel.Info,
                     new LogMessageGenerator
                     (
-                        () => Cortex.Coding.d23.ExtensionMethods.LogFire(e.FireInfo.Target)
+                        () => PerfExtensionMethods.LogFire(e.FireInfo.Target)
                     )
                 );
 
