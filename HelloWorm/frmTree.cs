@@ -442,7 +442,15 @@ namespace ei8.Prototypes.HelloWorm
                             new EnumerableChunk<INeuronChunk>(this.spikable.Network.GetItems<Neuron>().Where(n => n.Tag.ToUpper().StartsWith("DIGIT")).Select(n => new NeuronChunk(n))),
                             new NeuronChunk(checkedNeurons[1])
                         ),
-                        (n) => int.Parse(n.Tag.ToUpper().Replace("DIGIT", string.Empty)) - 1,
+                        (n, out i) => 
+                            {
+                                i = null;
+
+                                if (int.TryParse(n.Tag.ToUpper().Replace("DIGIT", string.Empty), out int parsedDigit))
+                                    i = parsedDigit - 1;
+
+                                return i.HasValue;
+                            },
                         (a, d, s) =>
                         {
                             this.StopProcessing();
